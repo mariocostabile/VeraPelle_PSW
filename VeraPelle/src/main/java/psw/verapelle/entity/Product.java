@@ -1,5 +1,6 @@
 package psw.verapelle.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -34,4 +35,9 @@ public class Product {
     @ManyToOne
     @JoinColumn(name = "category_id")
     private Category category;
+
+    @JsonIgnore
+    @Version
+    @Column(name = "version")
+    private Integer version;
 }

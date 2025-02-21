@@ -1,5 +1,6 @@
 package psw.verapelle.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -27,5 +28,10 @@ public class Category {
 
     @OneToMany(mappedBy = "category", cascade = CascadeType.ALL)
     private List<Product> products;
+
+    @JsonIgnore
+    @Version
+    @Column(name = "version")
+    private Integer version;
 
 }

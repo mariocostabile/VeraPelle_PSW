@@ -1,5 +1,6 @@
 package psw.verapelle.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -26,4 +27,9 @@ public class Cart {
 
     @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CartItem> cartItems;
+
+    @JsonIgnore
+    @Version
+    @Column(name = "version")
+    private Integer version;
 }

@@ -1,5 +1,6 @@
 package psw.verapelle.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -28,5 +29,10 @@ public class CartItem {
 
     @Column(name = "quantity", nullable = false)
     private int quantity;
+
+    @JsonIgnore
+    @Version
+    @Column(name = "version")
+    private Integer version;
 }
 
