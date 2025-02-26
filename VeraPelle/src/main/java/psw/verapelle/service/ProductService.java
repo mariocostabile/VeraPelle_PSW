@@ -19,6 +19,9 @@ public class ProductService {
 
     @Transactional
     public Product createProduct(ProductDTO productDTO) {
+        if (productDTO.getName() == null || productDTO.getName().trim().isEmpty()) {
+            throw new IllegalArgumentException("Product name cannot be empty");
+        }
         Category category = categoryRepository.findById(productDTO.getCategoryId())
                 .orElseThrow(() -> new RuntimeException("Category not found"));
         Product product = new Product(null, productDTO.getName(), productDTO.getDescription(),
@@ -30,17 +33,18 @@ public class ProductService {
     public void deleteProduct(Long productId) {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new RuntimeException("Product not found"));
+
         productRepository.delete(product);
     }
 
     @Transactional
     public Product updateProduct(Long id, Product updatedProduct) {
         return productRepository.findById(id).map(product -> {
-            product.setName(updatedProduct.getName());
-            product.setDescription(updatedProduct.getDescription());
-            product.setPrice(updatedProduct.getPrice());
-            product.setStockQuantity(updatedProduct.getStockQuantity());
-            product.setCategory(updatedProduct.getCategory());
+            product.setName(updatedProduct.getName() != null ? updatedProduct.getName() : product.getName());
+            product.setDescription(updatedProduct.getDescription() != null ? updatedProduct.getDescription() : product.getDescription());
+            product.setPrice(updatedProduct.getPrice() != null ? updatedProduct.getPrice() : product.getPrice());
+            product.setStockQuantity(updatedProduct.getStockQuantity() != null ? updatedProduct.getStockQuantity() : product.getStockQuantity());
+            product.setCategory(updatedProduct.getCategory() != null ? updatedProduct.getCategory() : product.getCategory());
             return productRepository.save(product);
         }).orElseThrow(() -> new RuntimeException("Product not found"));
     }

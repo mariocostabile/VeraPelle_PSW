@@ -1,6 +1,8 @@
 package psw.verapelle.DTO;
 
 
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -13,11 +15,18 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CustomerDTO {
-    private Long id;
+    private String id;
+    @NotBlank
     private String firstName;
+    @NotBlank
     private String lastName;
-    private LocalDate dateOfBirth;
+    @NotBlank
+    private String dateOfBirth;
+    @NotBlank
     private String address;
+    @NotBlank
     private String phone;
+    @NotBlank
+    @Email
     private String email;
 }

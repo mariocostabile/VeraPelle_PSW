@@ -13,7 +13,7 @@ import psw.verapelle.entity.Cart;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name="CartItem")
+@Table(name="cart_item")
 public class CartItem {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

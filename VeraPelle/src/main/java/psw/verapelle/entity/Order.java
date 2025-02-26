@@ -15,7 +15,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name="Orders")
+@Table(name="orders")
 public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -33,9 +33,9 @@ public class Order {
     )
     private List<Product> products;
 
-    @Column(name = "TotalAmount", nullable = false)
+    @Column(name = "total_amount")
     private BigDecimal totalAmount;
 
-    @Column(name = "OrderDate", nullable = false)
+    @Column(name = "order_date")
     private LocalDateTime orderDate;
 }
