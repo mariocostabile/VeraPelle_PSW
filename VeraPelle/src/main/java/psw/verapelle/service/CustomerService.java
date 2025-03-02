@@ -1,8 +1,9 @@
 package psw.verapelle.service;
 
 import jakarta.validation.Valid;
-import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import psw.verapelle.DTO.CustomerDTO;
 import psw.verapelle.entity.Customer;
@@ -34,6 +35,24 @@ public class CustomerService {
     //per keycloak
     public Customer saveCustomer(Customer customer) {
         return customerRepository.save(customer);
+    }
+
+    public Customer saveCustomer(@AuthenticationPrincipal Jwt jwt){
+        String keycloakId = jwt.getClaimAsString("sub");
+        String email = jwt.getClaimAsString("email");
+        String firstName = jwt.getClaimAsString("given_name");
+        String lastName = jwt.getClaimAsString("family_name");
+        Customer customer = new Customer();
+        customer = new Customer();
+        customer.setId(keycloakId);
+        customer.setEmail(email);
+        customer.setFirstName(firstName);
+        customer.setLastName(lastName);
+        return customerRepository.save(customer);
+    }
+
+    public Customer getCustomer(String keycloakId) {
+        return customerRepository.findById(keycloakId).orElseThrow(() -> new RuntimeException("Customer not found"));
     }
 
     public Customer updateCustomer(Long id, CustomerDTO customerDTO) {

@@ -11,7 +11,7 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.stereotype.Component;
-import psw.verapelle.DTO.CustomerDTO;
+
 import psw.verapelle.entity.Customer;
 import psw.verapelle.service.CustomerService;
 
@@ -31,7 +31,6 @@ public class KeycloakJwtAuthenticationConverter implements Converter<Jwt, Abstra
     }
     @Override
     public AbstractAuthenticationToken convert(@NonNull Jwt source) {
-        saveCustomer(source);
         return new JwtAuthenticationToken(
                 source,
                 Stream.concat(
@@ -40,20 +39,21 @@ public class KeycloakJwtAuthenticationConverter implements Converter<Jwt, Abstra
                         .collect(toSet()));
     }
 
-    private void saveCustomer(Jwt source) {
-        String userId = source.getSubject();
-        String firstName = (String) source.getClaim("given_name");
-        String lastName = (String) source.getClaim("family_name");
-        String email = (String) source.getClaim("email");
-        Customer c = new Customer();
-        c.setId(userId);
-        c.setFirstName(firstName);
-        c.setLastName(lastName);
-        c.setEmail(email);
-        if (customerService.findCustomerById(userId).isEmpty()) {
-            customerService.saveCustomer(c);
-        }
-    }
+
+//    private void saveCustomer(Jwt source) {
+//        String userId = source.getSubject();
+//        String firstName = (String) source.getClaim("given_name");
+//        String lastName = (String) source.getClaim("family_name");
+//        String email = (String) source.getClaim("email");
+//        Customer c = new Customer();
+//        c.setId(userId);
+//        c.setFirstName(firstName);
+//        c.setLastName(lastName);
+//        c.setEmail(email);
+//        if (customerService.findCustomerById(userId).isEmpty()) {
+//            customerService.saveCustomer(c);
+//        }
+//    }
 
     private Collection<? extends GrantedAuthority> extractResourceRoles(Jwt jwt) {
 

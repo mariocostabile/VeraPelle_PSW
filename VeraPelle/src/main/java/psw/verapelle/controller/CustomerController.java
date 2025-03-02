@@ -2,6 +2,7 @@ package psw.verapelle.controller;
 
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -45,25 +46,33 @@ public class CustomerController {
         return ResponseEntity.ok(customerService.updateCustomer(id,customerDTO));
     }
 
-    @GetMapping("/me")
-    public ResponseEntity<?> getCurrentCustomer(@AuthenticationPrincipal Jwt principal) {
+    @PostMapping("/register")
+    public ResponseEntity<?> registerCustomer(@AuthenticationPrincipal Jwt principal) {
         String keycloakId = principal.getClaimAsString("sub");
-        String email = principal.getClaimAsString("email");
-
-        Optional<Customer> customer = customerService.findCustomerById(keycloakId);
-
-        if (customer.isEmpty()) {
-            // Se il cliente non esiste nel DB, crealo
-            Customer newCustomer = new Customer();
-            newCustomer.setId(keycloakId);
-            newCustomer.setEmail(email);
-            newCustomer.setFirstName(principal.getClaimAsString("given_name"));
-            newCustomer.setLastName(principal.getClaimAsString("family_name"));
-            customerService.saveCustomer(newCustomer);
-        }
-
-        return ResponseEntity.ok(customer);
+        Optional<Customer> customerOpt = customerService.findCustomerById(keycloakId);
+        if (customerOpt.isEmpty())
+            return ResponseEntity.ok(customerService.saveCustomer(principal));
+        return ResponseEntity.status(HttpStatus.CONFLICT).body("User already exists.");
     }
+    
+    @GetMapping("/me")
+    public ResponseEntity<CustomerDTO> me(@AuthenticationPrincipal Jwt principal) {
+        String keycloakId = principal.getClaimAsString("sub");
+        try {
+            Customer customer = customerService.getCustomer(keycloakId);
+            CustomerDTO customerDTO = new CustomerDTO();
+            customerDTO.setFirstName(customer.getFirstName());
+            customerDTO.setLastName(customer.getLastName());
+            customerDTO.setDateOfBirth(customer.getDateOfBirth());
+            customerDTO.setEmail(customer.getEmail());
+            customerDTO.setPhone(customer.getPhone());
+            customerDTO.setAddress(customer.getAddress());
+            return ResponseEntity.ok(customerDTO);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+    }
+
 
 //    @DeleteMapping("/delete")
 //    @PreAuthorize("hasRole('USER')")
