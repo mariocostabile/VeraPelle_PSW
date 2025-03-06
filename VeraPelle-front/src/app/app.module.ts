@@ -6,6 +6,7 @@ import { AppComponent } from './app.component';
 import {HTTP_INTERCEPTORS, HttpClient} from '@angular/common/http';
 import {HttpTokenInterceptor} from './services/interceptor/http-token.interceptor';
 import {KeycloakService} from './services/keycloak/keycloak.service';
+import { HomeComponent } from './pages/home/home.component';
 
 export function kcFactory(kcService: KeycloakService){
   return () => kcService.init();
@@ -13,7 +14,8 @@ export function kcFactory(kcService: KeycloakService){
 
 @NgModule({
   declarations: [
-    AppComponent
+    AppComponent,
+    HomeComponent
   ],
   imports: [
     BrowserModule,

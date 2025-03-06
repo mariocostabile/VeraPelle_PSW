@@ -25,14 +25,14 @@ public class CustomerController {
     @Autowired
     private CustomerRepository customerRepository;
 
-    @GetMapping("/getAllCustomer")
+    @GetMapping("/auth/getAllCustomer")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<CustomerDTO>> getAllCustomers() {
         List<CustomerDTO> customers = customerService.getAllCustomers();
         return ResponseEntity.ok(customers);
     }
 
-    @GetMapping("/get/{id}")
+    @GetMapping("/auth/get/{id}")
     //@PreAuthorize("hasRole('USER')")
     public ResponseEntity<Customer> getCustomerById(@PathVariable String id) {
         Optional<Customer> customer = customerService.findCustomerById(id);
@@ -40,7 +40,7 @@ public class CustomerController {
     }
 
 
-    @PutMapping("/update/{id}")
+    @PutMapping("/auth/update/{id}")
     //@PreAuthorize("hasRole('USER')")  //il service è lo stesso perché verifica sempre prima se presente, in questo caso l'utente deve però avere un ruolo user che si assegna solo se già autenticato
     public ResponseEntity<Customer> updateCustomer(@PathVariable Long id, @Valid @RequestBody CustomerDTO customerDTO) {
         return ResponseEntity.ok(customerService.updateCustomer(id,customerDTO));
@@ -55,7 +55,7 @@ public class CustomerController {
         return ResponseEntity.status(HttpStatus.CONFLICT).body("User already exists.");
     }
     
-    @GetMapping("/me")
+    @GetMapping("/auth/me")
     public ResponseEntity<CustomerDTO> me(@AuthenticationPrincipal Jwt principal) {
         String keycloakId = principal.getClaimAsString("sub");
         try {
@@ -72,18 +72,4 @@ public class CustomerController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
     }
-
-
-//    @DeleteMapping("/delete")
-//    @PreAuthorize("hasRole('USER')")
-//    public ResponseEntity<String> deleteCustomer(@AuthenticationPrincipal Jwt principal) {
-//        Long userId = Long.parseLong(principal.getClaim("sub")); // Estrarre l'ID dal token JWT
-//        boolean deleted = customerService.deleteCustomer(userId);
-//        if (deleted) {
-//            return ResponseEntity.ok("Customer deleted successfully");
-//        } else {
-//            return ResponseEntity.notFound().build();
-//        }
-//    }
-
 }
