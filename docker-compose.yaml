@@ -25,6 +25,8 @@ services:
       KEYCLOAK_ADMIN_PASSWORD: admin
     networks:
       - spring-demo
+    volumes:
+      - C:\Users\mario\VeraPelle_PSW\my-custom-themes:/opt/keycloak/themes
     command:
       - "start-dev"
 networks:
