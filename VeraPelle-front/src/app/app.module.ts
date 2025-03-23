@@ -7,7 +7,8 @@ import {HTTP_INTERCEPTORS, HttpClient} from '@angular/common/http';
 import {HttpTokenInterceptor} from './services/interceptor/http-token.interceptor';
 import {KeycloakService} from './services/keycloak/keycloak.service';
 import { HomeComponent } from './pages/home/home.component';
-import { HeaderComponent } from './header/header/header.component';
+import { HeaderComponent } from './header/header.component';
+import { ProfiloComponent } from './pages/profilo/profilo.component';
 
 export function kcFactory(kcService: KeycloakService){
   return () => kcService.init();
@@ -17,7 +18,8 @@ export function kcFactory(kcService: KeycloakService){
   declarations: [
     AppComponent,
     HomeComponent,
-    HeaderComponent
+    HeaderComponent,
+    ProfiloComponent
   ],
   imports: [
     BrowserModule,
