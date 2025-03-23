@@ -2,7 +2,7 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { HomeComponent } from './pages/home/home.component';
 import { ProfiloComponent } from './pages/profilo/profilo.component';
-import { authGuard } from './services/guard/auth.guard'; // percorso corretto al tuo guard
+import { authGuard } from './core/services/guard/auth.guard'; // percorso corretto al tuo guard
 
 const routes: Routes = [
   { path: 'profilo', component: ProfiloComponent, canActivate: [authGuard] },

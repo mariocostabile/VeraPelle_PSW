@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import { KeycloakService } from 'app/services/keycloak/keycloak.service';
-import { UserProfile } from 'app/services/keycloak/user-profile';
+import { KeycloakService } from 'app/core/services/keycloak/keycloak.service';
+import { UserProfile } from 'app/core/services/keycloak/user-profile';
 
 @Component({
   standalone: false,
@@ -14,12 +14,12 @@ export class HeaderComponent implements OnInit {
   constructor(private keycloakService: KeycloakService) {}
 
   ngOnInit(): void {
-    // Recupera i dati dell'utente (se loggato)
+    // Carica il profilo dell'utente, se presente
     this.profile = this.keycloakService.profile;
   }
 
   isLoggedIn(): boolean {
-    // L’utente è loggato se esiste un token
+    // L'utente è considerato loggato se esiste un token nel profilo
     return !!this.profile?.token;
   }
 

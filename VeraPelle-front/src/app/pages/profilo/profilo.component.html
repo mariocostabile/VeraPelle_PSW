@@ -1,10 +1,25 @@
+<!-- src/app/pages/profilo/profilo.component.html -->
+
 <div *ngIf="profile; else notLogged">
   <h2>Profilo Utente</h2>
-  <p><strong>Username:</strong> {{ profile.username }}</p>
-  <p><strong>Nome:</strong> {{ profile.firstName }}</p>
-  <p><strong>Cognome:</strong> {{ profile.lastName }}</p>
-  <p><strong>Email:</strong> {{ profile.email }}</p>
-  <!-- Aggiungi qui eventuali campi aggiuntivi -->
+
+  <!-- Dati da Keycloak -->
+  <p><strong>Username (Keycloak):</strong> {{ profile.username }}</p>
+  <p><strong>Nome (Keycloak):</strong> {{ profile.firstName }}</p>
+  <p><strong>Cognome (Keycloak):</strong> {{ profile.lastName }}</p>
+  <p><strong>Email (Keycloak):</strong> {{ profile.email }}</p>
+
+  <!-- Dati dal DB (customerData) -->
+  <div *ngIf="customerData">
+    <h3>Dati aggiuntivi dal DB</h3>
+    <p><strong>Nome (DB):</strong> {{ customerData.firstName }}</p>
+    <p><strong>Cognome (DB):</strong> {{ customerData.lastName }}</p>
+    <p><strong>Data di nascita:</strong> {{ customerData.dateOfBirth }}</p>
+    <p><strong>Indirizzo:</strong> {{ customerData.address }}</p>
+    <p><strong>Telefono:</strong> {{ customerData.phone }}</p>
+    <p><strong>Email (DB):</strong> {{ customerData.email }}</p>
+    <!-- Aggiungi altri campi se presenti -->
+  </div>
 </div>
 
 <ng-template #notLogged>

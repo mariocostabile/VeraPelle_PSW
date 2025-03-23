@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { KeycloakService } from '../../services/keycloak/keycloak.service';
+import { KeycloakService } from '../../core/services/keycloak/keycloak.service';
 
 @Component({
   selector: 'app-home',

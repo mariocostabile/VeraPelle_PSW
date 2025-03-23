@@ -4,11 +4,12 @@ import { HttpClientModule } from '@angular/common/http';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import {HTTP_INTERCEPTORS, HttpClient} from '@angular/common/http';
-import {HttpTokenInterceptor} from './services/interceptor/http-token.interceptor';
-import {KeycloakService} from './services/keycloak/keycloak.service';
+import {HttpTokenInterceptor} from './core/services/interceptor/http-token.interceptor';
+import {KeycloakService} from './core/services/keycloak/keycloak.service';
 import { HomeComponent } from './pages/home/home.component';
-import { HeaderComponent } from './header/header.component';
+import { HeaderComponent } from './core/component/header/header.component';
 import { ProfiloComponent } from './pages/profilo/profilo.component';
+import { FooterComponent } from './core/component/footer/footer.component';
 
 export function kcFactory(kcService: KeycloakService){
   return () => kcService.init();
@@ -19,7 +20,8 @@ export function kcFactory(kcService: KeycloakService){
     AppComponent,
     HomeComponent,
     HeaderComponent,
-    ProfiloComponent
+    ProfiloComponent,
+    FooterComponent
   ],
   imports: [
     BrowserModule,
