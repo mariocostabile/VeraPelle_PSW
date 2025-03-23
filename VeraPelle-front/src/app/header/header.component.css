@@ -1,0 +1,52 @@
+.navbar {
+  background-color: #663b1d;       /* Colore principale */
+  display: flex;
+  align-items: center;
+  justify-content: space-between;  /* Brand a sinistra, pulsanti a destra */
+  padding: 1rem 2rem;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15); /* Leggera ombra */
+}
+
+/* Logo / Testo del brand */
+.brand {
+  color: #fff;
+  font-size: 1.5rem;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+/* Lista di navigazione */
+.navbar ul {
+  list-style: none;
+  display: flex;
+  gap: 1rem;
+  margin: 0;
+  padding: 0;
+}
+
+/* Ogni elemento di menu */
+.navbar li {
+  display: inline-block;
+  cursor: pointer;
+  color: #fff;
+  font-weight: 600;
+  padding: 0.5rem 0.75rem;
+  border-radius: 4px;
+  transition: background-color 0.3s;
+}
+
+/* Hover su <li> */
+.navbar li:hover {
+  background-color: #7f4d2c; /* Leggermente più chiaro o scuro di #663b1d */
+}
+
+/* Link nel menu (Profilo) */
+.navbar a {
+  color: #fff;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.navbar a:hover {
+  color: #e0e0e0;
+}

@@ -1,0 +1,3 @@
+docker cp "C:\Users\mario\VeraPelle_PSW\keycloak-custom-theme-master\providers\theme1.jar" festive_euler:/opt/keycloak/providers/
+
+docker restart festive_euler

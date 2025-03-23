@@ -1,0 +1,22 @@
+<nav class="navbar">
+  <!-- Logo / Brand a sinistra -->
+  <div class="brand">PELLEVERA</div>
+
+  <!-- Menu a destra -->
+  <ul>
+    <!-- Se NON loggato, mostra Login e Registrazione -->
+    <li *ngIf="!isLoggedIn()" (click)="login()">Login</li>
+    <li *ngIf="!isLoggedIn()" (click)="register()">Registrati</li>
+
+    <!-- Se loggato, mostra il Benvenuto, Logout e Profilo -->
+    <li *ngIf="isLoggedIn()">
+      Benvenuto, {{ profile?.username }}
+    </li>
+    <li *ngIf="isLoggedIn()" (click)="logout()">Logout</li>
+    <li *ngIf="isLoggedIn()">
+      <a routerLink="/profilo">
+        <i class="fa fa-user"></i> Profilo
+      </a>
+    </li>
+  </ul>
+</nav>
