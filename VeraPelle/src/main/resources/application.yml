@@ -1,0 +1,22 @@
+spring:
+    application:
+        name:
+    datasource:
+        url: jdbc:postgresql://localhost:5432/VeraPelleDB
+        username: postgres
+        password: 1234
+        driver-class-name: org.postgresql.Driver
+    jpa:
+        hibernate:
+            ddl-auto: update  # Opzioni: update, create, create-drop, validate
+        show-sql: true      # Mostra le query SQL nel log
+        properties:
+            hibernate:
+                dialect: org.hibernate.dialect.PostgreSQLDialect
+    security:
+        oauth2:
+            resourceserver:
+                jwt:
+                    issuer-uri: "http://localhost:8081/realms/ProgettoPSW_PelleVera"
+server:
+    port: 8080

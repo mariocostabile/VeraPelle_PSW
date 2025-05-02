@@ -1,0 +1,31 @@
+<div *ngIf="loading">Caricamento profilo…</div>
+<div *ngIf="!loading && error" class="error">Impossibile caricare il profilo.</div>
+
+<form *ngIf="!loading && !error" [formGroup]="form" (ngSubmit)="onSubmit()">
+  <label>
+    Nome
+    <input formControlName="firstName" />
+  </label>
+  <label>
+    Cognome
+    <input formControlName="lastName" />
+  </label>
+  <label>
+    Email
+    <input formControlName="email" />
+  </label>
+  <label>
+    Telefono
+    <input formControlName="phone" />
+  </label>
+  <label>
+    Indirizzo
+    <input formControlName="address" />
+  </label>
+  <label>
+    Data di nascita
+    <input type="date" formControlName="dateOfBirth" />
+  </label>
+
+  <button type="submit" [disabled]="form.invalid">Salva modifiche</button>
+</form>

@@ -1,0 +1,79 @@
+.header {
+  display: flex;
+  align-items: center;
+  background-color: #663b1d;
+  padding: 0.3rem 2rem;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+  color: #fff;
+
+  .logo {
+    font-size: 1.5rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    color: #fff;
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  .search {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+
+    input {
+      width: 400px;
+      padding: 0.2rem 0.5rem;
+      border: none;
+      border-radius: 2px 0 0 2px;
+    }
+
+    button {
+      margin-left: 0.25rem;
+      background: #8d6e63;
+      border: none;
+      color: #fff;
+      padding: 0.3rem 0.6rem;
+      border-radius: 0 2px 2px 0;
+      cursor: pointer;
+      transition: background 0.2s ease;
+      &:hover {
+        background: rgba(141, 110, 99, 0.9);
+      }
+    }
+  }
+
+  .nav-links {
+    display: flex;
+    align-items: center;
+    margin-left: auto;
+    list-style: none;
+    gap: 1rem;  /* distanza uniforme tra tutti i bottoni */
+
+    li {
+      display: flex;
+      align-items: center;
+    }
+
+    li:not(.separator) {
+      padding: 0.3rem 0.5rem;
+      border-radius: 4px;
+      transition: background-color 0.3s;
+      &:hover {
+        background-color: #7f4d2c;
+      }
+      .nav-item {
+        background: none;
+        border: none;
+        color: #fff;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+      }
+    }
+
+    /* Rimuoviamo del tutto il separatore */
+    .separator {
+      display: none;
+    }
+  }
+}
