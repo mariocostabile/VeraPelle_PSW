@@ -40,12 +40,13 @@ public class CustomerController {
         return customer.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-
-    @PutMapping("/auth/update/{id}")
-    @PreAuthorize("hasRole('USER')")  //il service è lo stesso perché verifica sempre prima se presente, in questo caso l'utente deve però avere un ruolo user che si assegna solo se già autenticato
-    public ResponseEntity<Customer> updateCustomer(@PathVariable Long id, @Valid @RequestBody CustomerDTO customerDTO) {
-        return ResponseEntity.ok(customerService.updateCustomer(id,customerDTO));
+    @PutMapping("/auth/update")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<CustomerDTO> updateCustomer(@AuthenticationPrincipal Jwt principal, @Valid @RequestBody CustomerDTO dto) {
+        CustomerDTO updated = customerService.updateCustomer(principal, dto);
+        return ResponseEntity.ok(updated);
     }
+
 
     @PostMapping("/auth/register")
     public ResponseEntity<?> registerCustomer(@AuthenticationPrincipal Jwt principal) {

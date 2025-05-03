@@ -20,20 +20,26 @@ export class ProfiloComponent implements OnInit {
 
   constructor(private fb: FormBuilder) {
     this.form = this.fb.group({
-      firstName: ['', Validators.required],
-      lastName:  ['', Validators.required],
-      email:     ['', [Validators.required, Validators.email]],
-      phone:     [''],
-      address:   [''],
+      firstName:   [{ value: '', disabled: true }, Validators.required],
+      lastName:    [{ value: '', disabled: true }, Validators.required],
+      email:       [{ value: '', disabled: true }, [Validators.required, Validators.email]],
+      phone:       [''],
+      address:     [''],
       dateOfBirth: ['']
     });
   }
 
   ngOnInit(): void {
     this.customerService.getCustomerProfile()
-      .pipe(catchError(() => { this.error = true; return of(null); }))
+      .pipe(
+        catchError(() => {
+          this.error = true;
+          return of(null);
+        })
+      )
       .subscribe(profile => {
         if (profile) {
+          // popola il form, inclusi i campi disabilitati
           this.form.patchValue(profile);
         }
         this.loading = false;
@@ -42,7 +48,11 @@ export class ProfiloComponent implements OnInit {
 
   onSubmit(): void {
     if (this.form.invalid) return;
-    this.customerService.updateCustomer(this.form.value as CustomerDTO)
+
+    // getRawValue include anche i campi disabled: avrai un CustomerDTO completo
+    const payload = this.form.getRawValue() as CustomerDTO;
+
+    this.customerService.updateCustomer(payload)
       .subscribe({
         next: updated => {
           this.form.patchValue(updated);
@@ -51,4 +61,5 @@ export class ProfiloComponent implements OnInit {
         error: () => alert('Errore durante l\'aggiornamento.')
       });
   }
+
 }

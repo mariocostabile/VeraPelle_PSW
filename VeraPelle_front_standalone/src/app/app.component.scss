@@ -1,5 +1,23 @@
-.container {
+/* reset margini del browser */
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+/* app-root: layout a colonna che occupa tutta la viewport */
+:host {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* il main.container si allunga tra header e footer */
+main.container {
+  flex: 1;
+  width: 100%;     /* forza piena larghezza */
+  max-width: none; /* disabilita eventuali max-width ereditati */
+  margin: 0;       /* elimina margini laterali */
   padding: 1rem;
-  background: #EFEBE9; // colore chiaro da contrasto
-  min-height: calc(100vh - 56px); // lascia spazio al header
+  background: #EFEBE9;
 }

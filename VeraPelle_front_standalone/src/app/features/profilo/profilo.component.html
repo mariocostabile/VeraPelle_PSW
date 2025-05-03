@@ -1,6 +1,3 @@
-<div *ngIf="loading">Caricamento profilo…</div>
-<div *ngIf="!loading && error" class="error">Impossibile caricare il profilo.</div>
-
 <form *ngIf="!loading && !error" [formGroup]="form" (ngSubmit)="onSubmit()">
   <label>
     Nome

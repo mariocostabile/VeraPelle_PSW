@@ -1,5 +1,8 @@
+/* src/app/core/components/header/header.component.scss */
+
 .header {
   display: flex;
+  flex-wrap: wrap;             // permette al contenuto di andare su più righe
   align-items: center;
   background-color: #663b1d;
   padding: 0.3rem 2rem;
@@ -7,21 +10,25 @@
   color: #fff;
 
   .logo {
+    flex: 0 0 auto;
     font-size: 1.5rem;
     font-weight: bold;
     text-transform: uppercase;
     color: #fff;
     text-decoration: none;
     cursor: pointer;
+    order: 1;                  // rimane sempre in testa
   }
 
   .search {
-    flex: 1;
+    flex: 1 1 300px;           // cresce fino a occupare lo spazio disponibile, ma non meno di 300px
     display: flex;
     justify-content: center;
+    margin: 0 1rem;            // spazio orizzontale tra logo e nav
 
     input {
-      width: 400px;
+      width: 100%;             // adatta la larghezza al contenitore
+      max-width: 400px;        // non diventa più largo di così
       padding: 0.2rem 0.5rem;
       border: none;
       border-radius: 2px 0 0 2px;
@@ -40,27 +47,28 @@
         background: rgba(141, 110, 99, 0.9);
       }
     }
+    order: 2;
   }
 
   .nav-links {
+    flex: 0 0 auto;
     display: flex;
     align-items: center;
     margin-left: auto;
     list-style: none;
-    gap: 1rem;  /* distanza uniforme tra tutti i bottoni */
+    gap: 1rem;
+    order: 3;
 
     li {
       display: flex;
       align-items: center;
-    }
-
-    li:not(.separator) {
       padding: 0.3rem 0.5rem;
       border-radius: 4px;
       transition: background-color 0.3s;
       &:hover {
         background-color: #7f4d2c;
       }
+
       .nav-item {
         background: none;
         border: none;
@@ -71,9 +79,26 @@
       }
     }
 
-    /* Rimuoviamo del tutto il separatore */
     .separator {
       display: none;
+    }
+  }
+
+  // ** Media Query per schermi piccoli **
+  @media (max-width: 768px) {
+    .logo {
+      flex-basis: 100%;        // logo su tutta la larghezza
+      text-align: center;
+      margin-bottom: 0.5rem;
+    }
+    .search {
+      flex-basis: 100%;        // search sotto il logo, full-width
+      margin: 0.5rem 0;
+    }
+    .nav-links {
+      flex-basis: 100%;        // nav sotto la search, full-width
+      justify-content: center;
+      padding: 0.5rem 0;
     }
   }
 }

@@ -1,0 +1,64 @@
+/* src/app/core/components/footer/footer.component.scss */
+
+.footer {
+  display: flex;
+  align-items: flex-start;
+  background-color: #663b1d;
+  padding: 0.3rem 2rem;
+  box-shadow: none;
+  color: #fff;
+  flex-wrap: wrap;
+
+  .footer__container {
+    display: flex;
+    width: 100%;
+    align-items: flex-start;
+    justify-content: space-between;
+  }
+
+  .footer__contacts {
+    line-height: 1.6;
+
+    /* titolo resettato come paragrafo */
+    h4 {
+      margin: 0 0 0.2rem;
+      font-size: 0.9rem;     /* stessa dimensione di <p> */
+      font-weight: normal;   /* peso normale, non bold */
+      color: #fff;           /* mantiene il bianco */
+    }
+
+    p {
+      margin: 0.2rem 0;
+      font-size: 0.9rem;
+    }
+  }
+
+  .footer__links {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+
+    li {
+      margin-bottom: 0.5rem;
+
+      a {
+        /* semplice link di testo */
+        color: #fff;
+        font-size: 0.9rem;
+        font-weight: normal;
+        text-decoration: underline;
+        background: none;
+        border: none;
+        padding: 0;
+        cursor: pointer;
+        transition: color 0.2s;
+
+        &:hover {
+          color: #ddd;
+        }
+      }
+    }
+  }
+}

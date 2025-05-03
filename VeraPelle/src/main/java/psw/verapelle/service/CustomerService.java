@@ -50,16 +50,28 @@ public class CustomerService {
         return customerRepository.findById(keycloakId).orElseThrow(() -> new RuntimeException("Customer not found"));
     }
 
-    public Customer updateCustomer(Long id, CustomerDTO customerDTO) {
-        Customer updatedCustomer = new Customer();
-        updatedCustomer.setId(customerDTO.getId());
-        updatedCustomer.setFirstName(customerDTO.getFirstName());
-        updatedCustomer.setLastName(customerDTO.getLastName());
-        updatedCustomer.setDateOfBirth(customerDTO.getDateOfBirth());
-        updatedCustomer.setAddress(customerDTO.getAddress());
-        updatedCustomer.setPhone(customerDTO.getPhone());
-        updatedCustomer.setEmail(customerDTO.getEmail());
-        return customerRepository.save(updatedCustomer);
+    public CustomerDTO updateCustomer(Jwt jwt, CustomerDTO dto) {
+        String keycloakId = jwt.getClaimAsString("sub");
+        Customer c = customerRepository.findById(keycloakId)
+                .orElseThrow(() -> new RuntimeException("Customer not found"));
+
+        // patch solo i campi modificabili
+        c.setPhone(dto.getPhone());
+        c.setAddress(dto.getAddress());
+        c.setDateOfBirth(dto.getDateOfBirth());
+
+        Customer saved = customerRepository.save(c);
+
+        // rimappa in DTO completo
+        return new CustomerDTO(
+                saved.getId(),
+                saved.getFirstName(),
+                saved.getLastName(),
+                saved.getDateOfBirth(),
+                saved.getAddress(),
+                saved.getPhone(),
+                saved.getEmail()
+        );
     }
 }
 
