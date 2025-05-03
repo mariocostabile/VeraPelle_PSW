@@ -1,104 +1,142 @@
 /* src/app/core/components/header/header.component.scss */
 
 .header {
-  display: flex;
-  flex-wrap: wrap;             // permette al contenuto di andare su più righe
-  align-items: center;
-  background-color: #663b1d;
-  padding: 0.3rem 2rem;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
-  color: #fff;
+  background-color: var(--color-primary);
+  color: var(--color-text);
+  font-family: var(--font-sans);
 
-  .logo {
-    flex: 0 0 auto;
-    font-size: 1.5rem;
-    font-weight: bold;
-    text-transform: uppercase;
-    color: #fff;
-    text-decoration: none;
-    cursor: pointer;
-    order: 1;                  // rimane sempre in testa
-  }
-
-  .search {
-    flex: 1 1 300px;           // cresce fino a occupare lo spazio disponibile, ma non meno di 300px
-    display: flex;
-    justify-content: center;
-    margin: 0 1rem;            // spazio orizzontale tra logo e nav
-
-    input {
-      width: 100%;             // adatta la larghezza al contenitore
-      max-width: 400px;        // non diventa più largo di così
-      padding: 0.2rem 0.5rem;
-      border: none;
-      border-radius: 2px 0 0 2px;
-    }
-
-    button {
-      margin-left: 0.25rem;
-      background: #8d6e63;
-      border: none;
-      color: #fff;
-      padding: 0.3rem 0.6rem;
-      border-radius: 0 2px 2px 0;
-      cursor: pointer;
-      transition: background 0.2s ease;
-      &:hover {
-        background: rgba(141, 110, 99, 0.9);
-      }
-    }
-    order: 2;
-  }
-
-  .nav-links {
-    flex: 0 0 auto;
+  /* ------------------ RIGA SUPERIORE ------------------ */
+  .header-top {
     display: flex;
     align-items: center;
-    margin-left: auto;
-    list-style: none;
-    gap: 1rem;
-    order: 3;
+    padding: 0.2rem 2rem;    /* da 0.25 → 0.2 per meno spazio verticale */
 
-    li {
+    .logo {
+      font-family: var(--font-heading);
+      font-size: 1.5rem;
+      font-weight: bold;
+      text-transform: uppercase;
+      color: var(--color-text);
+      text-decoration: none;
+      cursor: pointer;
+      flex: 0 0 auto;
+      margin-right: 1rem;
+    }
+
+    /* Search bar centrale */
+    .search {
       display: flex;
-      align-items: center;
-      padding: 0.3rem 0.5rem;
-      border-radius: 4px;
-      transition: background-color 0.3s;
-      &:hover {
-        background-color: #7f4d2c;
+      flex: 1;
+      margin: 0;
+      max-width: none;
+
+      input {
+        flex: 1;
+        padding: 0.4rem 0.8rem;
+        border: none;
+        border-radius: 2px 0 0 2px;
+        font-family: var(--font-sans);
       }
 
-      .nav-item {
+      button {
+        background: var(--color-accent);
+        border: none;
+        color: var(--color-text);
+        padding: 0.4rem 1rem;
+        border-radius: 0 2px 2px 0;
+        cursor: pointer;
+        transition: background 0.2s;
+
+        &:hover {
+          background: var(--color-primary-hover);
+        }
+      }
+    }
+
+    /* Auth-links a destra */
+    .auth-links {
+      display: flex;
+      flex: 0 0 auto;
+      margin-left: auto;
+      gap: 0.5rem;            /* da 1rem → 0.5rem per avvicinare i bottoni */
+      list-style: none;
+      padding: 0;
+
+      li .nav-item {
         background: none;
         border: none;
-        color: #fff;
+        color: var(--color-text);
         font-size: 1rem;
         font-weight: 600;
         cursor: pointer;
-      }
-    }
+        padding: 0.3rem 0.6rem;
+        border-radius: 4px;
+        transition: background-color 0.2s;
 
-    .separator {
-      display: none;
+        &:hover {
+          background-color: var(--color-primary-hover);
+        }
+      }
     }
   }
 
-  // ** Media Query per schermi piccoli **
-  @media (max-width: 768px) {
-    .logo {
-      flex-basis: 100%;        // logo su tutta la larghezza
-      text-align: center;
-      margin-bottom: 0.5rem;
-    }
-    .search {
-      flex-basis: 100%;        // search sotto il logo, full-width
-      margin: 0.5rem 0;
-    }
-    .nav-links {
-      flex-basis: 100%;        // nav sotto la search, full-width
+  /* ------------------ RIGA CATEGORIE ------------------ */
+  .header-bottom {
+    background-color: var(--color-primary);
+    padding: 0.1rem 2rem;     /* da 0.25rem → 0.1rem per avvicinare le righe */
+    margin-top: 0;            /* già zero */
+
+    .categories {
+      display: flex;
       justify-content: center;
-      padding: 0.5rem 0;
+      gap: 2rem;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+
+      li .nav-item {
+        background: none;
+        border: none;
+        color: var(--color-text);
+        font-size: 0.95rem;
+        font-weight: 500;
+        cursor: pointer;
+        padding: 0.3rem 0.6rem;
+        border-radius: 4px;
+        transition: background-color 0.2s;
+
+        &:hover {
+          background-color: var(--color-primary-hover);
+        }
+      }
+    }
+  }
+
+  /* ------------------ MOBILE ------------------ */
+  @media (max-width: 768px) {
+    .header-top {
+      flex-wrap: wrap;
+
+      .logo,
+      .search,
+      .auth-links {
+        flex-basis: 100%;
+        justify-content: center;
+        text-align: center;
+        margin-bottom: 0.5rem;
+      }
+
+      .search {
+        margin: 0.5rem 0;
+      }
+    }
+
+    .header-bottom {
+      .categories {
+        flex-wrap: wrap;
+        gap: 1rem;
+        justify-content: center;
+      }
     }
   }
 }

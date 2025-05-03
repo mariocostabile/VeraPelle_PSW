@@ -1,26 +1,36 @@
 <nav class="header">
-  <a routerLink="/" class="logo">VeraPelle</a>
+  <!-- RIGA ALTA: logo, barra di ricerca, login/registrati -->
+  <div class="header-top">
+    <a routerLink="/" class="logo">VeraPelle</a>
 
-  <div class="search">
-    <input type="text" placeholder="Cerca prodotti…" />
-    <button aria-label="Cerca">🔍</button>
+    <!-- Search bar -->
+    <div class="search">
+      <input type="text" placeholder="Cerca prodotti…" />
+      <button aria-label="Cerca">🔍</button>
+    </div>
+
+    <!-- Link di autenticazione -->
+    <ul class="auth-links">
+      <ng-container *ngIf="!isAuthenticated">
+        <li><button class="nav-item" (click)="login()">Login</button></li>
+        <li><button class="nav-item" (click)="register()">Registrati</button></li>
+      </ng-container>
+      <ng-container *ngIf="isAuthenticated">
+        <li><button class="nav-item" routerLink="/profilo">Profilo</button></li>
+        <li><button class="nav-item" (click)="logout()">Logout</button></li>
+      </ng-container>
+    </ul>
   </div>
 
-  <ul class="nav-links">
-    <li>
-      <button class="nav-item" routerLink="/" type="button">Home</button>
-    </li>
-
-    <!-- Se non autenticato: Login, Registrati -->
-    <ng-container *ngIf="!isAuthenticated">
-      <li><button class="nav-item" (click)="login()">Login</button></li>
-      <li><button class="nav-item" (click)="register()">Registrati</button></li>
-    </ng-container>
-
-    <!-- Se autenticato: Profilo, Logout -->
-    <ng-container *ngIf="isAuthenticated">
-      <li><button class="nav-item" routerLink="/profilo">Profilo</button></li>
-      <li><button class="nav-item" (click)="logout()">Logout</button></li>
-    </ng-container>
-  </ul>
+  <!-- RIGA CATEGORIE: centrata -->
+  <div class="header-bottom">
+    <ul class="categories">
+      <li><button class="nav-item" routerLink="/category/uomo">Uomo</button></li>
+      <li><button class="nav-item" routerLink="/category/donna">Donna</button></li>
+      <li><button class="nav-item" routerLink="/category/borse">Borse</button></li>
+      <li><button class="nav-item" routerLink="/category/giacche">Giacche</button></li>
+      <li><button class="nav-item" routerLink="/category/cinture">Cinture</button></li>
+      <li><button class="nav-item" routerLink="/category/accessori">Accessori</button></li>
+    </ul>
+  </div>
 </nav>
