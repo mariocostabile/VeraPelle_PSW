@@ -1,36 +1,51 @@
+<!-- src/app/features/header/header.component.html -->
 <nav class="header">
-  <!-- RIGA ALTA: logo, barra di ricerca, login/registrati -->
+  <!-- HEADER UNICO PER ADMIN, DOPPIO PER UTENTI -->
   <div class="header-top">
+    <!-- Logo sempre a sinistra -->
     <a routerLink="/" class="logo">VeraPelle</a>
 
-    <!-- Search bar -->
-    <div class="search">
-      <input type="text" placeholder="Cerca prodotti…" />
-      <button aria-label="Cerca">🔍</button>
-    </div>
-
-    <!-- Link di autenticazione -->
-    <ul class="auth-links">
-      <ng-container *ngIf="!isAuthenticated">
-        <li><button class="nav-item" (click)="login()">Login</button></li>
-        <li><button class="nav-item" (click)="register()">Registrati</button></li>
-      </ng-container>
-      <ng-container *ngIf="isAuthenticated">
-        <li><button class="nav-item" routerLink="/profilo">Profilo</button></li>
+    <!-- Se admin: menu gestione + logout in un'unica riga -->
+    <ng-container *ngIf="isAdmin; else userHeader">
+      <ul class="admin-menu">
+        <li><button class="nav-item" (click)="navigateTo('/admin/users')">Gestione Utenti</button></li>
+        <li><button class="nav-item" (click)="navigateTo('/admin/products')">Gestione Prodotti</button></li>
+        <li><button class="nav-item" (click)="navigateTo('/admin/categories')">Gestione Categorie</button></li>
+      </ul>
+      <ul class="auth-links">
         <li><button class="nav-item" (click)="logout()">Logout</button></li>
-      </ng-container>
-    </ul>
+      </ul>
+    </ng-container>
+
+    <!-- Template per utente: ricerca + auth-links -->
+    <ng-template #userHeader>
+      <!-- Search bar per utenti normali -->
+      <div class="search">
+        <input type="text" placeholder="Cerca prodotti…" />
+        <button aria-label="Cerca">🔍</button>
+      </div>
+      <!-- Link di autenticazione -->
+      <ul class="auth-links">
+        <ng-container *ngIf="!isAuthenticated">
+          <li><button class="nav-item" (click)="login()">Login</button></li>
+          <li><button class="nav-item" (click)="register()">Registrati</button></li>
+        </ng-container>
+        <ng-container *ngIf="isAuthenticated">
+          <li><button class="nav-item" routerLink="/profilo">Profilo</button></li>
+          <li><button class="nav-item" (click)="logout()">Logout</button></li>
+        </ng-container>
+      </ul>
+    </ng-template>
   </div>
 
-  <!-- RIGA CATEGORIE: centrata -->
-  <div class="header-bottom">
+  <!-- RIGA CATEGORIE solo per utenti normali -->
+  <div class="header-bottom" *ngIf="!isAdmin">
     <ul class="categories">
-      <li><button class="nav-item" routerLink="/category/uomo">Uomo</button></li>
-      <li><button class="nav-item" routerLink="/category/donna">Donna</button></li>
-      <li><button class="nav-item" routerLink="/category/borse">Borse</button></li>
-      <li><button class="nav-item" routerLink="/category/giacche">Giacche</button></li>
-      <li><button class="nav-item" routerLink="/category/cinture">Cinture</button></li>
-      <li><button class="nav-item" routerLink="/category/accessori">Accessori</button></li>
+      <li *ngFor="let cat of categories">
+        <button class="nav-item" [routerLink]="['/category', cat.name]">
+          {{ cat.name }}
+        </button>
+      </li>
     </ul>
   </div>
 </nav>

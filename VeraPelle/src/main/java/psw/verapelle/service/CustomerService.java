@@ -1,5 +1,6 @@
 package psw.verapelle.service;
 
+import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -19,9 +20,22 @@ public class CustomerService {
     @Autowired
     private CustomerRepository customerRepository;
 
+    /*-------------------------------------------------
+     |               Self-service methods              |
+     -------------------------------------------------*/
+
     public List<CustomerDTO> getAllCustomers() {
-        return customerRepository.findAll().stream().map(customer -> new CustomerDTO(customer.getId(), customer.getFirstName(),
-                customer.getLastName(), customer.getDateOfBirth(), customer.getAddress(), customer.getPhone(), customer.getEmail())).collect(Collectors.toList());
+        return customerRepository.findAll().stream()
+                .map(c -> new CustomerDTO(
+                        c.getId(),
+                        c.getFirstName(),
+                        c.getLastName(),
+                        c.getDateOfBirth(),
+                        c.getAddress(),
+                        c.getPhone(),
+                        c.getEmail()
+                ))
+                .collect(Collectors.toList());
     }
 
     public Optional<Customer> findCustomerById(String id) {
@@ -32,13 +46,12 @@ public class CustomerService {
         return customerRepository.findByEmail(email);
     }
 
-    public Customer saveCustomer(@AuthenticationPrincipal Jwt jwt){
+    public Customer saveCustomer(@AuthenticationPrincipal Jwt jwt) {
         String keycloakId = jwt.getClaimAsString("sub");
         String email = jwt.getClaimAsString("email");
         String firstName = jwt.getClaimAsString("given_name");
         String lastName = jwt.getClaimAsString("family_name");
         Customer customer = new Customer();
-        customer = new Customer();
         customer.setId(keycloakId);
         customer.setEmail(email);
         customer.setFirstName(firstName);
@@ -47,7 +60,8 @@ public class CustomerService {
     }
 
     public Customer getCustomer(String keycloakId) {
-        return customerRepository.findById(keycloakId).orElseThrow(() -> new RuntimeException("Customer not found"));
+        return customerRepository.findById(keycloakId)
+                .orElseThrow(() -> new RuntimeException("Customer not found"));
     }
 
     public CustomerDTO updateCustomer(Jwt jwt, CustomerDTO dto) {
@@ -73,6 +87,55 @@ public class CustomerService {
                 saved.getEmail()
         );
     }
+
+    /*-------------------------------------------------
+     |               Admin-service methods             |
+     -------------------------------------------------*/
+
+    @Transactional
+    public CustomerDTO getCustomerById(String id) {
+        Customer c = customerRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Customer not found"));
+        return new CustomerDTO(
+                c.getId(),
+                c.getFirstName(),
+                c.getLastName(),
+                c.getDateOfBirth(),
+                c.getAddress(),
+                c.getPhone(),
+                c.getEmail()
+        );
+    }
+
+    @Transactional
+    public CustomerDTO updateCustomerById(String id, @Valid CustomerDTO dto) {
+        Customer c = customerRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Customer not found"));
+
+        // aggiorniamo tutti i campi dal DTO
+        c.setFirstName(dto.getFirstName());
+        c.setLastName(dto.getLastName());
+        c.setDateOfBirth(dto.getDateOfBirth());
+        c.setAddress(dto.getAddress());
+        c.setPhone(dto.getPhone());
+        c.setEmail(dto.getEmail());
+
+        Customer saved = customerRepository.save(c);
+        return new CustomerDTO(
+                saved.getId(),
+                saved.getFirstName(),
+                saved.getLastName(),
+                saved.getDateOfBirth(),
+                saved.getAddress(),
+                saved.getPhone(),
+                saved.getEmail()
+        );
+    }
+
+    @Transactional
+    public void deleteCustomerById(String id) {
+        Customer c = customerRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Customer not found"));
+        customerRepository.delete(c);
+    }
 }
-
-

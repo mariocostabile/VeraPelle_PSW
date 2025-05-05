@@ -7,6 +7,7 @@ import psw.verapelle.DTO.CategoryDTO;
 import psw.verapelle.entity.Category;
 import psw.verapelle.repository.CategoryRepository;
 
+import java.util.List;
 import java.util.Objects;
 
 @Service
@@ -20,7 +21,13 @@ public class CategoryService {
         if (categoryDTO.getName() == null || categoryDTO.getName().trim().isEmpty()) {
             throw new IllegalArgumentException("Category name cannot be empty");
         }
-        Category category = new Category(null, categoryDTO.getName(), categoryDTO.getDescription(), null, null);
+        Category category = new Category(
+                null,
+                categoryDTO.getName(),
+                categoryDTO.getDescription(),
+                null,
+                null
+        );
         return categoryRepository.save(category);
     }
 
@@ -36,14 +43,27 @@ public class CategoryService {
         categoryRepository.delete(category);
     }
 
-
     @Transactional
     public Category updateCategory(Long id, Category updatedCategory) {
         return categoryRepository.findById(id).map(category -> {
-            category.setName(Objects.requireNonNullElse(updatedCategory.getName(), category.getName())); //ritorna il primo se non nullo altrimenti il secondo se non nullo
-            category.setDescription(Objects.requireNonNullElse(updatedCategory.getDescription(), category.getDescription()));
+            category.setName(
+                    Objects.requireNonNullElse(updatedCategory.getName(), category.getName())
+            );
+            category.setDescription(
+                    Objects.requireNonNullElse(updatedCategory.getDescription(), category.getDescription())
+            );
             return categoryRepository.save(category);
         }).orElseThrow(() -> new RuntimeException("Category not found"));
     }
 
+    @Transactional
+    public List<Category> getAllCategories() {
+        return categoryRepository.findAll();
+    }
+
+    @Transactional
+    public Category getCategoryById(Long id) {
+        return categoryRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Category not found"));
+    }
 }

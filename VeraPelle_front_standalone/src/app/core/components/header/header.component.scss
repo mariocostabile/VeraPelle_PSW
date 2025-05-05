@@ -5,11 +5,31 @@
   color: var(--color-text);
   font-family: var(--font-sans);
 
-  /* ------------------ RIGA SUPERIORE ------------------ */
+  /* ------------------ GLOBAL NAV-ITEM STYLES ------------------ */
+  .nav-item {
+    display: inline-block;
+    background: none;
+    border: none;
+    color: var(--color-text);
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    padding: 0.3rem 0.6rem;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+    text-decoration: none;
+    line-height: 1;
+  }
+  .nav-item:hover {
+    background-color: var(--color-primary-hover);
+  }
+
+  /* ------------------ HEADER TOP ------------------ */
   .header-top {
     display: flex;
     align-items: center;
-    padding: 0.2rem 2rem;    /* da 0.25 → 0.2 per meno spazio verticale */
+    justify-content: space-between;
+    padding: 0.5rem 2rem;
 
     .logo {
       font-family: var(--font-heading);
@@ -19,16 +39,14 @@
       color: var(--color-text);
       text-decoration: none;
       cursor: pointer;
-      flex: 0 0 auto;
       margin-right: 1rem;
     }
 
-    /* Search bar centrale */
+    /* Search bar per utenti normali */
     .search {
       display: flex;
       flex: 1;
-      margin: 0;
-      max-width: none;
+      margin: 0 1rem;
 
       input {
         flex: 1;
@@ -37,7 +55,6 @@
         border-radius: 2px 0 0 2px;
         font-family: var(--font-sans);
       }
-
       button {
         background: var(--color-accent);
         border: none;
@@ -46,69 +63,40 @@
         border-radius: 0 2px 2px 0;
         cursor: pointer;
         transition: background 0.2s;
-
-        &:hover {
-          background: var(--color-primary-hover);
-        }
+      }
+      button:hover {
+        background-color: var(--color-primary-hover);
       }
     }
 
-    /* Auth-links a destra */
-    .auth-links {
+    /* Auth links e menu admin allineati in un'unica riga */
+    .auth-links,
+    .admin-menu {
       display: flex;
-      flex: 0 0 auto;
-      margin-left: auto;
-      gap: 0.5rem;            /* da 1rem → 0.5rem per avvicinare i bottoni */
+      align-items: center;
+      gap: 1rem;
       list-style: none;
+      margin: 0;
       padding: 0;
-
-      li .nav-item {
-        background: none;
-        border: none;
-        color: var(--color-text);
-        font-size: 1rem;
-        font-weight: 600;
-        cursor: pointer;
-        padding: 0.3rem 0.6rem;
-        border-radius: 4px;
-        transition: background-color 0.2s;
-
-        &:hover {
-          background-color: var(--color-primary-hover);
-        }
-      }
+      flex-shrink: 0;
     }
   }
 
-  /* ------------------ RIGA CATEGORIE ------------------ */
+  /* ------------------ HEADER BOTTOM (Categorie per utenti) ------------------ */
   .header-bottom {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 2rem;
     background-color: var(--color-primary);
-    padding: 0.1rem 2rem;     /* da 0.25rem → 0.1rem per avvicinare le righe */
-    margin-top: 0;            /* già zero */
+    padding: 0.3rem 2rem;
 
     .categories {
       display: flex;
-      justify-content: center;
       gap: 2rem;
       list-style: none;
       margin: 0;
       padding: 0;
-
-      li .nav-item {
-        background: none;
-        border: none;
-        color: var(--color-text);
-        font-size: 0.95rem;
-        font-weight: 500;
-        cursor: pointer;
-        padding: 0.3rem 0.6rem;
-        border-radius: 4px;
-        transition: background-color 0.2s;
-
-        &:hover {
-          background-color: var(--color-primary-hover);
-        }
-      }
     }
   }
 
@@ -116,26 +104,29 @@
   @media (max-width: 768px) {
     .header-top {
       flex-wrap: wrap;
+      justify-content: center;
 
       .logo,
       .search,
-      .auth-links {
+      .auth-links,
+      .admin-menu {
         flex-basis: 100%;
         justify-content: center;
-        text-align: center;
         margin-bottom: 0.5rem;
       }
-
       .search {
         margin: 0.5rem 0;
       }
     }
 
     .header-bottom {
+      flex-wrap: wrap;
+      padding: 0.5rem 1rem;
+      gap: 1rem;
+
       .categories {
         flex-wrap: wrap;
         gap: 1rem;
-        justify-content: center;
       }
     }
   }

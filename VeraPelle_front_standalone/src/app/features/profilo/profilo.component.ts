@@ -1,7 +1,8 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule }              from '@angular/common';
 import { ReactiveFormsModule, FormGroup, FormBuilder, Validators } from '@angular/forms';
-import { CustomerService, CustomerDTO } from '../../core/services/customer/customer.service';
+import { CustomerService } from '../../core/services/customer/customer.service';
+import { CustomerDTO } from '../../core/models/customer-dto';
 import { catchError }                from 'rxjs/operators';
 import { of }                        from 'rxjs';
 

@@ -6,5 +6,11 @@ import { authGuard }         from './core/guards/auth.guard';
 export const routes: Routes = [
   { path: '',        component: HomeComponent },
   { path: 'profilo', component: ProfiloComponent, canActivate: [authGuard] },
+  {
+    path: 'admin',
+    loadChildren: () =>
+      import('./features/admin/admin.module').then(m => m.AdminModule),
+    canActivate: [authGuard]
+  },
   { path: '**',      redirectTo: '' }
 ];

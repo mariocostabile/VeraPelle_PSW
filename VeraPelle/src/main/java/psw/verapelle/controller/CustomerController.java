@@ -8,13 +8,16 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
+import psw.verapelle.DTO.CategoryDTO;
 import psw.verapelle.DTO.CustomerDTO;
 import psw.verapelle.entity.Customer;
-import psw.verapelle.repository.CustomerRepository;
+import psw.verapelle.entity.Category;
 import psw.verapelle.service.CustomerService;
+import psw.verapelle.service.CategoryService;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/customer")
@@ -22,56 +25,63 @@ public class CustomerController {
 
     @Autowired
     private CustomerService customerService;
+
     @Autowired
-    private CustomerRepository customerRepository;
+    private CategoryService categoryService;
 
-    @GetMapping("/auth/getAllCustomer")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<List<CustomerDTO>> getAllCustomers() {
-        List<CustomerDTO> customers = customerService.getAllCustomers();
-        return ResponseEntity.ok(customers);
+    /**
+     * Registra l'utente nel database interno basandosi sul JWT di Keycloak.
+     */
+    @PostMapping("/auth/register")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<?> registerCustomer(@AuthenticationPrincipal Jwt principal) {
+        String keycloakId = principal.getClaimAsString("sub");
+        Optional<Customer> existing = customerService.findCustomerById(keycloakId);
+        if (existing.isEmpty()) {
+            Customer saved = customerService.saveCustomer(principal);
+            CustomerDTO dto = customerService.getCustomerById(saved.getId());
+            return ResponseEntity.status(HttpStatus.CREATED).body(dto);
+        }
+        return ResponseEntity.status(HttpStatus.CONFLICT).body("User already exists.");
     }
 
-    //utile per admin panel
-    @GetMapping("/auth/get/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Customer> getCustomerById(@PathVariable String id) {
-        Optional<Customer> customer = customerService.findCustomerById(id);
-        return customer.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    /**
+     * Restituisce i dati dell'utente corrente.
+     */
+    @GetMapping("/auth/me")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<CustomerDTO> getCurrentCustomer(@AuthenticationPrincipal Jwt principal) {
+        String keycloakId = principal.getClaimAsString("sub");
+        CustomerDTO dto = customerService.getCustomerById(keycloakId);
+        return ResponseEntity.ok(dto);
     }
 
-    @PutMapping("/auth/update")
-    @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<CustomerDTO> updateCustomer(@AuthenticationPrincipal Jwt principal, @Valid @RequestBody CustomerDTO dto) {
+    /**
+     * Aggiorna i dati dell'utente corrente.
+     */
+    @PutMapping("/auth/me")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<CustomerDTO> updateCurrentCustomer(
+            @AuthenticationPrincipal Jwt principal,
+            @Valid @RequestBody CustomerDTO dto) {
+
         CustomerDTO updated = customerService.updateCustomer(principal, dto);
         return ResponseEntity.ok(updated);
     }
 
-
-    @PostMapping("/auth/register")
-    public ResponseEntity<?> registerCustomer(@AuthenticationPrincipal Jwt principal) {
-        String keycloakId = principal.getClaimAsString("sub");
-        Optional<Customer> customerOpt = customerService.findCustomerById(keycloakId);
-        if (customerOpt.isEmpty())
-            return ResponseEntity.ok(customerService.saveCustomer(principal));
-        return ResponseEntity.status(HttpStatus.CONFLICT).body("User already exists.");
-    }
-    
-    @GetMapping("/auth/me")
-    public ResponseEntity<CustomerDTO> me(@AuthenticationPrincipal Jwt principal) {
-        String keycloakId = principal.getClaimAsString("sub");
-        try {
-            Customer customer = customerService.getCustomer(keycloakId);
-            CustomerDTO customerDTO = new CustomerDTO();
-            customerDTO.setFirstName(customer.getFirstName());
-            customerDTO.setLastName(customer.getLastName());
-            customerDTO.setDateOfBirth(customer.getDateOfBirth());
-            customerDTO.setEmail(customer.getEmail());
-            customerDTO.setPhone(customer.getPhone());
-            customerDTO.setAddress(customer.getAddress());
-            return ResponseEntity.ok(customerDTO);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-        }
+    /**
+     * Endpoint pubblico per ottenere tutte le categorie.
+     */
+    @GetMapping("/categories")
+    public List<CategoryDTO> getAllCategories() {
+        return categoryService.getAllCategories().stream()
+                .map(c -> {
+                    CategoryDTO dto = new CategoryDTO();
+                    dto.setId(c.getId());
+                    dto.setName(c.getName());
+                    dto.setDescription(c.getDescription());
+                    return dto;
+                })
+                .collect(Collectors.toList());
     }
 }
