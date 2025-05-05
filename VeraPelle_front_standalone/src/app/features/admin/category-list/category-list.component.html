@@ -1,0 +1,35 @@
+<div class="admin-panel">
+  <h2>Gestione Categorie</h2>
+
+  <button class="btn-primary" routerLink="/admin/categories/new">Nuova Categoria</button>
+
+  <div *ngIf="isLoading" class="loading">Caricamento in corso…</div>
+  <div *ngIf="error" class="error">{{ error }}</div>
+
+  <table *ngIf="!isLoading && !error && categories.length">
+    <thead>
+    <tr>
+      <th>ID</th>
+      <th>Nome</th>
+      <th>Descrizione</th>
+      <th>Azioni</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr *ngFor="let cat of categories">
+      <td>{{ cat.id }}</td>
+      <td>{{ cat.name }}</td>
+      <td>{{ cat.description }}</td>
+      <td>
+        <button class="btn-delete" (click)="deleteCategory(cat.id!)">
+          Elimina
+        </button>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+
+  <div *ngIf="!isLoading && !error && !categories.length" class="empty">
+    Nessuna categoria trovata.
+  </div>
+</div>

@@ -1,0 +1,45 @@
+<div class="admin-panel">
+  <h2>Gestione Prodotti</h2>
+
+  <button class="btn-primary" routerLink="/admin/products/new">
+    Nuovo Prodotto
+  </button>
+
+  <div *ngIf="isLoading" class="loading">
+    Caricamento in corso…
+  </div>
+  <div *ngIf="error" class="error">
+    {{ error }}
+  </div>
+
+  <table *ngIf="!isLoading && !error && products.length">
+    <thead>
+    <tr>
+      <th>ID</th>
+      <th>Nome</th>
+      <th>Prezzo</th>
+      <th>Quantità</th>
+      <th>Categoria ID</th>
+      <th>Azioni</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr *ngFor="let p of products">
+      <td>{{ p.id }}</td>
+      <td>{{ p.name }}</td>
+      <td>{{ p.price | currency:'EUR' }}</td>
+      <td>{{ p.stockQuantity }}</td>
+      <td>{{ p.categoryId }}</td>
+      <td>
+        <button class="btn-delete" (click)="deleteProduct(p.id!)">
+          Elimina
+        </button>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+
+  <div *ngIf="!isLoading && !error && !products.length" class="empty">
+    Nessun prodotto trovato.
+  </div>
+</div>

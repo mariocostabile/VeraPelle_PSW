@@ -1,9 +1,8 @@
 // src/app/features/header/header.component.ts
 
 import { Component, inject, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { Router, RouterLink } from '@angular/router';
-import { NgIf, NgForOf } from '@angular/common';
+import { CommonModule, NgIf, NgForOf } from '@angular/common';
+import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { KeycloakService } from '../../../core/services/keycloak/keycloak.service';
 import { CategoryService } from '../../../core/services/category/category.service';
 import { CategoryDTO } from '../../../core/models/category-dto';
@@ -11,7 +10,7 @@ import { CategoryDTO } from '../../../core/models/category-dto';
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [CommonModule, RouterLink, NgIf, NgForOf],
+  imports: [CommonModule, RouterLink, RouterLinkActive, NgIf, NgForOf],
   templateUrl: './header.component.html',
   styleUrls: ['./header.component.scss']
 })
