@@ -1,0 +1,32 @@
+<div class="admin-users">
+  <h2>Gestione Utenti</h2>
+
+  <div *ngIf="loading">Caricamento in corso…</div>
+  <div *ngIf="error" class="error">{{ error }}</div>
+
+  <table *ngIf="!loading && users.length" class="user-table">
+    <thead>
+    <tr>
+      <th>Id</th>
+      <th>Nome</th>
+      <th>Cognome</th>
+      <th>Email</th>
+      <th>Azioni</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr *ngFor="let u of users">
+      <td>{{ u.id }}</td>
+      <td>{{ u.firstName }}</td>
+      <td>{{ u.lastName }}</td>
+      <td>{{ u.email }}</td>
+      <td>
+        <!-- potrai aggiungere qui un pulsante “Modifica” -->
+        <button (click)="deleteUser(u.id)">Elimina</button>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+
+  <div *ngIf="!loading && !users.length">Nessun utente trovato.</div>
+</div>
