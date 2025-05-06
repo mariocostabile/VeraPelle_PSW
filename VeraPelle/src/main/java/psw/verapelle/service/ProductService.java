@@ -10,61 +10,78 @@ import psw.verapelle.repository.CategoryRepository;
 import psw.verapelle.repository.ProductRepository;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class ProductService {
 
     @Autowired
     private ProductRepository productRepository;
+
     @Autowired
     private CategoryRepository categoryRepository;
 
     @Transactional
     public Product createProduct(ProductDTO productDTO) {
+        // Validazione del nome
         if (productDTO.getName() == null || productDTO.getName().trim().isEmpty()) {
             throw new IllegalArgumentException("Product name cannot be empty");
         }
-        Category category = categoryRepository.findById(productDTO.getCategoryId())
-                .orElseThrow(() -> new RuntimeException("Category not found"));
-        Product product = new Product(
-                null,
-                productDTO.getName(),
-                productDTO.getDescription(),
-                productDTO.getPrice(),
-                productDTO.getStockQuantity(),
-                category,
-                null
-        );
+
+        // Costruzione dell'entità Product
+        Product product = new Product();
+        product.setName(productDTO.getName());
+        product.setDescription(productDTO.getDescription());
+        product.setPrice(productDTO.getPrice());
+        product.setStockQuantity(productDTO.getStockQuantity());
+
+        // Associazione delle categorie (Many-to-Many)
+        List<Category> categories = productDTO.getCategoryIds().stream()
+                .map(id -> categoryRepository.findById(id)
+                        .orElseThrow(() -> new RuntimeException("Category not found: " + id)))
+                .collect(Collectors.toList());
+        product.setCategories(categories);
+
         return productRepository.save(product);
+    }
+
+    @Transactional
+    public Product updateProduct(Long id, ProductDTO productDTO) {
+        return productRepository.findById(id)
+                .map(product -> {
+                    // Aggiornamento campi base
+                    if (productDTO.getName() != null) {
+                        product.setName(productDTO.getName());
+                    }
+                    if (productDTO.getDescription() != null) {
+                        product.setDescription(productDTO.getDescription());
+                    }
+                    if (productDTO.getPrice() != null) {
+                        product.setPrice(productDTO.getPrice());
+                    }
+                    if (productDTO.getStockQuantity() != 0) {
+                        product.setStockQuantity(productDTO.getStockQuantity());
+                    }
+
+                    // Riassegnazione categorie
+                    if (productDTO.getCategoryIds() != null) {
+                        List<Category> categories = productDTO.getCategoryIds().stream()
+                                .map(cid -> categoryRepository.findById(cid)
+                                        .orElseThrow(() -> new RuntimeException("Category not found: " + cid)))
+                                .collect(Collectors.toList());
+                        product.setCategories(categories);
+                    }
+
+                    return productRepository.save(product);
+                })
+                .orElseThrow(() -> new RuntimeException("Product not found: " + id));
     }
 
     @Transactional
     public void deleteProduct(Long productId) {
         Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new RuntimeException("Product not found"));
+                .orElseThrow(() -> new RuntimeException("Product not found: " + productId));
         productRepository.delete(product);
-    }
-
-    @Transactional
-    public Product updateProduct(Long id, Product updatedProduct) {
-        return productRepository.findById(id).map(product -> {
-            product.setName(
-                    updatedProduct.getName() != null ? updatedProduct.getName() : product.getName()
-            );
-            product.setDescription(
-                    updatedProduct.getDescription() != null ? updatedProduct.getDescription() : product.getDescription()
-            );
-            product.setPrice(
-                    updatedProduct.getPrice() != null ? updatedProduct.getPrice() : product.getPrice()
-            );
-            product.setStockQuantity(
-                    updatedProduct.getStockQuantity() != null ? updatedProduct.getStockQuantity() : product.getStockQuantity()
-            );
-            product.setCategory(
-                    updatedProduct.getCategory() != null ? updatedProduct.getCategory() : product.getCategory()
-            );
-            return productRepository.save(product);
-        }).orElseThrow(() -> new RuntimeException("Product not found"));
     }
 
     @Transactional
@@ -75,6 +92,6 @@ public class ProductService {
     @Transactional
     public Product getProductById(Long id) {
         return productRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Product not found"));
+                .orElseThrow(() -> new RuntimeException("Product not found: " + id));
     }
 }

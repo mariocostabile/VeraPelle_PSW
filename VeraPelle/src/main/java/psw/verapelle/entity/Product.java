@@ -1,13 +1,12 @@
+// src/main/java/psw/verapelle/entity/Product.java
+
 package psw.verapelle.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-
+import lombok.*;
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
@@ -20,23 +19,26 @@ public class Product {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "name")
+    @Column(nullable = false)
     private String name;
 
-    @Column(name = "description")
+    @Column
     private String description;
 
-    @Column(name = "price")
+    @Column(nullable = false)
     private BigDecimal price;
 
-    @Column(name = "stock_quantity")
+    @Column(name = "stock_quantity", nullable = false)
     private Integer stockQuantity;
 
-    @ManyToOne
-    @JoinColumn(name = "category_id")
-    private Category category;
+    @ManyToMany
+    @JoinTable(
+            name = "product_categories",
+            joinColumns = @JoinColumn(name = "product_id"),
+            inverseJoinColumns = @JoinColumn(name = "category_id")
+    )
+    private List<Category> categories = new ArrayList<>();
 
-    @JsonIgnore
     @Version
     @Column(name = "version")
     private Integer version;

@@ -8,7 +8,7 @@
   h2 {
     margin-bottom: 1rem;
     font-size: 1.5rem;
-    color: #222;   /* Titolo nero come per le altre sezioni */
+    color: #222;
   }
 
   .loading,
@@ -55,17 +55,23 @@
     tbody tr:hover td {
       background-color: var(--color-bg);
     }
-  }
 
-  .btn-delete {
-    background: var(--color-accent);
-    border: none;
-    padding: 0.3rem 0.6rem;
-    border-radius: 0.2rem;
-    cursor: pointer;
+    .actions {
+      display: flex;
+      align-items: center;
 
-    &:hover {
-      background: var(--color-primary-hover);
+      .btn-icon {
+        margin-left: 0.5rem;
+        font-size: 1.2rem;
+        cursor: pointer;
+      }
+
+      .btn-icon.btn-delete {
+        background: none;
+        border: none;
+        padding: 0;
+        color: var(--color-accent);
+      }
     }
   }
 }

@@ -1,0 +1,50 @@
+<!-- src/app/features/admin/category-form/category-form.component.html -->
+
+<div class="admin-panel">
+  <h2>{{ categoryId ? 'Modifica Categoria' : 'Nuova Categoria' }}</h2>
+
+  <form [formGroup]="form" (ngSubmit)="onSubmit()">
+    <label>
+      Nome
+      <input
+        type="text"
+        formControlName="name"
+        class="form-control"
+        placeholder="Inserisci nome"
+      />
+    </label>
+    <div
+      class="error-message"
+      *ngIf="form.get('name')?.invalid && form.get('name')?.touched"
+    >
+      Il nome è obbligatorio
+    </div>
+
+    <label>
+      Descrizione
+      <textarea
+        formControlName="description"
+        class="form-control"
+        rows="3"
+        placeholder="Inserisci descrizione"
+      ></textarea>
+    </label>
+
+    <div class="form-actions">
+      <button
+        type="submit"
+        [disabled]="form.invalid"
+        class="btn btn-primary"
+      >
+        Salva
+      </button>
+      <button
+        type="button"
+        (click)="onCancel()"
+        class="btn btn-secondary"
+      >
+        Annulla
+      </button>
+    </div>
+  </form>
+</div>

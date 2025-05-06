@@ -1,11 +1,10 @@
+// src/main/java/psw/verapelle/entity/Category.java
+
 package psw.verapelle.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -15,23 +14,20 @@ import java.util.List;
 @Entity
 @Table(name = "category")
 public class Category {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "name", nullable = false, unique = true)
+    @Column(nullable = false, unique = true)
     private String name;
 
-    @Column(name = "description")
+    @Column
     private String description;
 
-    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL)
-    private List<Product> products;
+    @ManyToMany(mappedBy = "categories")
+    private List<Product> products = new ArrayList<>();
 
-    @JsonIgnore
     @Version
     @Column(name = "version")
     private Integer version;
-
 }

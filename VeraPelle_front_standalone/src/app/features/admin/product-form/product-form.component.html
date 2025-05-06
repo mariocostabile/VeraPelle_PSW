@@ -1,0 +1,98 @@
+<!-- src/app/features/admin/product-form/product-form.component.html -->
+
+<div class="admin-panel">
+  <h2>{{ productId ? 'Modifica Prodotto' : 'Nuovo Prodotto' }}</h2>
+
+  <form [formGroup]="form" (ngSubmit)="onSubmit()">
+    <label>
+      Nome
+      <input
+        type="text"
+        formControlName="name"
+        class="form-control"
+        placeholder="Inserisci nome"
+      />
+    </label>
+
+    <label>
+      Descrizione
+      <textarea
+        formControlName="description"
+        class="form-control"
+        rows="3"
+        placeholder="Inserisci descrizione"
+      ></textarea>
+    </label>
+
+    <label>
+      Prezzo
+      <div class="input-group">
+        <span class="input-group-text">€</span>
+        <input
+          type="number"
+          formControlName="price"
+          class="form-control input-with-symbol"
+          step="0.01"
+          min="0"
+          placeholder="0,00"
+          (focus)="form.get('price')?.value === 0 && form.get('price')?.setValue(null)"
+        />
+      </div>
+      <div
+        class="error-message"
+        *ngIf="form.get('price')?.invalid && form.get('price')?.touched"
+      >
+        Inserisci un prezzo valido
+      </div>
+    </label>
+
+    <label>
+      Quantità
+      <input
+        type="number"
+        formControlName="stockQuantity"
+        class="form-control"
+        placeholder="0"
+        (focus)="form.get('stockQuantity')?.value === 0 && form.get('stockQuantity')?.setValue(null)"
+      />
+    </label>
+
+    <label>
+      Categorie
+      <div class="checkbox-grid">
+        <label *ngFor="let c of categories" class="checkbox-item">
+          <input
+            type="checkbox"
+            [value]="c.id"
+            (change)="onCategoryChange($event)"
+            [checked]="form.value.categoryIds.includes(c.id)"
+          />
+          <span>{{ c.name }}</span>
+        </label>
+      </div>
+      <div
+        class="error-message"
+        *ngIf="form.get('categoryIds')?.invalid && form.get('categoryIds')?.touched"
+      >
+        Seleziona almeno una categoria
+      </div>
+    </label>
+
+    <div class="form-actions">
+      <button
+        type="submit"
+        [disabled]="form.invalid"
+        class="btn btn-primary"
+      >
+        Salva
+      </button>
+      <button
+        type="button"
+        (click)="onCancel()"
+        class="btn btn-secondary"
+      >
+        Annulla
+      </button>
+    </div>
+  </form>
+</div>

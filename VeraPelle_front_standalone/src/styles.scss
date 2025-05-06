@@ -1,13 +1,18 @@
 /* styles.scss */
 
+/* 0) Box‐sizing universale */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
 /* 1) Definizione variabili globali */
 :root {
   /* Palette colori */
-  --color-primary: #663b1d;          /* sfondo header & footer */
-  --color-primary-hover: #7f4d2c;    /* hover nav & footer-link */
-  --color-accent: #8d6e63;           /* pulsante di ricerca */
-  --color-bg: #EFEBE9;               /* background main */
-  --color-text: #fff;                /* testo chiaro */
+  --color-primary: #663b1d;
+  --color-primary-hover: #7f4d2c;
+  --color-accent: #8d6e63;
+  --color-bg: #EFEBE9;
+  --color-text: #fff;
   --color-shadow: rgba(0, 0, 0, 0.15);
 
   /* Font */

@@ -19,7 +19,7 @@
       <th>Nome</th>
       <th>Prezzo</th>
       <th>Quantità</th>
-      <th>Categoria ID</th>
+      <th>Categorie</th>
       <th>Azioni</th>
     </tr>
     </thead>
@@ -29,11 +29,20 @@
       <td>{{ p.name }}</td>
       <td>{{ p.price | currency:'EUR' }}</td>
       <td>{{ p.stockQuantity }}</td>
-      <td>{{ p.categoryId }}</td>
-      <td>
-        <button class="btn-delete" (click)="deleteProduct(p.id!)">
-          Elimina
-        </button>
+      <td>{{ p.categoryIds.join(', ') }}</td>
+      <td class="actions">
+        <!-- Modifica -->
+        <a
+          class="btn-icon btn-edit"
+          [routerLink]="['/admin/products', p.id, 'edit']"
+          title="Modifica"
+        >✏️</a>
+        <!-- Elimina -->
+        <button
+          class="btn-icon btn-delete"
+          (click)="deleteProduct(p.id!)"
+          title="Elimina"
+        >🗑️</button>
       </td>
     </tr>
     </tbody>

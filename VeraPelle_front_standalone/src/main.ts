@@ -3,7 +3,7 @@
 import { bootstrapApplication } from '@angular/platform-browser';
 import { importProvidersFrom, APP_INITIALIZER } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
-import { provideRouter } from '@angular/router';
+import { provideRouter, Router } from '@angular/router';
 import {
   provideHttpClient,
   withInterceptorsFromDi
@@ -18,7 +18,8 @@ import { CustomerService }      from './app/core/services/customer/customer.serv
 
 export function appInitializerFactory(
   kc: KeycloakService,
-  customer: CustomerService
+  customer: CustomerService,
+  router: Router
 ): () => Promise<void> {
   return () =>
     // 1) init Keycloak e check-sso
@@ -26,9 +27,13 @@ export function appInitializerFactory(
       // 2) se vengo da "Registrati", faccio il POST di sync
       if (localStorage.getItem('isRegistering') === 'true') {
         localStorage.removeItem('isRegistering');
-        // usa lastValueFrom se toPromise dà warning
         await customer.registerCustomer().toPromise();
         console.log('✅ Utente sincronizzato in Postgres');
+      }
+
+      // 3) redirect automatico per admin dopo login
+      if (kc.hasRole('ADMIN') && window.location.pathname === '/') {
+        await router.navigate(['/admin/products']);
       }
     });
 }
@@ -49,11 +54,11 @@ bootstrapApplication(AppComponent, {
     KeycloakService,
     CustomerService,
 
-    // 4) Inizializzazione Keycloak (e sincronizzazione utente)
+    // 4) Inizializzazione Keycloak (sync + redirect admin)
     {
       provide: APP_INITIALIZER,
       useFactory: appInitializerFactory,
-      deps: [KeycloakService, CustomerService],
+      deps: [KeycloakService, CustomerService, Router],
       multi: true
     }
   ]

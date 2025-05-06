@@ -1,18 +1,27 @@
-import { NgModule } from '@angular/core';
+import { NgModule }             from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { UserListComponent } from './user-list/user-list.component';
-import { ProductListComponent } from './product-list/product-list.component';
+
+import { ProductListComponent }  from './product-list/product-list.component';
+import { ProductFormComponent }  from './product-form/product-form.component';
 import { CategoryListComponent } from './category-list/category-list.component';
+import { CategoryFormComponent } from './category-form/category-form.component';
+import { UserListComponent }     from './user-list/user-list.component';
 
 const routes: Routes = [
-  // /admin/products → ProductListComponent
-  { path: 'products', component: ProductListComponent },
-  // /admin/categories → CategoryListComponent
-  { path: 'categories', component: CategoryListComponent },
-  // /admin/users → UserListComponent
+  // Prodotti
+  { path: 'products',          component: ProductListComponent },
+  { path: 'products/new',      component: ProductFormComponent },
+  { path: 'products/:id/edit', component: ProductFormComponent },
+
+  // Categorie
+  { path: 'categories',          component: CategoryListComponent },
+  { path: 'categories/new',      component: CategoryFormComponent },
+  { path: 'categories/:id/edit', component: CategoryFormComponent },
+
+  // Utenti
   { path: 'users', component: UserListComponent },
 
-  // redirect automatico su /admin → /admin/products
+  // Default
   { path: '', redirectTo: 'products', pathMatch: 'full' }
 ];
 
@@ -20,4 +29,4 @@ const routes: Routes = [
   imports: [RouterModule.forChild(routes)],
   exports: [RouterModule]
 })
-export class AdminRoutingModule { }
+export class AdminRoutingModule {}

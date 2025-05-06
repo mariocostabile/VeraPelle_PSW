@@ -1,10 +1,18 @@
+<!-- src/app/features/admin/category-list/category-list.component.html -->
+
 <div class="admin-panel">
   <h2>Gestione Categorie</h2>
 
-  <button class="btn-primary" routerLink="/admin/categories/new">Nuova Categoria</button>
+  <button class="btn-primary" routerLink="/admin/categories/new">
+    Nuova Categoria
+  </button>
 
-  <div *ngIf="isLoading" class="loading">Caricamento in corso…</div>
-  <div *ngIf="error" class="error">{{ error }}</div>
+  <div *ngIf="isLoading" class="loading">
+    Caricamento in corso…
+  </div>
+  <div *ngIf="error" class="error">
+    {{ error }}
+  </div>
 
   <table *ngIf="!isLoading && !error && categories.length">
     <thead>
@@ -20,10 +28,19 @@
       <td>{{ cat.id }}</td>
       <td>{{ cat.name }}</td>
       <td>{{ cat.description }}</td>
-      <td>
-        <button class="btn-delete" (click)="deleteCategory(cat.id!)">
-          Elimina
-        </button>
+      <td class="actions">
+        <!-- Modifica -->
+        <a
+          class="btn-icon btn-edit"
+          [routerLink]="['/admin/categories', cat.id, 'edit']"
+          title="Modifica"
+        >✏️</a>
+        <!-- Elimina -->
+        <button
+          class="btn-icon btn-delete"
+          (click)="deleteCategory(cat.id!)"
+          title="Elimina"
+        >🗑️</button>
       </td>
     </tr>
     </tbody>

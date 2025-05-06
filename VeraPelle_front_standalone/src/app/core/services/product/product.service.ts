@@ -5,20 +5,27 @@ import { HttpClient }         from '@angular/common/http';
 import { Observable }         from 'rxjs';
 import { ProductDTO }         from '@app/core/models/product-dto';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({ providedIn: 'root' })
 export class ProductService {
   private http = inject(HttpClient);
-  // ← qui il percorso corretto:
-  private readonly baseUrl = 'http://localhost:8080/api/admin/products';
+  private baseUrl = 'http://localhost:8080/api/admin/products';
 
-  /** GET /api/admin/products */
   getProducts(): Observable<ProductDTO[]> {
     return this.http.get<ProductDTO[]>(this.baseUrl);
   }
 
-  /** DELETE /api/admin/products/{id} */
+  getProductById(id: number): Observable<ProductDTO> {
+    return this.http.get<ProductDTO>(`${this.baseUrl}/${id}`);
+  }
+
+  createProduct(dto: ProductDTO): Observable<ProductDTO> {
+    return this.http.post<ProductDTO>(this.baseUrl, dto);
+  }
+
+  updateProduct(id: number, dto: ProductDTO): Observable<ProductDTO> {
+    return this.http.put<ProductDTO>(`${this.baseUrl}/${id}`, dto);
+  }
+
   deleteProduct(id: number): Observable<void> {
     return this.http.delete<void>(`${this.baseUrl}/${id}`);
   }
