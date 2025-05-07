@@ -40,20 +40,6 @@ public class KeycloakJwtAuthenticationConverter implements Converter<Jwt, Abstra
     }
 
 
-//    private void saveCustomer(Jwt source) {
-//        String userId = source.getSubject();
-//        String firstName = (String) source.getClaim("given_name");
-//        String lastName = (String) source.getClaim("family_name");
-//        String email = (String) source.getClaim("email");
-//        Customer c = new Customer();
-//        c.setId(userId);
-//        c.setFirstName(firstName);
-//        c.setLastName(lastName);
-//        c.setEmail(email);
-//        if (customerService.findCustomerById(userId).isEmpty()) {
-//            customerService.saveCustomer(c);
-//        }
-//    }
 
     private Collection<? extends GrantedAuthority> extractResourceRoles(Jwt jwt) {
 
