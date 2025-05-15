@@ -1,10 +1,11 @@
 import { Component, OnInit, inject } from '@angular/core';
-import { CommonModule }              from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormGroup, FormBuilder, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
 import { CustomerService } from '../../core/services/customer/customer.service';
 import { CustomerDTO } from '../../core/models/customer-dto';
-import { catchError }                from 'rxjs/operators';
-import { of }                        from 'rxjs';
+import { catchError } from 'rxjs/operators';
+import { of } from 'rxjs';
 
 @Component({
   selector: 'app-profilo',
@@ -15,6 +16,8 @@ import { of }                        from 'rxjs';
 })
 export class ProfiloComponent implements OnInit {
   private customerService = inject(CustomerService);
+  private router = inject(Router);
+
   form: FormGroup;
   loading = true;
   error = false;
@@ -40,7 +43,6 @@ export class ProfiloComponent implements OnInit {
       )
       .subscribe(profile => {
         if (profile) {
-          // popola il form, inclusi i campi disabilitati
           this.form.patchValue(profile);
         }
         this.loading = false;
@@ -50,7 +52,6 @@ export class ProfiloComponent implements OnInit {
   onSubmit(): void {
     if (this.form.invalid) return;
 
-    // getRawValue include anche i campi disabled: avrai un CustomerDTO completo
     const payload = this.form.getRawValue() as CustomerDTO;
 
     this.customerService.updateCustomer(payload)
@@ -63,4 +64,8 @@ export class ProfiloComponent implements OnInit {
       });
   }
 
+  /** Torna alla home senza salvare */
+  cancel(): void {
+    this.router.navigate(['/']);
+  }
 }

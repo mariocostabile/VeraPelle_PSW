@@ -1,38 +1,24 @@
 <nav class="header">
-  <!-- HEADER UNICO PER ADMIN, DOPPIO PER UTENTI -->
   <div class="header-top">
-    <!-- Logo sempre a sinistra -->
     <a routerLink="/" class="logo">VeraPelle</a>
 
-    <!-- Se admin: menu gestione + logout in un'unica riga -->
     <ng-container *ngIf="isAdmin; else userHeader">
       <ul class="admin-menu">
         <li routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
-          <button class="nav-item" [routerLink]="['/admin/products']">
-            Gestione Prodotti
-          </button>
+          <button class="nav-item" [routerLink]="['/admin/products']">Gestione Prodotti</button>
         </li>
         <li routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
-          <button class="nav-item" [routerLink]="['/admin/categories']">
-            Gestione Categorie
-          </button>
+          <button class="nav-item" [routerLink]="['/admin/categories']">Gestione Categorie</button>
         </li>
         <li routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
-          <button class="nav-item" [routerLink]="['/admin/users']">
-            Gestione Utenti
-          </button>
+          <button class="nav-item" [routerLink]="['/admin/users']">Gestione Utenti</button>
         </li>
       </ul>
       <ul class="auth-links">
-        <li>
-          <button class="nav-item" (click)="logout()">
-            Logout
-          </button>
-        </li>
+        <li><button class="nav-item" (click)="logout()">Logout</button></li>
       </ul>
     </ng-container>
 
-    <!-- Template per utente: ricerca + auth-links -->
     <ng-template #userHeader>
       <div class="search">
         <input type="text" placeholder="Cerca prodotti…" />
@@ -51,8 +37,8 @@
     </ng-template>
   </div>
 
-  <!-- RIGA CATEGORIE solo per utenti normali -->
-  <div class="header-bottom" *ngIf="!isAdmin">
+  <!-- questa riga appare solo se showCategories = true -->
+  <div class="header-bottom" *ngIf="showCategories">
     <ul class="categories">
       <li *ngFor="let cat of categories">
         <button class="nav-item" [routerLink]="['/category', cat.name]">

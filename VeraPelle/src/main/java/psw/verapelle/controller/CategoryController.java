@@ -11,13 +11,13 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api/admin/categories")
+@RequestMapping("/api/categories")  // Modificato da "/api/admin/categories"
 public class CategoryController {
 
     @Autowired
     private CategoryService categoryService;
 
-    @PreAuthorize("hasRole('ADMIN')")
+    /** LETTURA PUBBLICA DI TUTTE LE CATEGORIE */
     @GetMapping
     public List<CategoryDTO> getAllCategories() {
         return categoryService.getAllCategories().stream()
@@ -25,12 +25,14 @@ public class CategoryController {
                 .collect(Collectors.toList());
     }
 
+    /** DETTAGLIO CATEGORIA (solo ADMIN) */
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/{id}")
     public CategoryDTO getCategoryById(@PathVariable Long id) {
         return toDTO(categoryService.getCategoryById(id));
     }
 
+    /** CREAZIONE CATEGORIA (solo ADMIN) */
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public CategoryDTO createCategory(@RequestBody CategoryDTO categoryDTO) {
@@ -38,6 +40,7 @@ public class CategoryController {
         return toDTO(created);
     }
 
+    /** MODIFICA CATEGORIA (solo ADMIN) */
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
     public CategoryDTO updateCategory(@PathVariable Long id,
@@ -49,12 +52,14 @@ public class CategoryController {
         return toDTO(updated);
     }
 
+    /** CANCELLAZIONE CATEGORIA (solo ADMIN) */
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public void deleteCategory(@PathVariable Long id) {
         categoryService.deleteCategory(id);
     }
 
+    /** MAPPER ENTITY → DTO */
     private CategoryDTO toDTO(Category c) {
         CategoryDTO dto = new CategoryDTO();
         dto.setId(c.getId());

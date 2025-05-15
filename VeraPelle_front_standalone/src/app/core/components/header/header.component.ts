@@ -1,11 +1,10 @@
-// src/app/features/header/header.component.ts
-
 import { Component, inject, OnInit } from '@angular/core';
-import { CommonModule, NgIf, NgForOf } from '@angular/common';
-import { Router, RouterLink, RouterLinkActive } from '@angular/router';
-import { KeycloakService } from '../../../core/services/keycloak/keycloak.service';
-import { CategoryService } from '../../../core/services/category/category.service';
-import { CategoryDTO } from '../../../core/models/category-dto';
+import { CommonModule, NgIf, NgForOf }   from '@angular/common';
+import { Router, RouterLink, RouterLinkActive, NavigationEnd } from '@angular/router';
+import { filter }                        from 'rxjs/operators';
+import { KeycloakService }               from '../../../core/services/keycloak/keycloak.service';
+import { CategoryService }               from '../../../core/services/category/category.service';
+import { CategoryDTO }                   from '../../../core/models/category-dto';
 
 @Component({
   selector: 'app-header',
@@ -21,17 +20,28 @@ export class HeaderComponent implements OnInit {
 
   isAdmin = false;
   categories: CategoryDTO[] = [];
+  currentUrl = '';
 
   get isAuthenticated(): boolean {
     return !!this.kc.profile?.token;
   }
 
+  /** Mostra le categorie solo se NON admin e NON in /profilo */
+  get showCategories(): boolean {
+    return !this.isAdmin && this.currentUrl !== '/profilo';
+  }
+
   async ngOnInit(): Promise<void> {
-    // Determina se l'utente è admin
+    // Ruolo
     this.isAdmin = this.kc.hasRole('ADMIN');
 
+    // Traccia la route corrente
+    this.router.events
+      .pipe(filter(e => e instanceof NavigationEnd))
+      .subscribe((e: NavigationEnd) => this.currentUrl = e.urlAfterRedirects);
+
+    // Carica le categorie solo per utenti normali
     if (!this.isAdmin) {
-      // Carica le categorie solo per utenti non-admin
       this.categoryService.getCategories().subscribe({
         next: cats => this.categories = cats,
         error: err => console.error('Errore caricamento categorie', err)

@@ -10,7 +10,7 @@ import { CategoryDTO }        from '@app/core/models/category-dto';
 })
 export class CategoryService {
   private http = inject(HttpClient);
-  private readonly baseUrl = 'http://localhost:8080/api/admin/categories';
+  private readonly baseUrl = 'http://localhost:8080/api/categories';
 
   /** GET /api/admin/categories */
   getCategories(): Observable<CategoryDTO[]> {

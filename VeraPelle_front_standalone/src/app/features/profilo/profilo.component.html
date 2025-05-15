@@ -1,28 +1,40 @@
-<form *ngIf="!loading && !error" [formGroup]="form" (ngSubmit)="onSubmit()">
-  <label>
-    Nome
-    <input formControlName="firstName" />
-  </label>
-  <label>
-    Cognome
-    <input formControlName="lastName" />
-  </label>
-  <label>
-    Email
-    <input formControlName="email" />
-  </label>
-  <label>
-    Telefono
-    <input formControlName="phone" />
-  </label>
-  <label>
-    Indirizzo
-    <input formControlName="address" />
-  </label>
-  <label>
-    Data di nascita
-    <input type="date" formControlName="dateOfBirth" />
-  </label>
+<div class="profile-card" *ngIf="!loading && !error">
+  <h2 class="card-title">Il tuo profilo</h2>
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" class="profile-form">
+    <div class="form-grid">
+      <div class="form-group">
+        <label for="firstName">Nome</label>
+        <input id="firstName" formControlName="firstName" type="text" />
+      </div>
+      <div class="form-group">
+        <label for="lastName">Cognome</label>
+        <input id="lastName" formControlName="lastName" type="text" />
+      </div>
+      <div class="form-group full-width">
+        <label for="email">Email</label>
+        <input id="email" formControlName="email" type="email" />
+      </div>
+      <div class="form-group">
+        <label for="phone">Telefono</label>
+        <input id="phone" formControlName="phone" type="tel" />
+      </div>
+      <div class="form-group full-width">
+        <label for="address">Indirizzo</label>
+        <input id="address" formControlName="address" type="text" />
+      </div>
+      <div class="form-group full-width">
+        <label for="dateOfBirth">Data di nascita</label>
+        <input id="dateOfBirth" formControlName="dateOfBirth" type="date" />
+      </div>
+    </div>
 
-  <button type="submit" [disabled]="form.invalid">Salva modifiche</button>
-</form>
+    <div class="form-actions">
+      <button type="button" class="btn-cancel" (click)="cancel()">
+        Annulla
+      </button>
+      <button type="submit" [disabled]="form.invalid">
+        Salva modifiche
+      </button>
+    </div>
+  </form>
+</div>

@@ -1,27 +1,104 @@
-form {
-  display: grid;
-  gap: 0.5rem;
-  max-width: 400px;
+.profile-card {
+  background: #fff;
+  padding: 2rem;
+  max-width: 600px;
+  margin: 0 auto;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+
+  .card-title {
+    margin-bottom: 1.5rem;
+    font-size: 1.5rem;
+    color: #663b1d;
+    text-align: center;
+  }
 }
-label {
+
+.profile-form {
   display: flex;
   flex-direction: column;
-  font-weight: 600;
+
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+
+    // per campi full-width (come email, indirizzo, data)
+    .full-width {
+      grid-column: span 2;
+    }
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+
+    label {
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+      color: #333;
+    }
+
+    input {
+      padding: 0.75rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 1rem;
+      transition: border-color 0.2s, box-shadow 0.2s;
+
+      &:focus {
+        outline: none;
+        border-color: #663b1d;
+        box-shadow: 0 0 0 3px rgba(102, 59, 29, 0.2);
+      }
+    }
+  }
+
+  .form-actions {
+    margin-top: 1.5rem;
+    text-align: right;
+
+    .btn-cancel {
+      margin-right: 1rem;
+      padding: 0.75rem 1.5rem;
+      background: transparent;
+      color: #663b1d;
+      border: 1px solid #663b1d;
+      border-radius: 4px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 0.2s;
+
+      &:hover {
+        background: rgba(102, 59, 29, 0.1);
+      }
+    }
+
+    button[type="submit"] {
+      padding: 0.75rem 1.5rem;
+      background: #663b1d;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+
+      &:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+      &:not(:disabled):hover {
+        background: darken(#663b1d, 10%);
+      }
+    }
+  }
 }
-input {
-  padding: 0.25rem;
-  border-radius: 4px;
-  border: 1px solid #ccc;
-}
-button {
-  width: fit-content;
-  padding: 0.5rem 1rem;
-  background: #663b1d;
-  color: #fff;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-.error {
-  color: #f88;
+
+/* Responsività: su schermi piccoli, layout a colonna */
+@media (max-width: 600px) {
+  .profile-form .form-grid {
+    grid-template-columns: 1fr;
+  }
 }
