@@ -11,7 +11,7 @@
       <th>Nome</th>
       <th>Cognome</th>
       <th>Email</th>
-      <th>Azioni</th>
+      <th class="th-actions">Azioni</th>
     </tr>
     </thead>
     <tbody>
@@ -20,9 +20,13 @@
       <td>{{ u.firstName }}</td>
       <td>{{ u.lastName }}</td>
       <td>{{ u.email }}</td>
-      <td>
-        <button class="btn-delete" (click)="deleteUser(u.id)">
-          Elimina
+      <td class="td-actions">
+        <!-- Bottone Modifica -->
+        <button
+          class="btn-edit"
+          (click)="editUser(u.id)"
+          title="Modifica utente">
+          ✏️
         </button>
       </td>
     </tr>

@@ -1,3 +1,5 @@
+// src/app/features/admin/admin.module.ts
+
 import { NgModule }         from '@angular/core';
 import { CommonModule }     from '@angular/common';
 import { HttpClientModule } from '@angular/common/http';
@@ -15,7 +17,7 @@ import { UserListComponent }     from './user-list/user-list.component';
     HttpClientModule,
     AdminRoutingModule,
 
-    // Standalone components usati in questo modulo
+    // Standalone components used in this module
     ProductListComponent,
     ProductFormComponent,
     CategoryListComponent,

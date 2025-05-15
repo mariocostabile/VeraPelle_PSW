@@ -20,13 +20,10 @@ public class CustomerDTO {
     private String firstName;
     @NotBlank
     private String lastName;
-    @NotBlank
     private String dateOfBirth;
-    @NotBlank
     private String address;
-    @NotBlank
     private String phone;
-    @NotBlank
     @Email
+    @NotBlank
     private String email;
 }

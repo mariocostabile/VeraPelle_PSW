@@ -40,14 +40,36 @@
     tbody tr:hover td {
       background-color: var(--color-bg);
     }
+
+    /* Larghezza e allineamento per la colonna Azioni */
+    th.th-actions,
+    td.td-actions {
+      width: 100px;
+      text-align: center;
+    }
   }
 
+  /* Bottone di modifica (penna) */
+  .btn-edit {
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: 0.25rem;
+
+    &:hover {
+      color: var(--color-primary-hover);
+    }
+  }
+
+  /* Pulsante elimina (se riabilitato in futuro) */
   .btn-delete {
     background: var(--color-accent);
     border: none;
     padding: 0.3rem 0.6rem;
     border-radius: 0.2rem;
     cursor: pointer;
+    margin-left: 0.5rem;
 
     &:hover {
       background: var(--color-primary-hover);

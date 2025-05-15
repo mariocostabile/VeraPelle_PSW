@@ -1,13 +1,14 @@
 // src/app/features/admin/user-list/user-list.component.ts
 
 import { Component, OnInit } from '@angular/core';
-import { CommonModule }       from '@angular/common';       // ← serve per NgIf, NgFor
-import { AdminUserService }   from '../admin-user.service';
-import { CustomerDTO }        from '../../../core/models/customer-dto';
+import { CommonModule }      from '@angular/common';       // ← serve per NgIf, NgFor
+import { Router }            from '@angular/router';       // ← servono router.navigate
+import { AdminUserService }  from '../admin-user.service';
+import { CustomerDTO }       from '../../../core/models/customer-dto';
 
 @Component({
-  standalone: true,            // ← abilitiamo il componente standalone
-  imports: [CommonModule],      // ← qui porti dentro NgIf, NgFor, ecc.
+  standalone: true,
+  imports: [CommonModule],
   selector: 'app-user-list',
   templateUrl: './user-list.component.html',
   styleUrls: ['./user-list.component.scss']
@@ -17,7 +18,10 @@ export class UserListComponent implements OnInit {
   loading = false;
   error: string | null = null;
 
-  constructor(private adminUserService: AdminUserService) {}
+  constructor(
+    private adminUserService: AdminUserService,
+    private router: Router           // ← iniettiamo il Router
+  ) {}
 
   ngOnInit(): void {
     this.loadUsers();
@@ -47,5 +51,12 @@ export class UserListComponent implements OnInit {
       next: () => this.loadUsers(),
       error: err => alert('Impossibile eliminare: ' + err.message)
     });
+  }
+
+  /**
+   * Naviga al form di modifica dell'utente selezionato.
+   */
+  editUser(id: string): void {
+    this.router.navigate(['/admin', 'users', id, 'edit']);
   }
 }
