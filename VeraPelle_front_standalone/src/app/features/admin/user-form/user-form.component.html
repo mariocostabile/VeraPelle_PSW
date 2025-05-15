@@ -1,0 +1,40 @@
+<div class="user-form-panel" *ngIf="!loading; else waitTpl">
+  <h2>Modifica Utente</h2>
+  <form [formGroup]="form" (ngSubmit)="onSubmit()">
+    <div class="grid">
+      <label>Nome
+        <input formControlName="firstName" />
+      </label>
+      <label>Cognome
+        <input formControlName="lastName" />
+      </label>
+      <label>Email
+        <input formControlName="email" type="email" />
+      </label>
+      <label>Telefono
+        <input formControlName="phone" />
+      </label>
+      <label>Indirizzo
+        <input formControlName="address" />
+      </label>
+      <label>Data di nascita
+        <input formControlName="dateOfBirth" type="date" />
+      </label>
+    </div>
+
+    <div class="actions">
+      <button type="button" class="btn-cancel" (click)="onCancel()">
+        Annulla
+      </button>
+      <button type="submit" [disabled]="form.invalid">
+        Salva modifiche
+      </button>
+    </div>
+
+    <div *ngIf="error" class="error">{{ error }}</div>
+  </form>
+</div>
+
+<ng-template #waitTpl>
+  <div class="loading">Caricamento…</div>
+</ng-template>
