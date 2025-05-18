@@ -71,4 +71,6 @@ public class ProductController {
         dto.setCategoryIds(catIds);
         return dto;
     }
+
+
 }

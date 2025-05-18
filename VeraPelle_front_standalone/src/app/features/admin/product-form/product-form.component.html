@@ -1,9 +1,9 @@
 <!-- src/app/features/admin/product-form/product-form.component.html -->
-
 <div class="admin-panel">
   <h2>{{ productId ? 'Modifica Prodotto' : 'Nuovo Prodotto' }}</h2>
 
   <form [formGroup]="form" (ngSubmit)="onSubmit()">
+    <!-- Nome -->
     <label>
       Nome
       <input
@@ -14,6 +14,7 @@
       />
     </label>
 
+    <!-- Descrizione -->
     <label>
       Descrizione
       <textarea
@@ -24,6 +25,7 @@
       ></textarea>
     </label>
 
+    <!-- Prezzo -->
     <label>
       Prezzo
       <div class="input-group">
@@ -46,6 +48,7 @@
       </div>
     </label>
 
+    <!-- Quantità -->
     <label>
       Quantità
       <input
@@ -57,6 +60,7 @@
       />
     </label>
 
+    <!-- Categorie -->
     <label>
       Categorie
       <div class="checkbox-grid">
@@ -78,18 +82,63 @@
       </div>
     </label>
 
+    <!-- Sezione immagini -->
+    <div class="image-upload">
+      <label>Immagini prodotto</label>
+
+      <div class="upload-controls">
+        <label class="btn btn-secondary">
+          Scegli file
+          <input type="file" multiple (change)="onFilesSelected($event)" />
+        </label>
+        <span class="file-count">{{ selectedPreviews.length }} file selezionati</span>
+        <button
+          type="button"
+          class="btn btn-primary"
+          [disabled]="!productId || !selectedPreviews.length"
+          (click)="uploadSelectedImages()"
+        >
+          Carica immagini
+        </button>
+      </div>
+
+      <!-- Nuove selezioni -->
+      <div class="preview-section new-previews">
+        <div class="section-title">Nuove immagini</div>
+        <div class="preview-grid">
+          <div class="preview-thumb" *ngFor="let p of selectedPreviews; let i = index">
+            <img [src]="p.preview" alt="preview immagine" />
+            <button type="button" class="remove-btn" (click)="removeSelected(i)" title="Rimuovi">×</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Già caricate -->
+      <div class="preview-section existing-previews">
+        <div class="section-title">Immagini caricate</div>
+        <div class="existing-grid">
+          <div class="preview-thumb" *ngFor="let img of imageList">
+            <img [src]="img.urlPath" alt="immagine prodotto" />
+            <button type="button" class="remove-btn" (click)="removeImage(img)" title="Elimina">×</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- Bottoni Salva / Annulla -->
     <div class="form-actions">
       <button
         type="submit"
-        [disabled]="form.invalid"
         class="btn btn-primary"
+        [disabled]="form.invalid"
       >
         Salva
       </button>
       <button
         type="button"
-        (click)="onCancel()"
         class="btn btn-secondary"
+        (click)="onCancel()"
       >
         Annulla
       </button>

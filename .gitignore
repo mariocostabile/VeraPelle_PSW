@@ -1,6 +1,6 @@
 # === Escludi interi sottoprogetti ===
 /keycloak-26.1.4/
-/VeraPelle-front/
+/NON_APRIRE_VeraPelle-front/
 
 # === VeraPelle_front_standalone specific ===
 /VeraPelle_front_standalone/.angular/

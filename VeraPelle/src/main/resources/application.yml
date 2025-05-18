@@ -1,6 +1,6 @@
 spring:
     application:
-        name:
+        name: VeraPelleApplication
     datasource:
         url: jdbc:postgresql://localhost:5432/VeraPelleDB
         username: postgres
@@ -8,8 +8,8 @@ spring:
         driver-class-name: org.postgresql.Driver
     jpa:
         hibernate:
-            ddl-auto: update  # Opzioni: update, create, create-drop, validate
-        show-sql: true      # Mostra le query SQL nel log
+            ddl-auto: update    # Opzioni: update, create, create-drop, validate
+        show-sql: true        # Mostra le query SQL nel log
         properties:
             hibernate:
                 dialect: org.hibernate.dialect.PostgreSQLDialect
@@ -18,5 +18,11 @@ spring:
             resourceserver:
                 jwt:
                     issuer-uri: "http://localhost:8081/realms/ProgettoPSW_PelleVera"
+
 server:
     port: 8080
+
+# → Directory in cui salviamo i file caricati
+app:
+    uploads:
+        dir: C:/Users/mario/VeraPelle_PSW/uploads
