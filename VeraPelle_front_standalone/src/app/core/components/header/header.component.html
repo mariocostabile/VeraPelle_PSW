@@ -1,17 +1,19 @@
+<!-- src/app/core/components/header/header.component.html -->
 <nav class="header">
   <div class="header-top">
     <a routerLink="/" class="logo">VeraPelle</a>
 
+    <!-- Menu Admin -->
     <ng-container *ngIf="isAdmin; else userHeader">
       <ul class="admin-menu">
         <li routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
-          <button class="nav-item" [routerLink]="['/admin/products']">Gestione Prodotti</button>
+          <button class="nav-item" routerLink="/admin/products">Gestione Prodotti</button>
         </li>
         <li routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
-          <button class="nav-item" [routerLink]="['/admin/categories']">Gestione Categorie</button>
+          <button class="nav-item" routerLink="/admin/categories">Gestione Categorie</button>
         </li>
         <li routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
-          <button class="nav-item" [routerLink]="['/admin/users']">Gestione Utenti</button>
+          <button class="nav-item" routerLink="/admin/users">Gestione Utenti</button>
         </li>
       </ul>
       <ul class="auth-links">
@@ -19,8 +21,9 @@
       </ul>
     </ng-container>
 
+    <!-- Header per utenti -->
     <ng-template #userHeader>
-      <div class="search">
+      <div class="search" *ngIf="currentUrl !== '/profilo'">
         <input type="text" placeholder="Cerca prodotti…" />
         <button aria-label="Cerca">🔍</button>
       </div>
@@ -35,16 +38,5 @@
         </ng-container>
       </ul>
     </ng-template>
-  </div>
-
-  <!-- questa riga appare solo se showCategories = true -->
-  <div class="header-bottom" *ngIf="showCategories">
-    <ul class="categories">
-      <li *ngFor="let cat of categories">
-        <button class="nav-item" [routerLink]="['/category', cat.name]">
-          {{ cat.name }}
-        </button>
-      </li>
-    </ul>
   </div>
 </nav>

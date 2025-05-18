@@ -1,20 +1,19 @@
 // src/app/features/home/home.component.ts
-
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
-import { KeycloakService } from '../../core/services/keycloak/keycloak.service';
+import { Component, OnInit }           from '@angular/core';
+import { CommonModule }                from '@angular/common';
+import { RouterModule, Router }        from '@angular/router';
+import { KeycloakService }             from '../../core/services/keycloak/keycloak.service';
+import { ProductListComponent }        from '../store/product-list/product-list.component';
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule],
-  template: `
-    <section class="home">
-      <h1>Benvenuto in VeraPelle!</h1>
-      <p>Questa è la pagina principale dell’app.</p>
-    </section>
-  `,
+  imports: [
+    CommonModule,
+    RouterModule,
+    ProductListComponent
+  ],
+  templateUrl: './home.component.html',
   styleUrls: ['./home.component.scss']
 })
 export class HomeComponent implements OnInit {
@@ -24,7 +23,7 @@ export class HomeComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    // Se autenticato e con ruolo ADMIN, redirect automatico alla console admin
+    // Se ADMIN, redirect automatico alla console
     if (this.kc.profile?.token && this.kc.hasRole('ADMIN')) {
       this.router.navigate(['/admin/users']);
     }

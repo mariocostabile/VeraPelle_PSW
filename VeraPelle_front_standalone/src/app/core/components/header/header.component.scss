@@ -1,11 +1,9 @@
 /* src/app/core/components/header/header.component.scss */
-
 .header {
   background-color: var(--color-primary);
   color: var(--color-text);
   font-family: var(--font-sans);
 
-  /* ------------------ GLOBAL NAV-ITEM STYLES ------------------ */
   .nav-item {
     display: inline-block;
     background: none;
@@ -24,7 +22,6 @@
     background-color: var(--color-primary-hover);
   }
 
-  /* ------------------ HEADER TOP ------------------ */
   .header-top {
     display: flex;
     align-items: center;
@@ -42,7 +39,6 @@
       margin-right: 1rem;
     }
 
-    /* Search bar per utenti normali */
     .search {
       display: flex;
       flex: 1;
@@ -69,7 +65,6 @@
       }
     }
 
-    /* Auth links e menu admin allineati in un'unica riga */
     .auth-links,
     .admin-menu {
       display: flex;
@@ -82,35 +77,14 @@
     }
   }
 
-  /* ------------------ HEADER BOTTOM (Categorie per utenti) ------------------ */
-  .header-bottom {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 2rem;
-    background-color: var(--color-primary);
-    padding: 0.3rem 2rem;
-
-    .categories {
-      display: flex;
-      gap: 2rem;
-      list-style: none;
-      margin: 0;
-      padding: 0;
-    }
-  }
-
-  /* Stato “attivo” della voce selezionata */
   .admin-menu li.active .nav-item {
     background-color: var(--color-primary-hover);
   }
 
-  /* ------------------ MOBILE ------------------ */
   @media (max-width: 768px) {
     .header-top {
       flex-wrap: wrap;
       justify-content: center;
-
       .logo,
       .search,
       .auth-links,
@@ -121,17 +95,6 @@
       }
       .search {
         margin: 0.5rem 0;
-      }
-    }
-
-    .header-bottom {
-      flex-wrap: wrap;
-      padding: 0.5rem 1rem;
-      gap: 1rem;
-
-      .categories {
-        flex-wrap: wrap;
-        gap: 1rem;
       }
     }
   }

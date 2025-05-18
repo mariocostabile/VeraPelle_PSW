@@ -1,0 +1,50 @@
+<!-- src/app/features/store/product-list/product-list.component.html -->
+<div class="store-container">
+  <!-- Filtri categorie -->
+  <nav class="category-filter">
+    <button
+      [class.active]="selectedCategoryId === null"
+      (click)="onCategorySelect(null)">
+      Tutte
+    </button>
+    <button
+      *ngFor="let c of categories"
+      [class.active]="selectedCategoryId === c.id"
+      (click)="onCategorySelect(c.id)">
+      {{ c.name }}
+    </button>
+  </nav>
+
+  <!-- Griglia prodotti -->
+  <div class="product-grid">
+    <div *ngFor="let p of products" class="product-card">
+      <h3>{{ p.name }}</h3>
+      <p class="price">€{{ p.price }}</p>
+      <p class="cats">
+        <ng-container *ngFor="let name of p.categoryNames; let i = index">
+          {{ name }}<span *ngIf="i < p.categoryNames.length - 1">, </span>
+        </ng-container>
+      </p>
+      <a [routerLink]="['/store/products', p.id]" class="btn-details">
+        Dettagli
+      </a>
+    </div>
+  </div>
+
+  <!-- Paginazione -->
+  <div class="pagination">
+    <button (click)="goToPage(page - 1)" [disabled]="page === 0">
+      « Prev
+    </button>
+    <ng-container *ngFor="let p of [].constructor(totalPages); let i = index">
+      <button
+        [class.active]="i === page"
+        (click)="goToPage(i)">
+        {{ i + 1 }}
+      </button>
+    </ng-container>
+    <button (click)="goToPage(page + 1)" [disabled]="page === totalPages - 1">
+      Next »
+    </button>
+  </div>
+</div>

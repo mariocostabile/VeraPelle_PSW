@@ -1,52 +1,41 @@
+// src/app/core/components/header/header.component.ts
 import { Component, inject, OnInit } from '@angular/core';
-import { CommonModule, NgIf, NgForOf }   from '@angular/common';
+import { CommonModule, NgIf }        from '@angular/common';
 import { Router, RouterLink, RouterLinkActive, NavigationEnd } from '@angular/router';
-import { filter }                        from 'rxjs/operators';
-import { KeycloakService }               from '../../../core/services/keycloak/keycloak.service';
-import { CategoryService }               from '../../../core/services/category/category.service';
-import { CategoryDTO }                   from '../../../core/models/category-dto';
+import { filter }                    from 'rxjs/operators';
+import { KeycloakService }           from '../../../core/services/keycloak/keycloak.service';
 
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [CommonModule, RouterLink, RouterLinkActive, NgIf, NgForOf],
+  imports: [
+    CommonModule,
+    RouterLink,
+    RouterLinkActive,
+    NgIf
+  ],
   templateUrl: './header.component.html',
   styleUrls: ['./header.component.scss']
 })
 export class HeaderComponent implements OnInit {
   public kc = inject(KeycloakService);
-  private categoryService = inject(CategoryService);
   private router = inject(Router);
 
   isAdmin = false;
-  categories: CategoryDTO[] = [];
   currentUrl = '';
 
   get isAuthenticated(): boolean {
     return !!this.kc.profile?.token;
   }
 
-  /** Mostra le categorie solo se NON admin e NON in /profilo */
-  get showCategories(): boolean {
-    return !this.isAdmin && this.currentUrl !== '/profilo';
-  }
-
   async ngOnInit(): Promise<void> {
     // Ruolo
     this.isAdmin = this.kc.hasRole('ADMIN');
 
-    // Traccia la route corrente
+    // Traccia la route corrente (utile se vuoi disabilitare search in /profilo)
     this.router.events
       .pipe(filter(e => e instanceof NavigationEnd))
       .subscribe((e: NavigationEnd) => this.currentUrl = e.urlAfterRedirects);
-
-    // Carica le categorie solo per utenti normali
-    if (!this.isAdmin) {
-      this.categoryService.getCategories().subscribe({
-        next: cats => this.categories = cats,
-        error: err => console.error('Errore caricamento categorie', err)
-      });
-    }
   }
 
   login(): Promise<void> | undefined {

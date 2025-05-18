@@ -1,5 +1,13 @@
-<section class="home">
-  <h1>Benvenuto da VeraPelle</h1>
-  <p>Il tuo negozio di prodotti in pelle di qualità.</p>
-  <button class="cta">Scopri i nostri prodotti</button>
+<!-- src/app/features/home/home.component.html -->
+<section class="home-hero">
+  <div class="hero-text">
+    <h1>Benvenuto da VeraPelle</h1>
+    <p>Il tuo negozio di prodotti in pelle di qualità.</p>
+    <button routerLink="/store" class="cta">
+      Scopri i nostri prodotti
+    </button>
+  </div>
 </section>
+
+<!-- Lista prodotti subito sotto -->
+<app-product-list></app-product-list>

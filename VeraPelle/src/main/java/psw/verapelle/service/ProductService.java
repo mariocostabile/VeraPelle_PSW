@@ -1,8 +1,11 @@
+// src/main/java/psw/verapelle/service/ProductService.java
 package psw.verapelle.service;
 
-import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;    // <— import Spring
 import psw.verapelle.DTO.ProductDTO;
 import psw.verapelle.entity.Category;
 import psw.verapelle.entity.Product;
@@ -10,6 +13,7 @@ import psw.verapelle.repository.CategoryRepository;
 import psw.verapelle.repository.ProductRepository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -21,21 +25,21 @@ public class ProductService {
     @Autowired
     private CategoryRepository categoryRepository;
 
+    /**
+     * Crea un nuovo prodotto (solo ADMIN).
+     */
     @Transactional
     public Product createProduct(ProductDTO productDTO) {
-        // Validazione del nome
         if (productDTO.getName() == null || productDTO.getName().trim().isEmpty()) {
             throw new IllegalArgumentException("Product name cannot be empty");
         }
 
-        // Costruzione dell'entità Product
         Product product = new Product();
         product.setName(productDTO.getName());
         product.setDescription(productDTO.getDescription());
         product.setPrice(productDTO.getPrice());
         product.setStockQuantity(productDTO.getStockQuantity());
 
-        // Associazione delle categorie (Many-to-Many)
         List<Category> categories = productDTO.getCategoryIds().stream()
                 .map(id -> categoryRepository.findById(id)
                         .orElseThrow(() -> new RuntimeException("Category not found: " + id)))
@@ -45,11 +49,13 @@ public class ProductService {
         return productRepository.save(product);
     }
 
+    /**
+     * Aggiorna un prodotto esistente (solo ADMIN).
+     */
     @Transactional
     public Product updateProduct(Long id, ProductDTO productDTO) {
         return productRepository.findById(id)
                 .map(product -> {
-                    // Aggiornamento campi base
                     if (productDTO.getName() != null) {
                         product.setName(productDTO.getName());
                     }
@@ -62,21 +68,21 @@ public class ProductService {
                     if (productDTO.getStockQuantity() != 0) {
                         product.setStockQuantity(productDTO.getStockQuantity());
                     }
-
-                    // Riassegnazione categorie
                     if (productDTO.getCategoryIds() != null) {
-                        List<Category> categories = productDTO.getCategoryIds().stream()
+                        List<Category> cats = productDTO.getCategoryIds().stream()
                                 .map(cid -> categoryRepository.findById(cid)
                                         .orElseThrow(() -> new RuntimeException("Category not found: " + cid)))
                                 .collect(Collectors.toList());
-                        product.setCategories(categories);
+                        product.setCategories(cats);
                     }
-
                     return productRepository.save(product);
                 })
                 .orElseThrow(() -> new RuntimeException("Product not found: " + id));
     }
 
+    /**
+     * Elimina un prodotto (solo ADMIN).
+     */
     @Transactional
     public void deleteProduct(Long productId) {
         Product product = productRepository.findById(productId)
@@ -84,14 +90,36 @@ public class ProductService {
         productRepository.delete(product);
     }
 
-    @Transactional
+    /**
+     * Ritorna tutti i prodotti (solo ADMIN, senza paginazione).
+     */
+    @Transactional(readOnly = true)
     public List<Product> getAllProducts() {
         return productRepository.findAll();
     }
 
-    @Transactional
+    /**
+     * Ritorna un prodotto per ID (solo ADMIN).
+     */
+    @Transactional(readOnly = true)
     public Product getProductById(Long id) {
         return productRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Product not found: " + id));
+    }
+
+    // ──────────── Nuovo metodo paginato / con filtro ────────────
+
+    /**
+     * Ritorna una pagina di prodotti, eventualmente filtrati per categoria.
+     *
+     * @param categoryId opzionale: se presente, restituisce solo i prodotti di quella categoria
+     * @param pageable   parametri di paging (page, size, sort)
+     */
+    @Transactional(readOnly = true)
+    public Page<Product> findAll(Optional<Long> categoryId, Pageable pageable) {
+        if (categoryId.isPresent()) {
+            return productRepository.findAllByCategories_Id(categoryId.get(), pageable);
+        }
+        return productRepository.findAll(pageable);
     }
 }
