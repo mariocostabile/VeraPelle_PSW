@@ -1,7 +1,7 @@
 // src/main/java/psw/verapelle/entity/Product.java
-
 package psw.verapelle.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import java.math.BigDecimal;
@@ -31,13 +31,30 @@ public class Product {
     @Column(name = "stock_quantity", nullable = false)
     private Integer stockQuantity;
 
+    /**
+     * Relazione con le categorie.
+     * Non serializziamo direttamente la lista per evitare ricorsioni o payload troppo grandi.
+     */
     @ManyToMany
     @JoinTable(
             name = "product_categories",
             joinColumns = @JoinColumn(name = "product_id"),
             inverseJoinColumns = @JoinColumn(name = "category_id")
     )
+    @JsonIgnore
     private List<Category> categories = new ArrayList<>();
+
+    /**
+     * Relazione con i colori del prodotto.
+     */
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "product_colors",
+            joinColumns = @JoinColumn(name = "product_id"),
+            inverseJoinColumns = @JoinColumn(name = "color_id")
+    )
+    @JsonIgnore
+    private List<Color> colors = new ArrayList<>();
 
     @Version
     @Column(name = "version")
@@ -53,5 +70,6 @@ public class Product {
             cascade = CascadeType.ALL,
             orphanRemoval = true
     )
+    @JsonIgnore
     private List<ProductImage> images = new ArrayList<>();
 }

@@ -1,3 +1,4 @@
+// src/main/java/psw/verapelle/controller/PublicProductController.java
 package psw.verapelle.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,6 +9,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import psw.verapelle.DTO.ColorDTO;
 import psw.verapelle.DTO.ProductPublicDTO;
 import psw.verapelle.entity.Category;
 import psw.verapelle.entity.Product;
@@ -44,11 +46,7 @@ public class PublicProductController {
         return ResponseEntity.ok(toPublicDTO(product));
     }
 
-    /**
-     * Helper per mappare Product → ProductPublicDTO con descrizione e immagini.
-     */
     private ProductPublicDTO toPublicDTO(Product product) {
-        // Costruiamo la base URL del back-end (es. http://localhost:8080)
         String baseUrl = ServletUriComponentsBuilder
                 .fromCurrentContextPath()
                 .build()
@@ -62,13 +60,19 @@ public class PublicProductController {
                 .map(Category::getName)
                 .collect(Collectors.toList());
 
+        // mappiamo i colori associati
+        List<ColorDTO> colors = product.getColors().stream()
+                .map(c -> new ColorDTO(c.getId(), c.getName(), c.getHexCode()))
+                .collect(Collectors.toList());
+
         return new ProductPublicDTO(
                 product.getId(),
                 product.getName(),
                 product.getPrice(),
                 categories,
                 product.getDescription(),
-                imageUrls
+                imageUrls,
+                colors
         );
     }
 }

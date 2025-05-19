@@ -14,4 +14,7 @@ public class ProductDTO {
     private int stockQuantity;
     // ← sostituito categoryId con lista di ID
     private List<Long> categoryIds;
+
+    // ← aggiunto: lista di ID dei colori associati
+    private List<Long> colorIds;
 }

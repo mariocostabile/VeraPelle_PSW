@@ -42,8 +42,8 @@
     td {
       padding: 0.75rem;
       text-align: left;
-      border-bottom: 1px solid var(--color-primary-hover);
       background-color: #fff;
+      border-bottom: none;
     }
 
     th {
@@ -52,10 +52,41 @@
       font-weight: 600;
     }
 
+    tbody tr:not(:last-child) {
+      border-bottom: 1px solid var(--color-primary-hover);
+    }
+
     tbody tr:hover td {
       background-color: var(--color-bg);
     }
+
+    .actions {
+      display: flex;
+      align-items: center;
+
+      .btn-icon {
+        margin-left: 0.5rem;
+        font-size: 1.2rem;
+        background: none;
+        border: none;
+        padding: 0;
+        cursor: pointer;
+        line-height: 1;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .btn-icon.btn-delete {
+        color: var(--color-accent);
+      }
+
+      .btn-icon.btn-edit {
+        color: var(--color-primary);
+      }
+    }
   }
+
 
   /* Colonna Azioni: icone distanziate */
   .actions {

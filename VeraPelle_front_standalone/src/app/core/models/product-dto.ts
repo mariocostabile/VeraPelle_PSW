@@ -7,4 +7,5 @@ export interface ProductDTO {
   price: number;
   stockQuantity: number;
   categoryIds: number[];    // array di ID di categorie
+  colorIds: number[];       // ← array di ID di colori
 }

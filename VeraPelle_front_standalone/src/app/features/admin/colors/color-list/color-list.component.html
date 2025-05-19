@@ -1,0 +1,44 @@
+<div class="admin-panel">
+  <h2>Palette Colori</h2>
+
+  <button class="btn btn-primary" (click)="onNew()">
+    Nuovo Colore
+  </button>
+
+  <div *ngIf="loading" class="loading">
+    Caricamento colori…
+  </div>
+  <div *ngIf="error" class="error">
+    {{ error }}
+  </div>
+
+  <table *ngIf="!loading && !error && colors.length" class="color-table">
+    <thead>
+    <tr>
+      <th>ID</th>
+      <th>Anteprima</th>
+      <th>Nome</th>
+      <th>Hex</th>
+      <th>Azioni</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr *ngFor="let c of colors">
+      <td>{{ c.id }}</td>
+      <td>
+        <span class="swatch" [style.background]="c.hexCode"></span>
+      </td>
+      <td>{{ c.name }}</td>
+      <td>{{ c.hexCode }}</td>
+      <td class="actions">
+        <button class="btn-icon btn-edit" (click)="onEdit(c)" title="Modifica">✏️</button>
+        <button class="btn-icon btn-delete" (click)="onDelete(c)" title="Elimina">🗑️</button>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+
+  <div *ngIf="!loading && !error && !colors.length" class="empty">
+    Nessun colore trovato.
+  </div>
+</div>

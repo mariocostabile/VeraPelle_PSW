@@ -82,6 +82,28 @@
       </div>
     </label>
 
+    <!-- Colori -->
+    <label>
+      Colori
+      <div class="checkbox-grid">
+        <label *ngFor="let c of colors" class="checkbox-item">
+          <input
+            type="checkbox"
+            [value]="c.id"
+            (change)="onColorChange($event)"
+            [checked]="form.value.colorIds.includes(c.id)"
+          />
+          <span>{{ c.name }}</span>
+        </label>
+      </div>
+      <div
+        class="error-message"
+        *ngIf="form.get('colorIds')?.invalid && form.get('colorIds')?.touched"
+      >
+        Seleziona almeno un colore
+      </div>
+    </label>
+
     <!-- Sezione immagini -->
     <div class="image-upload">
       <label>Immagini prodotto</label>

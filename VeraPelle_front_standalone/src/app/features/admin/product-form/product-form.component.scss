@@ -27,7 +27,6 @@
   background: var(--color-shadow);
 }
 
-
 /* ——— Nascondi widget nativo input[type=file] ——— */
 .upload-controls input[type="file"] {
   position: absolute;
@@ -39,7 +38,6 @@
   overflow: hidden;
   z-index: -1;
 }
-
 
 /* ——— Resto del file ——— */
 .admin-panel {

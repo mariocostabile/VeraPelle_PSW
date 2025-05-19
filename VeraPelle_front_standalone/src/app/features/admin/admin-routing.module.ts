@@ -8,7 +8,9 @@ import { ProductFormComponent }   from './product-form/product-form.component';
 import { CategoryListComponent }  from './category-list/category-list.component';
 import { CategoryFormComponent }  from './category-form/category-form.component';
 import { UserListComponent }      from './user-list/user-list.component';
-import { UserFormComponent }      from './user-form/user-form.component';  // ← nuovo import
+import { UserFormComponent }      from './user-form/user-form.component';
+import { ColorListComponent }     from './colors/color-list/color-list.component';    // ← nuovo
+import { ColorFormComponent }     from './colors/color-form/color-form.component';    // ← nuovo
 
 const routes: Routes = [
   // Prodotti
@@ -21,9 +23,14 @@ const routes: Routes = [
   { path: 'categories/new',      component: CategoryFormComponent },
   { path: 'categories/:id/edit', component: CategoryFormComponent },
 
+  // Colori
+  { path: 'colors',          component: ColorListComponent },
+  { path: 'colors/new',      component: ColorFormComponent },
+  { path: 'colors/:id/edit', component: ColorFormComponent },
+
   // Utenti
   { path: 'users',            component: UserListComponent },
-  { path: 'users/:id/edit',   component: UserFormComponent },  // ← routing per il form admin
+  { path: 'users/:id/edit',   component: UserFormComponent },
 
   // Default
   { path: '', redirectTo: 'products', pathMatch: 'full' }

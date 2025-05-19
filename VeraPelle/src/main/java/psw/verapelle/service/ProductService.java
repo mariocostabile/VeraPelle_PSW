@@ -7,9 +7,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import psw.verapelle.DTO.ProductDTO;
-import psw.verapelle.entity.Category;
+import psw.verapelle.entity.Color;
 import psw.verapelle.entity.Product;
 import psw.verapelle.repository.CategoryRepository;
+import psw.verapelle.repository.ColorRepository;
 import psw.verapelle.repository.ProductRepository;
 
 import java.util.List;
@@ -25,6 +26,9 @@ public class ProductService {
     @Autowired
     private CategoryRepository categoryRepository;
 
+    @Autowired
+    private ColorRepository colorRepository;  // ← iniettato
+
     @Transactional
     public Product createProduct(ProductDTO productDTO) {
         if (productDTO.getName() == null || productDTO.getName().trim().isEmpty()) {
@@ -37,12 +41,23 @@ public class ProductService {
         product.setPrice(productDTO.getPrice());
         product.setStockQuantity(productDTO.getStockQuantity());
 
+        // categorie
         product.setCategories(
                 productDTO.getCategoryIds().stream()
                         .map(id -> categoryRepository.findById(id)
                                 .orElseThrow(() -> new RuntimeException("Category not found: " + id)))
                         .collect(Collectors.toList())
         );
+
+        // colori (se presenti)
+        if (productDTO.getColorIds() != null) {
+            product.setColors(
+                    productDTO.getColorIds().stream()
+                            .map(id -> colorRepository.findById(id)
+                                    .orElseThrow(() -> new RuntimeException("Color not found: " + id)))
+                            .collect(Collectors.toList())
+            );
+        }
 
         return productRepository.save(product);
     }
@@ -60,10 +75,11 @@ public class ProductService {
                     if (productDTO.getPrice() != null) {
                         product.setPrice(productDTO.getPrice());
                     }
-                    // StockQuantity è un int primitivo; consideriamo sempre aggiornare se >= 0
+                    // StockQuantity è primitivo, aggiorniamo se >= 0
                     if (productDTO.getStockQuantity() >= 0) {
                         product.setStockQuantity(productDTO.getStockQuantity());
                     }
+
                     if (productDTO.getCategoryIds() != null) {
                         product.setCategories(
                                 productDTO.getCategoryIds().stream()
@@ -72,6 +88,17 @@ public class ProductService {
                                         .collect(Collectors.toList())
                         );
                     }
+
+                    // colori (se presenti)
+                    if (productDTO.getColorIds() != null) {
+                        product.setColors(
+                                productDTO.getColorIds().stream()
+                                        .map(cid -> colorRepository.findById(cid)
+                                                .orElseThrow(() -> new RuntimeException("Color not found: " + cid)))
+                                        .collect(Collectors.toList())
+                        );
+                    }
+
                     return productRepository.save(product);
                 })
                 .orElseThrow(() -> new RuntimeException("Product not found: " + id));

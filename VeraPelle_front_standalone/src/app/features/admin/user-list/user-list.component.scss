@@ -28,7 +28,8 @@
     td {
       padding: 0.75rem 1rem;
       text-align: left;
-      border-bottom: 1px solid var(--color-primary-hover);
+      background-color: #fff;
+      border-bottom: none;
     }
 
     th {
@@ -37,17 +38,42 @@
       font-weight: 600;
     }
 
+    tbody tr:not(:last-child) {
+      border-bottom: 1px solid var(--color-primary-hover);
+    }
+
     tbody tr:hover td {
       background-color: var(--color-bg);
     }
 
-    /* Larghezza e allineamento per la colonna Azioni */
+    /* Colonna Azioni */
     th.th-actions,
     td.td-actions {
       width: 100px;
       text-align: center;
     }
+
+    .btn-edit {
+      background: none;
+      border: none;
+      font-size: 1.2rem;
+      cursor: pointer;
+      padding: 0;
+      line-height: 1;
+    }
+
+    .btn-delete {
+      background: none;
+      border: none;
+      font-size: 1.2rem;
+      cursor: pointer;
+      padding: 0;
+      line-height: 1;
+      color: var(--color-accent);
+      margin-left: 0.5rem;
+    }
   }
+
 
   /* Bottone di modifica (penna) */
   .btn-edit {

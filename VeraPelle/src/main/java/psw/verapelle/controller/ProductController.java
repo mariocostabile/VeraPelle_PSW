@@ -1,9 +1,11 @@
+// src/main/java/psw/verapelle/controller/ProductController.java
 package psw.verapelle.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import psw.verapelle.DTO.ProductDTO;
+import psw.verapelle.entity.Color;
 import psw.verapelle.entity.Category;
 import psw.verapelle.entity.Product;
 import psw.verapelle.service.ProductService;
@@ -69,8 +71,14 @@ public class ProductController {
                 .map(Category::getId)
                 .collect(Collectors.toList());
         dto.setCategoryIds(catIds);
+
+        // ← Mappatura dei colori: lista di ID di colore
+        List<Long> colorIds = p.getColors()
+                .stream()
+                .map(Color::getId)
+                .collect(Collectors.toList());
+        dto.setColorIds(colorIds);
+
         return dto;
     }
-
-
 }
