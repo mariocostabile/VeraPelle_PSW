@@ -27,14 +27,14 @@ public class CategoryController {
 
     /** DETTAGLIO CATEGORIA (solo ADMIN) */
     @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping("/{id}")
+    @GetMapping("/admin/{id}")
     public CategoryDTO getCategoryById(@PathVariable Long id) {
         return toDTO(categoryService.getCategoryById(id));
     }
 
     /** CREAZIONE CATEGORIA (solo ADMIN) */
     @PreAuthorize("hasRole('ADMIN')")
-    @PostMapping
+    @PostMapping("/admin/create")
     public CategoryDTO createCategory(@RequestBody CategoryDTO categoryDTO) {
         Category created = categoryService.createCategory(categoryDTO);
         return toDTO(created);
@@ -42,7 +42,7 @@ public class CategoryController {
 
     /** MODIFICA CATEGORIA (solo ADMIN) */
     @PreAuthorize("hasRole('ADMIN')")
-    @PutMapping("/{id}")
+    @PutMapping("/admin/{id}")
     public CategoryDTO updateCategory(@PathVariable Long id,
                                       @RequestBody CategoryDTO categoryDTO) {
         Category toUpdate = new Category();
@@ -54,7 +54,7 @@ public class CategoryController {
 
     /** CANCELLAZIONE CATEGORIA (solo ADMIN) */
     @PreAuthorize("hasRole('ADMIN')")
-    @DeleteMapping("/{id}")
+    @DeleteMapping("admin/{id}")
     public void deleteCategory(@PathVariable Long id) {
         categoryService.deleteCategory(id);
     }

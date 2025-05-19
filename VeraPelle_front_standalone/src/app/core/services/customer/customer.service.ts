@@ -9,7 +9,7 @@ import { CustomerUpdate } from '../../models/customer-update';
 
 @Injectable({ providedIn: 'root' })
 export class CustomerService {
-  private readonly baseUrl = 'http://localhost:8080/customer/auth';
+  private readonly baseUrl = 'http://localhost:8080/api/customer/auth';
 
   constructor(
     private http: HttpClient,

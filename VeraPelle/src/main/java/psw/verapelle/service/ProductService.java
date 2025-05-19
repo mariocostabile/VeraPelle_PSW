@@ -1,11 +1,10 @@
-// src/main/java/psw/verapelle/service/ProductService.java
 package psw.verapelle.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;    // <— import Spring
+import org.springframework.transaction.annotation.Transactional;
 import psw.verapelle.DTO.ProductDTO;
 import psw.verapelle.entity.Category;
 import psw.verapelle.entity.Product;
@@ -107,7 +106,7 @@ public class ProductService {
                 .orElseThrow(() -> new RuntimeException("Product not found: " + id));
     }
 
-    // ──────────── Nuovo metodo paginato / con filtro ────────────
+    // ──────────── Metodi paginati / con filtro ────────────
 
     /**
      * Ritorna una pagina di prodotti, eventualmente filtrati per categoria.
@@ -119,6 +118,20 @@ public class ProductService {
     public Page<Product> findAll(Optional<Long> categoryId, Pageable pageable) {
         if (categoryId.isPresent()) {
             return productRepository.findAllByCategories_Id(categoryId.get(), pageable);
+        }
+        return productRepository.findAll(pageable);
+    }
+
+    /**
+     * Ritorna una pagina di prodotti, eventualmente filtrati per tutte le categorie specificate.
+     *
+     * @param categoryIds lista di ID categorie
+     * @param pageable    parametri di paging (page, size, sort)
+     */
+    @Transactional(readOnly = true)
+    public Page<Product> findAllByCategories(List<Long> categoryIds, Pageable pageable) {
+        if (categoryIds != null && !categoryIds.isEmpty()) {
+            return productRepository.findByAllCategories(categoryIds, pageable);
         }
         return productRepository.findAll(pageable);
     }

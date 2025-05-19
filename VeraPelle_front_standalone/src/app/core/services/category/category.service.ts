@@ -19,21 +19,21 @@ export class CategoryService {
 
   /** GET /api/admin/categories/{id} */
   getCategoryById(id: number): Observable<CategoryDTO> {
-    return this.http.get<CategoryDTO>(`${this.baseUrl}/${id}`);
+    return this.http.get<CategoryDTO>(`${this.baseUrl}/admin/${id}`);
   }
 
   /** POST /api/admin/categories */
   createCategory(dto: CategoryDTO): Observable<CategoryDTO> {
-    return this.http.post<CategoryDTO>(this.baseUrl, dto);
+    return this.http.post<CategoryDTO>(`${this.baseUrl}/admin/create`, dto);
   }
 
   /** PUT /api/admin/categories/{id} */
   updateCategory(id: number, dto: CategoryDTO): Observable<CategoryDTO> {
-    return this.http.put<CategoryDTO>(`${this.baseUrl}/${id}`, dto);
+    return this.http.put<CategoryDTO>(`${this.baseUrl}/admin/${id}`, dto);
   }
 
   /** DELETE /api/admin/categories/{id} */
   deleteCategory(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.baseUrl}/${id}`);
+    return this.http.delete<void>(`${this.baseUrl}/admin/${id}`);
   }
 }

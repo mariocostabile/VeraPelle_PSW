@@ -1,9 +1,7 @@
-// src/main.ts
-
 import { bootstrapApplication } from '@angular/platform-browser';
 import { importProvidersFrom, APP_INITIALIZER } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
-import { provideRouter, Router } from '@angular/router';
+import { provideRouter, withHashLocation, Router } from '@angular/router';
 import {
   provideHttpClient,
   withInterceptorsFromDi
@@ -22,16 +20,23 @@ export function appInitializerFactory(
   router: Router
 ): () => Promise<void> {
   return () =>
-    // 1) init Keycloak e check-sso
     kc.init().then(async () => {
-      // 2) se vengo da "Registrati", faccio il POST di sync
+      // Gestione registrazione: sincronizzo e redirigo al fragment salvato
       if (localStorage.getItem('isRegistering') === 'true') {
         localStorage.removeItem('isRegistering');
         await customer.registerCustomer().toPromise();
         console.log('✅ Utente sincronizzato in Postgres');
+
+        const saved = localStorage.getItem('kc-redirect');
+        if (saved) {
+          localStorage.removeItem('kc-redirect');
+          const relativePath = saved.replace(window.location.origin, '');
+          await router.navigateByUrl(relativePath);
+          return;
+        }
       }
 
-      // 3) redirect automatico per admin dopo login
+      // Redirect automatico admin
       if (kc.hasRole('ADMIN') && window.location.pathname === '/') {
         await router.navigate(['/admin/products']);
       }
@@ -40,21 +45,21 @@ export function appInitializerFactory(
 
 bootstrapApplication(AppComponent, {
   providers: [
-    // 0) BrowserModule per direttive comuni
+    // BrowserModule per direttive comuni
     importProvidersFrom(BrowserModule),
 
-    // 1) Routing
-    provideRouter(routes),
+    // Routing con hash location strategy
+    provideRouter(routes, withHashLocation()),
 
-    // 2) HttpClient + interceptor
+    // HttpClient + interceptor
     provideHttpClient(withInterceptorsFromDi()),
     { provide: HTTP_INTERCEPTORS, useClass: HttpTokenInterceptor, multi: true },
 
-    // 3) KeycloakService & CustomerService
+    // Servizi Keycloak e Customer
     KeycloakService,
     CustomerService,
 
-    // 4) Inizializzazione Keycloak (sync + redirect admin)
+    // Inizializzazione Keycloak (sync registrazione + redirect admin)
     {
       provide: APP_INITIALIZER,
       useFactory: appInitializerFactory,

@@ -3,14 +3,14 @@
   <!-- Filtri categorie -->
   <nav class="category-filter">
     <button
-      [class.active]="selectedCategoryId === null"
-      (click)="onCategorySelect(null)">
+      [class.active]="selectedCategoryIds.length === 0"
+      (click)="onCategoryToggle(null)">
       Tutte
     </button>
     <button
       *ngFor="let c of categories"
-      [class.active]="selectedCategoryId === c.id"
-      (click)="onCategorySelect(c.id)">
+      [class.active]="selectedCategoryIds.includes(c.id)"
+      (click)="onCategoryToggle(c.id)">
       {{ c.name }}
     </button>
   </nav>
@@ -36,7 +36,7 @@
     <button (click)="goToPage(page - 1)" [disabled]="page === 0">
       « Prev
     </button>
-    <ng-container *ngFor="let p of [].constructor(totalPages); let i = index">
+    <ng-container *ngFor="let _ of [].constructor(totalPages); let i = index">
       <button
         [class.active]="i === page"
         (click)="goToPage(i)">

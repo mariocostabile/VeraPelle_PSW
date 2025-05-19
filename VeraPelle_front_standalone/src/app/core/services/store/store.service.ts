@@ -17,19 +17,20 @@ export class StoreService {
   private baseUrl = 'http://localhost:8080/api/products';
 
   /**
-   * Restituisce una pagina di prodotti, filtrata per categoria opzionale.
+   * Restituisce una pagina di prodotti, filtrata per categorie opzionali.
    */
   getProducts(
     page: number,
     size: number,
-    categoryId?: number
+    categoryIds: number[] = []
   ): Observable<Paginated<ProductPublicDTO>> {
     let params = new HttpParams()
       .set('page', page.toString())
       .set('size', size.toString());
 
-    if (categoryId != null) {
-      params = params.set('categoryId', categoryId.toString());
+    if (categoryIds && categoryIds.length > 0) {
+      // Spring accetta parametri di query comma-separated per List<Long>
+      params = params.set('categories', categoryIds.join(','));
     }
 
     return this.http.get<Paginated<ProductPublicDTO>>(this.baseUrl, { params });

@@ -1,4 +1,3 @@
-// src/main/java/psw/verapelle/controller/PublicProductController.java
 package psw.verapelle.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +11,7 @@ import psw.verapelle.entity.Category;
 import psw.verapelle.entity.Product;
 import psw.verapelle.service.ProductService;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -27,20 +27,23 @@ public class PublicProductController {
      * Parametri:
      *   - page (default 0)
      *   - size (default 10)
-     *   - categoryId (opzionale)
-     *
-     * Restituisce una pagina di ProductPublicDTO, filtrata per categoria se categoryId è presente.
+     *   - categories (opzionale, lista di ID)
+     * Restituisce una pagina di ProductPublicDTO, filtrata per tutte le categorie se categories è presente.
      */
     @GetMapping
     public Page<ProductPublicDTO> getProducts(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
-            @RequestParam(required = false) Long categoryId
+            @RequestParam(required = false, name = "categories") List<Long> categoryIds
     ) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("name"));
-        return productService
-                .findAll(Optional.ofNullable(categoryId), pageable)
-                .map(this::toPublicDTO);
+        Page<Product> products;
+        if (categoryIds != null && !categoryIds.isEmpty()) {
+            products = productService.findAllByCategories(categoryIds, pageable);
+        } else {
+            products = productService.findAll(Optional.empty(), pageable);
+        }
+        return products.map(this::toPublicDTO);
     }
 
     /**

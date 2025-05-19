@@ -86,10 +86,12 @@ export class KeycloakService {
 
   /** Registrazione via Keycloak */
   register(): Promise<void> | undefined {
-    localStorage.setItem('isRegistering', 'true');
+    const returnTo = window.location.href;             // salva l’URL completo
+    localStorage.setItem('kc-redirect', returnTo);    // lo recupereremo dopo
     return this.kc?.login({
       action: 'register',
-      redirectUri: window.location.origin + '/'
+      redirectUri: returnTo
     });
   }
+
 }
