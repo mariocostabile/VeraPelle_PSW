@@ -1,3 +1,5 @@
+// src/main/java/psw/verapelle/repository/ProductRepository.java
+
 package psw.verapelle.repository;
 
 import org.springframework.data.domain.Page;
@@ -6,9 +8,10 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-import java.util.List;
-
 import psw.verapelle.entity.Product;
+
+import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface ProductRepository extends JpaRepository<Product, Long> {
@@ -34,4 +37,14 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             Pageable pageable
     );
 
+    /**
+     * Recupera un prodotto insieme a tutte le sue immagini (JOIN FETCH).
+     */
+    @Query("""
+      SELECT p
+        FROM Product p
+  LEFT JOIN FETCH p.images
+       WHERE p.id = :id
+      """)
+    Optional<Product> findByIdWithImages(@Param("id") Long id);
 }

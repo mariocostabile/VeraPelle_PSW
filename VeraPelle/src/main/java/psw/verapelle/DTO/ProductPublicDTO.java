@@ -1,4 +1,3 @@
-// src/main/java/psw/verapelle/DTO/ProductPublicDTO.java
 package psw.verapelle.DTO;
 
 import lombok.AllArgsConstructor;
@@ -18,4 +17,8 @@ public class ProductPublicDTO {
     private String name;
     private BigDecimal price;
     private List<String> categoryNames;
+
+    // Nuovi campi
+    private String description;
+    private List<String> imageUrls;
 }

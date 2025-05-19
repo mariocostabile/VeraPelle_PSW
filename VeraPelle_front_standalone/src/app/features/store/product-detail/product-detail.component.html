@@ -1,16 +1,47 @@
+<!-- src/app/features/store/product-detail/product-detail.component.html -->
 <div class="detail-container" *ngIf="!loading">
   <ng-container *ngIf="product; else notFound">
-    <h1>{{ product.name }}</h1>
-    <p class="price">€{{ product.price }}</p>
-    <p class="categories">
-      <strong>Categoria:</strong>
-      <span *ngFor="let c of product.categoryNames; let i=index">
-        {{ c }}<span *ngIf="i < product.categoryNames.length - 1">, </span>
-      </span>
-    </p>
-    <div class="actions">
-      <button class="btn-add-cart">Aggiungi al carrello</button>
-      <button class="btn-buy-now">Acquista ora</button>
+    <div class="detail-grid">
+      <!-- Gallery Immagini con slider -->
+      <div class="images">
+        <div class="slider">
+          <button class="nav prev" (click)="onPrev()" aria-label="Precedente">‹</button>
+          <div class="main-wrapper">
+            <img
+              class="main-img"
+              [src]="selectedImage"
+              alt="{{ product.name }}"
+            />
+          </div>
+          <button class="nav next" (click)="onNext()" aria-label="Successiva">›</button>
+        </div>
+        <div class="thumbs">
+          <img
+            *ngFor="let img of product.imageUrls; let idx = index"
+            [src]="img"
+            (click)="onSelectImage(img); currentIndex = idx"
+            [class.active]="img === selectedImage"
+            alt="{{ product.name }} thumbnail {{ idx + 1 }}"
+          />
+        </div>
+      </div>
+
+      <!-- Informazioni Prodotto -->
+      <div class="info">
+        <h1>{{ product.name }}</h1>
+        <p class="price">€{{ product.price }}</p>
+        <p class="categories">
+          <strong>Categoria:</strong>
+          <span *ngFor="let c of product.categoryNames; let i = index">
+            {{ c }}<span *ngIf="i < product.categoryNames.length - 1">, </span>
+          </span>
+        </p>
+        <p class="description">{{ product.description }}</p>
+        <div class="actions">
+          <button class="btn-add-cart">Aggiungi al carrello</button>
+          <button class="btn-buy-now">Acquista ora</button>
+        </div>
+      </div>
     </div>
   </ng-container>
   <ng-template #notFound>

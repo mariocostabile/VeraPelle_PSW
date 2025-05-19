@@ -13,7 +13,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name="products")
+@Table(name = "products")
 public class Product {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -42,4 +42,16 @@ public class Product {
     @Version
     @Column(name = "version")
     private Integer version;
+
+    /**
+     * Relazione con le immagini del prodotto.
+     * JPA caricherà la lista di ProductImage collegate via product_id.
+     */
+    @OneToMany(
+            mappedBy = "product",
+            fetch = FetchType.LAZY,
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    private List<ProductImage> images = new ArrayList<>();
 }
