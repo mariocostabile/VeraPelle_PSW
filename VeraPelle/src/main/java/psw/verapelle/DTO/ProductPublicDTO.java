@@ -20,7 +20,6 @@ public class ProductPublicDTO {
     private List<String> categoryNames;
     private String description;
     private List<String> imageUrls;
-
-    // ← aggiunto: lista di colori disponibili per questo prodotto
     private List<ColorDTO> colors;
+    private Integer stockQuantity;
 }

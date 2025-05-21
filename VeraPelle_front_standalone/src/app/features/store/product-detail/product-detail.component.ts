@@ -1,9 +1,13 @@
 // src/app/features/store/product-detail/product-detail.component.ts
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute } from '@angular/router';
-import { StoreService } from '@app/core/services/store/store.service';
+import { ActivatedRoute, ParamMap } from '@angular/router';
+import { Location } from '@angular/common';
+import { switchMap } from 'rxjs/operators';
+
+import { StoreService, CartItemRequest } from '@app/core/services/store/store.service';
 import { ProductPublicDTO } from '@app/core/models/product-public-dto';
+import { ColorDTO } from '@app/core/models/color-dto';
 
 @Component({
   selector: 'app-product-detail',
@@ -15,31 +19,53 @@ import { ProductPublicDTO } from '@app/core/models/product-public-dto';
 export class ProductDetailComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private store = inject(StoreService);
+  private location = inject(Location);
 
   product: ProductPublicDTO | null = null;
   selectedImage: string | null = null;
-  currentIndex = 0;  // indice corrente per lo slider
+  currentIndex = 0;
   loading = true;
   error: string | null = null;
 
+  selectedColorId: number | null = null;
+  quantity = 1;
+  maxQuantity = 0;
+  validationError: string | null = null;
+
   ngOnInit(): void {
-    const id = Number(this.route.snapshot.paramMap.get('id'));
-    this.store.getProductById(id).subscribe({
-      next: p => {
-        this.product = p;
-        this.currentIndex = 0;
-        this.selectedImage = p.imageUrls.length ? p.imageUrls[0] : null;
-        this.loading = false;
-      },
-      error: () => {
-        this.error = 'Prodotto non trovato';
-        this.loading = false;
-      }
-    });
+    // Ogni volta che cambia l'id nei param, rilanciamo il fetch del prodotto
+    this.route.paramMap
+      .pipe(
+        switchMap((params: ParamMap) => {
+          this.loading = true;
+          this.error = null;
+          const id = Number(params.get('id'));
+          return this.store.getProductById(id);
+        })
+      )
+      .subscribe({
+        next: p => {
+          this.product = p;
+          this.currentIndex = 0;
+          this.selectedImage = p.imageUrls.length ? p.imageUrls[0] : null;
+          this.maxQuantity = p.stockQuantity;
+          this.quantity = 1;
+          this.loading = false;
+        },
+        error: () => {
+          this.error = 'Prodotto non trovato';
+          this.loading = false;
+        }
+      });
   }
 
-  onSelectImage(url: string): void {
+  goBack(): void {
+    this.location.back();
+  }
+
+  onSelectImage(url: string, idx: number): void {
     this.selectedImage = url;
+    this.currentIndex = idx;
   }
 
   onPrev(): void {
@@ -54,5 +80,43 @@ export class ProductDetailComponent implements OnInit {
     const len = this.product.imageUrls.length;
     this.currentIndex = (this.currentIndex + 1) % len;
     this.selectedImage = this.product.imageUrls[this.currentIndex];
+  }
+
+  selectColor(id: number): void {
+    this.selectedColorId = id;
+    this.validationError = null;
+  }
+
+  changeQuantity(delta: number): void {
+    if (!this.product) return;
+    this.quantity = Math.min(this.maxQuantity, Math.max(1, this.quantity + delta));
+    this.validationError = null;
+  }
+
+  addToCart(): void {
+    if (!this.selectedColorId) {
+      this.validationError = 'Per favore seleziona un colore.';
+      return;
+    }
+    if (this.quantity < 1 || this.quantity > this.maxQuantity) {
+      this.validationError = `La quantità deve essere tra 1 e ${this.maxQuantity}.`;
+      return;
+    }
+    this.validationError = null;
+
+    const item: CartItemRequest = {
+      productId: this.product!.id,
+      colorId: this.selectedColorId,
+      quantity: this.quantity
+    };
+
+    this.store.addToCart(item).subscribe({
+      next: () => {
+        // TODO: mostrare conferma (e.g. toast)
+      },
+      error: () => {
+        this.validationError = 'Impossibile aggiungere al carrello. Riprova.';
+      }
+    });
   }
 }

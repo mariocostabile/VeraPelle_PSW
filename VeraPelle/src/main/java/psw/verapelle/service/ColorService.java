@@ -1,4 +1,3 @@
-// src/main/java/psw/verapelle/service/ColorService.java
 package psw.verapelle.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,8 +52,12 @@ public class ColorService {
 
     @Transactional
     public void deleteColor(Long id) {
+        // 1) Verifico che il colore esista
         Color c = colorRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Color not found: " + id));
+        // 2) Rimuovo tutte le associazioni con i prodotti
+        colorRepository.deleteProductAssociations(id);
+        // 3) Elimino il colore
         colorRepository.delete(c);
     }
 

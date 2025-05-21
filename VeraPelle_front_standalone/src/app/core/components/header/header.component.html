@@ -12,7 +12,6 @@
         <li routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
           <button class="nav-item" routerLink="/admin/categories">Gestione Categorie</button>
         </li>
-        <!-- Nuova voce Colori -->
         <li routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
           <button class="nav-item" routerLink="/admin/colors">Gestione Colori</button>
         </li>
@@ -27,10 +26,42 @@
 
     <!-- Header per utenti -->
     <ng-template #userHeader>
-      <div class="search" *ngIf="currentUrl !== '/profilo'">
-        <input type="text" placeholder="Cerca prodotti…" />
-        <button aria-label="Cerca">🔍</button>
+      <div
+        #searchRef
+        class="search"
+        *ngIf="currentUrl !== '/profilo'"
+        (click)="$event.stopPropagation()"
+      >
+        <!-- Input di ricerca -->
+        <input
+          [formControl]="searchControl"
+          type="text"
+          placeholder="Cerca prodotti…"
+          aria-label="Cerca prodotti"
+          (click)="$event.stopPropagation()"
+        />
+        <span *ngIf="loadingSuggestions" class="spinner">⏳</span>
+
+        <!-- Dropdown suggestions -->
+        <ul class="suggestions-dropdown" *ngIf="suggestions.length">
+          <li
+            *ngFor="let prod of suggestions"
+            class="suggestion-item"
+            (click)="onSelectProduct(prod); $event.stopPropagation()"
+          >
+            <img
+              *ngIf="prod.imageUrls?.length"
+              [src]="prod.imageUrls[0]"
+              alt="{{ prod.name }}"
+              class="thumb"
+            />
+            <div class="info">
+              <span class="name">{{ prod.name }}</span>
+            </div>
+          </li>
+        </ul>
       </div>
+
       <ul class="auth-links">
         <ng-container *ngIf="!isAuthenticated">
           <li><button class="nav-item" (click)="login()">Login</button></li>

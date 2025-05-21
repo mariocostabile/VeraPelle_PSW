@@ -1,4 +1,8 @@
 <!-- src/app/features/store/product-detail/product-detail.component.html -->
+
+<!-- Pulsante “Indietro” sempre visibile -->
+<button class="btn-back" (click)="goBack()">← Indietro</button>
+
 <div class="detail-container" *ngIf="!loading">
   <ng-container *ngIf="product; else notFound">
     <div class="detail-grid">
@@ -19,7 +23,7 @@
           <img
             *ngFor="let img of product.imageUrls; let idx = index"
             [src]="img"
-            (click)="onSelectImage(img); currentIndex = idx"
+            (click)="onSelectImage(img, idx)"
             [class.active]="img === selectedImage"
             alt="{{ product.name }} thumbnail {{ idx + 1 }}"
           />
@@ -37,15 +41,65 @@
           </span>
         </p>
         <p class="description">{{ product.description }}</p>
+
+        <!-- Color Picker -->
+        <div class="color-picker" *ngIf="product.colors?.length">
+          <label>Colore:</label>
+          <div class="swatches">
+            <span
+              *ngFor="let c of product.colors"
+              class="swatch"
+              [style.background]="c.hexCode"
+              [class.selected]="c.id === selectedColorId"
+              (click)="selectColor(c.id)"
+            ></span>
+          </div>
+        </div>
+
+        <!-- Quantity Spinner / Out of Stock -->
+        <div class="quantity-picker" *ngIf="maxQuantity > 0; else outOfStock">
+          <label>Quantità:</label>
+          <button (click)="changeQuantity(-1)" [disabled]="quantity <= 1">–</button>
+          <input
+            type="number"
+            [value]="quantity"
+            (input)="quantity = $any($event.target).valueAsNumber; validationError = null"
+            [min]="1"
+            [max]="maxQuantity"
+          />
+          <button (click)="changeQuantity(1)" [disabled]="quantity >= maxQuantity">+</button>
+        </div>
+        <ng-template #outOfStock>
+          <p class="out-of-stock">Prodotto esaurito</p>
+        </ng-template>
+
+        <!-- Messaggio di validazione -->
+        <p *ngIf="validationError" class="validation-error">{{ validationError }}</p>
+
+        <!-- Azioni sempre abilitate, ma disattivate se quantità non valida -->
         <div class="actions">
-          <button class="btn-add-cart">Aggiungi al carrello</button>
-          <button class="btn-buy-now">Acquista ora</button>
+          <button
+            class="btn-add-cart"
+            (click)="addToCart()"
+            [disabled]="quantity < 1 || quantity > maxQuantity"
+          >
+            Aggiungi al carrello
+          </button>
+          <button
+            class="btn-buy-now"
+            (click)="addToCart()"
+            [disabled]="quantity < 1 || quantity > maxQuantity"
+          >
+            Acquista ora
+          </button>
         </div>
       </div>
     </div>
   </ng-container>
+
   <ng-template #notFound>
     <p class="error">{{ error }}</p>
   </ng-template>
 </div>
+
 <div *ngIf="loading" class="loading">Caricamento...</div>

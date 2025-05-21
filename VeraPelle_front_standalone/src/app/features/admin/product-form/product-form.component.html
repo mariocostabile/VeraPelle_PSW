@@ -117,7 +117,7 @@
         <button
           type="button"
           class="btn btn-primary"
-          [disabled]="!productId || !selectedPreviews.length"
+          [disabled]="!selectedPreviews.length"
           (click)="uploadSelectedImages()"
         >
           Carica immagini
@@ -146,7 +146,6 @@
         </div>
       </div>
     </div>
-
 
     <!-- Bottoni Salva / Annulla -->
     <div class="form-actions">

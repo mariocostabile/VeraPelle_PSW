@@ -1,4 +1,3 @@
-// src/main/java/psw/verapelle/controller/PublicProductController.java
 package psw.verapelle.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,6 +45,17 @@ public class PublicProductController {
         return ResponseEntity.ok(toPublicDTO(product));
     }
 
+    /**
+     * Suggestion: ricerca prodotti per nome (ignore case)
+     */
+    @GetMapping("/suggestions")
+    public List<ProductPublicDTO> suggestProducts(@RequestParam("q") String keyword) {
+        return productService.findByNameContainingIgnoreCase(keyword)
+                .stream()
+                .map(this::toPublicDTO)
+                .collect(Collectors.toList());
+    }
+
     private ProductPublicDTO toPublicDTO(Product product) {
         String baseUrl = ServletUriComponentsBuilder
                 .fromCurrentContextPath()
@@ -60,7 +70,6 @@ public class PublicProductController {
                 .map(Category::getName)
                 .collect(Collectors.toList());
 
-        // mappiamo i colori associati
         List<ColorDTO> colors = product.getColors().stream()
                 .map(c -> new ColorDTO(c.getId(), c.getName(), c.getHexCode()))
                 .collect(Collectors.toList());
@@ -72,7 +81,8 @@ public class PublicProductController {
                 categories,
                 product.getDescription(),
                 imageUrls,
-                colors
+                colors,
+                product.getStockQuantity()
         );
     }
 }

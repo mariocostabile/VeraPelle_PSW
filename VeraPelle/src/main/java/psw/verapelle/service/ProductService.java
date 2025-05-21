@@ -7,7 +7,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import psw.verapelle.DTO.ProductDTO;
-import psw.verapelle.entity.Color;
 import psw.verapelle.entity.Product;
 import psw.verapelle.repository.CategoryRepository;
 import psw.verapelle.repository.ColorRepository;
@@ -27,7 +26,7 @@ public class ProductService {
     private CategoryRepository categoryRepository;
 
     @Autowired
-    private ColorRepository colorRepository;  // ← iniettato
+    private ColorRepository colorRepository;
 
     @Transactional
     public Product createProduct(ProductDTO productDTO) {
@@ -133,5 +132,13 @@ public class ProductService {
         return (categoryIds != null && !categoryIds.isEmpty())
                 ? productRepository.findByAllCategories(categoryIds, pageable)
                 : productRepository.findAll(pageable);
+    }
+
+    /**
+     * Suggestion: cerca prodotti il cui nome contiene (ignore case) la keyword.
+     */
+    @Transactional(readOnly = true)
+    public List<Product> findByNameContainingIgnoreCase(String keyword) {
+        return productRepository.findByNameContainingIgnoreCase(keyword);
     }
 }

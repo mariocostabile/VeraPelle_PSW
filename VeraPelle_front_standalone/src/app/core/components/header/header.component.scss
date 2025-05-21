@@ -40,6 +40,7 @@
     }
 
     .search {
+      position: relative;
       display: flex;
       flex: 1;
       margin: 0 1rem;
@@ -50,6 +51,7 @@
         border: none;
         border-radius: 2px 0 0 2px;
         font-family: var(--font-sans);
+        outline: none;
       }
       button {
         background: var(--color-accent);
@@ -62,6 +64,69 @@
       }
       button:hover {
         background-color: var(--color-primary-hover);
+      }
+
+      .spinner {
+        position: absolute;
+        right: 2.5rem;
+        top: 50%;
+        transform: translateY(-50%);
+      }
+
+      .suggestions-dropdown {
+        position: absolute;
+        top: calc(100% + 0.25rem);
+        left: 0;
+        width: 100%;
+        max-height: 300px;
+        overflow-y: auto;
+        background: white;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        z-index: 1000;
+        list-style: none;
+        margin: 0;
+        padding: 0;
+
+        .suggestion-item {
+          display: flex;
+          align-items: center;
+          padding: 0.75rem 0.5rem;        // più spazio verticale
+          cursor: pointer;
+          transition: background 0.1s;
+          border-bottom: 1px solid #e0e0e0; // linea di separazione
+
+          &:last-child {
+            border-bottom: none;          // nessuna linea dopo l’ultimo
+          }
+
+          &:hover {
+            background: #f5f5f5;
+          }
+
+          .thumb {
+            width: 40px;
+            height: 40px;
+            object-fit: cover;
+            margin-right: 0.5rem;
+            border-radius: 2px;
+          }
+
+          .info {
+            display: flex;
+            flex-direction: column;
+
+            /* forziamo il nome in nero */
+            .name {
+              font-weight: 500;
+              color: #222 !important;
+            }
+            /* prezzo nascosto */
+            .price {
+              display: none !important;
+            }
+          }
+        }
       }
     }
 
@@ -85,6 +150,7 @@
     .header-top {
       flex-wrap: wrap;
       justify-content: center;
+
       .logo,
       .search,
       .auth-links,
@@ -93,6 +159,7 @@
         justify-content: center;
         margin-bottom: 0.5rem;
       }
+
       .search {
         margin: 0.5rem 0;
       }

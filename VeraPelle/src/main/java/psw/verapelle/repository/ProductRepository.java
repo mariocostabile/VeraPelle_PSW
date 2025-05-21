@@ -1,5 +1,3 @@
-// src/main/java/psw/verapelle/repository/ProductRepository.java
-
 package psw.verapelle.repository;
 
 import org.springframework.data.domain.Page;
@@ -43,8 +41,13 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     @Query("""
       SELECT p
         FROM Product p
-  LEFT JOIN FETCH p.images
+   LEFT JOIN FETCH p.images
        WHERE p.id = :id
       """)
     Optional<Product> findByIdWithImages(@Param("id") Long id);
+
+    /**
+     * Suggestion: cerca prodotti il cui nome contiene (ignore case) la keyword.
+     */
+    List<Product> findByNameContainingIgnoreCase(String keyword);
 }

@@ -12,10 +12,10 @@ export class ImageUploadService {
 
   constructor(private http: HttpClient) {}
 
-  uploadImages(productId: number, files: File[]): Observable<ProductImageDTO[]> {
-    const formData = new FormData();
-    files.forEach(f => formData.append('files', f, f.name));
-
+  /**
+   * Carica immagini per un prodotto. Accetta direttamente un FormData contenente i file.
+   */
+  uploadImages(productId: number, formData: FormData): Observable<ProductImageDTO[]> {
     return this.http.post<ProductImageDTO[]>(
       `${this.baseUrl}/${productId}/images`,
       formData
@@ -26,6 +26,9 @@ export class ImageUploadService {
     );
   }
 
+  /**
+   * Recupera le immagini già caricate di un prodotto.
+   */
   getImages(productId: number): Observable<ProductImageDTO[]> {
     return this.http.get<ProductImageDTO[]>(
       `${this.baseUrl}/${productId}/images`
@@ -36,6 +39,9 @@ export class ImageUploadService {
     );
   }
 
+  /**
+   * Elimina un'immagine di un prodotto dal server.
+   */
   deleteImage(productId: number, imageId: number): Observable<void> {
     return this.http.delete<void>(
       `${this.baseUrl}/${productId}/images/${imageId}`

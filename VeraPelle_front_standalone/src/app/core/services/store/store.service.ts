@@ -1,3 +1,4 @@
+// src/app/core/services/store/store.service.ts
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
@@ -11,10 +12,17 @@ interface Paginated<T> {
   number: number; // pagina corrente
 }
 
+export interface CartItemRequest {
+  productId: number;
+  colorId: number;
+  quantity: number;
+}
+
 @Injectable({ providedIn: 'root' })
 export class StoreService {
   private http = inject(HttpClient);
-  private baseUrl = 'http://localhost:8080/api/products';
+  private productsUrl = 'http://localhost:8080/api/products';
+  private cartUrl = 'http://localhost:8080/api/cart/items';
 
   /**
    * Restituisce una pagina di prodotti, filtrata per categorie opzionali.
@@ -33,13 +41,20 @@ export class StoreService {
       params = params.set('categories', categoryIds.join(','));
     }
 
-    return this.http.get<Paginated<ProductPublicDTO>>(this.baseUrl, { params });
+    return this.http.get<Paginated<ProductPublicDTO>>(this.productsUrl, { params });
   }
 
   /**
    * Restituisce il dettaglio di un singolo prodotto.
    */
   getProductById(id: number): Observable<ProductPublicDTO> {
-    return this.http.get<ProductPublicDTO>(`${this.baseUrl}/${id}`);
+    return this.http.get<ProductPublicDTO>(`${this.productsUrl}/${id}`);
+  }
+
+  /**
+   * Aggiunge un articolo al carrello.
+   */
+  addToCart(item: CartItemRequest): Observable<any> {
+    return this.http.post(this.cartUrl, item);
   }
 }

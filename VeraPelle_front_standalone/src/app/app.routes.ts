@@ -8,9 +8,14 @@ import { ProductListComponent }   from './features/store/product-list/product-li
 import { ProductDetailComponent } from './features/store/product-detail/product-detail.component';
 
 export const routes: Routes = [
-  { path: '',        component: HomeComponent },
-  { path: 'store',   component: ProductListComponent },
+  { path: '', component: HomeComponent },
+
+  // 1) Rotta specifica dettaglio prodotto
   { path: 'store/products/:id', component: ProductDetailComponent },
+
+  // 2) Rotta generica lista prodotti
+  { path: 'store', component: ProductListComponent },
+
   { path: 'profilo', component: ProfiloComponent, canActivate: [authGuard] },
   {
     path: 'admin',
@@ -18,5 +23,5 @@ export const routes: Routes = [
       import('./features/admin/admin.module').then(m => m.AdminModule),
     canActivate: [authGuard]
   },
-  { path: '**',      redirectTo: '' }
+  { path: '**', redirectTo: '' }
 ];

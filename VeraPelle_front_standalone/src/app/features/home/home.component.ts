@@ -25,7 +25,7 @@ export class HomeComponent implements OnInit {
   ngOnInit(): void {
     // Se ADMIN, redirect automatico alla console
     if (this.kc.profile?.token && this.kc.hasRole('ADMIN')) {
-      this.router.navigate(['/admin/users']);
+      this.router.navigate(['/admin/products']);
     }
   }
 }
