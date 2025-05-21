@@ -1,5 +1,6 @@
 // src/app/core/components/header/header.component.ts
-import { Component, inject, OnInit, HostListener, ElementRef, ViewChild, AfterViewInit } from '@angular/core';
+
+import { Component, inject, OnInit, HostListener, ElementRef, ViewChild, AfterViewInit, Input } from '@angular/core';
 import { CommonModule, NgIf, NgForOf } from '@angular/common';
 import { Router, RouterLink, RouterLinkActive, NavigationEnd } from '@angular/router';
 import { filter, debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
@@ -24,18 +25,19 @@ import { ProductPublicDTO } from '@app/core/models/product-public-dto';
   styleUrls: ['./header.component.scss']
 })
 export class HeaderComponent implements OnInit, AfterViewInit {
+  /** Numero di articoli in carrello, passato da AppComponent */
+  @Input() cartCount = 0;
+
   public kc = inject(KeycloakService);
   private router = inject(Router);
   private productService = inject(ProductService);
 
-  // Ora static: false per legarsi dopo il render del *ngIf
   @ViewChild('searchRef', { read: ElementRef, static: false })
   searchRef!: ElementRef<HTMLElement>;
 
   isAdmin = false;
   currentUrl = '';
 
-  // Search: FormControl non-nullable
   searchControl = new FormControl<string>('', { nonNullable: true });
   suggestions: ProductPublicDTO[] = [];
   loadingSuggestions = false;
@@ -79,7 +81,6 @@ export class HeaderComponent implements OnInit, AfterViewInit {
   }
 
   onSelectProduct(prod: ProductPublicDTO): void {
-    // Rotta aggiornata
     this.router.navigate(['/store/products', prod.id]);
     this.suggestions = [];
     this.searchControl.setValue('');

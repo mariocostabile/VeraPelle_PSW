@@ -5,70 +5,106 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import psw.verapelle.entity.Cart;
 import psw.verapelle.entity.CartItem;
+import psw.verapelle.entity.Color;
 import psw.verapelle.entity.Product;
 import psw.verapelle.repository.CartItemRepository;
-import psw.verapelle.repository.CartRepository;
+import psw.verapelle.repository.ColorRepository;
 import psw.verapelle.repository.ProductRepository;
 
-import java.util.List;
 import java.util.Optional;
 
 @Service
 public class CartItemService {
+
     @Autowired
     private CartItemRepository cartItemRepository;
+
     @Autowired
-    private CartRepository cartRepository;
+    private CartService cartService;
+
     @Autowired
     private ProductRepository productRepository;
 
+    @Autowired
+    private ColorRepository colorRepository;
+
+    /**
+     * Aggiunge un item al carrello guest o loggato, basato sul cartIdCookie.
+     */
     @Transactional
-    public CartItem addCartItem(Long cartId, Long productId, int quantity) {
-        Cart cart = cartRepository.findById(cartId)
-                .orElseThrow(() -> new RuntimeException("Cart not found"));
+    public CartItem addCartItem(String cartIdCookie, Long productId, Long colorId, int quantity) {
+        if (quantity < 1) {
+            throw new IllegalArgumentException("Quantity must be at least 1");
+        }
+
+        Cart cart = cartService.getCart(cartIdCookie);
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new RuntimeException("Product not found"));
+        Color color = colorRepository.findById(colorId)
+                .orElseThrow(() -> new RuntimeException("Color not found"));
 
         if (product.getStockQuantity() < quantity) {
-            throw new RuntimeException("Not enough stock available for this product.");
+            throw new RuntimeException("Insufficient stock for product: " + product.getName());
         }
 
-        Optional<CartItem> existingItem = cart.getCartItems().stream()
-                .filter(item -> item.getProduct().getId().equals(productId))
+        // Cerca un item con stesso prodotto+colore nel carrello corrente
+        Optional<CartItem> existing = cart.getCartItems().stream()
+                .filter(ci ->
+                        ci.getProduct().getId().equals(productId) &&
+                                ci.getSelectedColor().getId().equals(colorId)
+                )
                 .findFirst();
 
-        if (existingItem.isPresent()) {
-            CartItem cartItem = existingItem.get();
-            cartItem.setQuantity(cartItem.getQuantity() + quantity);
-            return cartItemRepository.save(cartItem);
+        if (existing.isPresent()) {
+            CartItem ci = existing.get();
+            ci.setQuantity(ci.getQuantity() + quantity);
+            return cartItemRepository.save(ci);
         }
 
-        CartItem cartItem = new CartItem();
-        cartItem.setCart(cart);
-        cartItem.setProduct(product);
-        cartItem.setQuantity(quantity);
-        return cartItemRepository.save(cartItem);
+        // Altrimenti ne creo uno nuovo
+        CartItem ci = new CartItem();
+        ci.setCart(cart);
+        ci.setProduct(product);
+        ci.setSelectedColor(color);
+        ci.setQuantity(quantity);
+        return cartItemRepository.save(ci);
     }
 
+    /**
+     * Aggiorna la quantità di un CartItem esistente (deve restare ≥ 1)
+     * solo se appartiene al cart identificato da cartIdCookie.
+     */
     @Transactional
-    public void removeCartItem(Long cartItemId) {
-        CartItem cartItem = cartItemRepository.findById(cartItemId)
+    public CartItem updateCartItemQuantity(String cartIdCookie, Long itemId, int quantity) {
+        if (quantity < 1) {
+            throw new IllegalArgumentException("Quantity must be at least 1");
+        }
+
+        Cart cart = cartService.getCart(cartIdCookie);
+        CartItem ci = cartItemRepository.findById(itemId)
                 .orElseThrow(() -> new RuntimeException("CartItem not found"));
 
-        // Ripristina lo stock quando un prodotto viene rimosso dal carrello
-        Product product = cartItem.getProduct();
-        product.setStockQuantity(product.getStockQuantity() + cartItem.getQuantity());
-        productRepository.save(product);
+        if (!ci.getCart().getId().equals(cart.getId())) {
+            throw new RuntimeException("CartItem does not belong to this cart");
+        }
 
-        // Elimina l'elemento dal carrello
-        cartItemRepository.delete(cartItem);
+        ci.setQuantity(quantity);
+        return cartItemRepository.save(ci);
     }
 
-
+    /**
+     * Rimuove un CartItem dal carrello identificato da cartIdCookie.
+     */
     @Transactional
-    public List<CartItem> getCartItems(Long cartId) {
-        Cart cart = cartRepository.findById(cartId)
-                .orElseThrow(() -> new RuntimeException("Cart not found"));
-        return cart.getCartItems();
+    public void removeCartItem(String cartIdCookie, Long cartItemId) {
+        Cart cart = cartService.getCart(cartIdCookie);
+        CartItem ci = cartItemRepository.findById(cartItemId)
+                .orElseThrow(() -> new RuntimeException("CartItem not found"));
+
+        if (!ci.getCart().getId().equals(cart.getId())) {
+            throw new RuntimeException("CartItem does not belong to this cart");
+        }
+
+        cartItemRepository.delete(ci);
     }
 }

@@ -109,3 +109,15 @@
     }
   }
 }
+
+/* ----------------------------- */
+/* Miniatura prodotto nella card */
+/* ----------------------------- */
+.product-thumb {
+  width: 100%;
+  max-width: 230px;    /* regola a piacere */
+  height: auto;
+  object-fit: cover;
+  border-radius: 0.25rem;
+  margin-bottom: 0.5rem;
+}

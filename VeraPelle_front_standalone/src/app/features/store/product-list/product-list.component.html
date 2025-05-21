@@ -18,6 +18,14 @@
   <!-- Griglia prodotti -->
   <div class="product-grid">
     <div *ngFor="let p of products" class="product-card">
+
+      <!-- Miniatura del prodotto (o placeholder) -->
+      <img
+        [src]="p.imageUrls?.length ? p.imageUrls[0] : 'assets/img/placeholder.png'"
+        [alt]="p.name"
+        class="product-thumb"
+      />
+
       <h3>{{ p.name }}</h3>
       <p class="price">€{{ p.price }}</p>
       <p class="cats">
@@ -30,6 +38,7 @@
       </a>
     </div>
   </div>
+
 
   <!-- Paginazione -->
   <div class="pagination">

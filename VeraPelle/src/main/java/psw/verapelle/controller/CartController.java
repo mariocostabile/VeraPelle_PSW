@@ -1,0 +1,167 @@
+package psw.verapelle.controller;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import psw.verapelle.DTO.*;
+import psw.verapelle.entity.Cart;
+import psw.verapelle.entity.CartItem;
+import psw.verapelle.entity.ProductImage;
+import psw.verapelle.service.CartItemService;
+import psw.verapelle.service.CartService;
+
+import java.time.Duration;
+import java.util.List;
+import java.util.stream.Collectors;
+
+@RestController
+@RequestMapping("/api/cart")
+public class CartController {
+
+    @Autowired
+    private CartService cartService;
+
+    @Autowired
+    private CartItemService cartItemService;
+
+    // 1) Recupera lo stato attuale del carrello (guest via cookie)
+    @GetMapping
+    public ResponseEntity<CartDTO> getCart(
+            @CookieValue(value = "cartId", required = false) String cartIdCookie
+    ) {
+        Cart cart = cartService.getCart(cartIdCookie);
+
+        // (ri)emetto sempre il cookie per il guest cart
+        ResponseCookie cookie = ResponseCookie.from("cartId", cart.getId().toString())
+                .path("/")
+                .httpOnly(true)
+                .sameSite("Lax")
+                .maxAge(Duration.ofDays(7))
+                .build();
+
+        CartDTO dto = toCartDTO(cart);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, cookie.toString())
+                .body(dto);
+    }
+
+    // 2) Aggiunge un item (guest via cartIdCookie)
+    @PostMapping("/items")
+    public ResponseEntity<CartItemDTO> addItem(
+            @CookieValue(value = "cartId", required = false) String cartIdCookie,
+            @RequestBody AddCartItemRequest req
+    ) {
+        CartItem ci = cartItemService.addCartItem(
+                cartIdCookie,
+                req.getProductId(),
+                req.getColorId(),
+                req.getQuantity()
+        );
+
+        // in caso di nuovo cart creato all’interno del service, riemettiamo il cookie
+        ResponseCookie cookie = ResponseCookie.from("cartId", ci.getCart().getId().toString())
+                .path("/")
+                .httpOnly(true)
+                .sameSite("Lax")
+                .maxAge(Duration.ofDays(7))
+                .build();
+
+        CartItemDTO dto = toCartItemDTO(ci);
+        return ResponseEntity.status(201)
+                .header(HttpHeaders.SET_COOKIE, cookie.toString())
+                .body(dto);
+    }
+
+    // 3) Modifica la quantità (guest via cartIdCookie)
+    @PutMapping("/items/{itemId}")
+    public ResponseEntity<CartItemDTO> updateItem(
+            @CookieValue(value = "cartId", required = false) String cartIdCookie,
+            @PathVariable Long itemId,
+            @RequestBody UpdateCartItemQuantityRequest req
+    ) {
+        CartItem ci = cartItemService.updateCartItemQuantity(
+                cartIdCookie,
+                itemId,
+                req.getQuantity()
+        );
+        return ResponseEntity.ok(toCartItemDTO(ci));
+    }
+
+    // 4) Rimuove un singolo item (guest via cartIdCookie)
+    @DeleteMapping("/items/{itemId}")
+    public ResponseEntity<Void> removeItem(
+            @CookieValue(value = "cartId", required = false) String cartIdCookie,
+            @PathVariable Long itemId
+    ) {
+        cartItemService.removeCartItem(cartIdCookie, itemId);
+        return ResponseEntity.noContent().build();
+    }
+
+    // 5) Svuota tutto il carrello (guest via cartIdCookie)
+    @DeleteMapping
+    public ResponseEntity<Void> clearCart(
+            @CookieValue(value = "cartId", required = false) String cartIdCookie
+    ) {
+        cartService.clearCart(cartIdCookie);
+        return ResponseEntity.noContent().build();
+    }
+
+    // --- helper per trasformare entity → DTO ---
+
+    private CartDTO toCartDTO(Cart cart) {
+        List<CartItemDTO> items = cart.getCartItems().stream()
+                .map(this::toCartItemDTO)
+                .collect(Collectors.toList());
+        double total = items.stream()
+                .mapToDouble(CartItemDTO::getSubtotal)
+                .sum();
+        return new CartDTO(cart.getId(), items, total);
+    }
+
+    private CartItemDTO toCartItemDTO(CartItem ci) {
+        var p = ci.getProduct();
+        // estraiamo gli ID di categorie e colori
+        List<Long> categoryIds = p.getCategories().stream()
+                .map(c -> c.getId())
+                .collect(Collectors.toList());
+        List<Long> colorIds = p.getColors().stream()
+                .map(c -> c.getId())
+                .collect(Collectors.toList());
+
+        // estraiamo gli URL delle immagini
+        List<String> imageUrls = p.getImages().stream()
+                .map(ProductImage::getUrlPath)
+                .collect(Collectors.toList());
+
+        var prodDto = new ProductDTO(
+                p.getId(),
+                p.getName(),
+                p.getDescription(),
+                p.getPrice(),
+                p.getStockQuantity(),
+                categoryIds,
+                colorIds
+        );
+
+        var color = ci.getSelectedColor();
+        var colorDto = new ColorDTO(
+                color.getId(),
+                color.getName(),
+                color.getHexCode()
+        );
+
+        // miniatura: prima immagine se presente
+        String thumb = imageUrls.isEmpty() ? null : imageUrls.get(0);
+
+        return new CartItemDTO(
+                ci.getId(),
+                prodDto,
+                ci.getQuantity(),
+                prodDto.getPrice().doubleValue() * ci.getQuantity(),
+                thumb,
+                colorDto
+        );
+    }
+}

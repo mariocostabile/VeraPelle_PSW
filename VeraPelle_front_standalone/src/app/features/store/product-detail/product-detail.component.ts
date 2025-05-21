@@ -1,13 +1,15 @@
 // src/app/features/store/product-detail/product-detail.component.ts
+
 import { Component, OnInit, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { ActivatedRoute, ParamMap } from '@angular/router';
-import { Location } from '@angular/common';
-import { switchMap } from 'rxjs/operators';
+import { CommonModule }               from '@angular/common';
+import { ActivatedRoute, ParamMap }   from '@angular/router';
+import { Location }                   from '@angular/common';
+import { switchMap }                  from 'rxjs/operators';
 
 import { StoreService, CartItemRequest } from '@app/core/services/store/store.service';
-import { ProductPublicDTO } from '@app/core/models/product-public-dto';
-import { ColorDTO } from '@app/core/models/color-dto';
+import { CartService }                   from '@app/core/services/cart/cart.service';
+import { ProductPublicDTO }              from '@app/core/models/product-public-dto';
+import { ColorDTO }                      from '@app/core/models/color-dto';
 
 @Component({
   selector: 'app-product-detail',
@@ -17,23 +19,26 @@ import { ColorDTO } from '@app/core/models/color-dto';
   styleUrls: ['./product-detail.component.scss']
 })
 export class ProductDetailComponent implements OnInit {
-  private route = inject(ActivatedRoute);
-  private store = inject(StoreService);
-  private location = inject(Location);
+  // Flag per mostrare/nascondere il toast
+  showToast: boolean = false;
+
+  private route       = inject(ActivatedRoute);
+  private store       = inject(StoreService);
+  private cartService = inject(CartService);
+  private location    = inject(Location);
 
   product: ProductPublicDTO | null = null;
-  selectedImage: string | null = null;
+  selectedImage: string | null      = null;
   currentIndex = 0;
-  loading = true;
+  loading      = true;
   error: string | null = null;
 
   selectedColorId: number | null = null;
-  quantity = 1;
-  maxQuantity = 0;
+  quantity       = 1;
+  maxQuantity    = 0;
   validationError: string | null = null;
 
   ngOnInit(): void {
-    // Ogni volta che cambia l'id nei param, rilanciamo il fetch del prodotto
     this.route.paramMap
       .pipe(
         switchMap((params: ParamMap) => {
@@ -45,15 +50,15 @@ export class ProductDetailComponent implements OnInit {
       )
       .subscribe({
         next: p => {
-          this.product = p;
-          this.currentIndex = 0;
+          this.product       = p;
+          this.currentIndex  = 0;
           this.selectedImage = p.imageUrls.length ? p.imageUrls[0] : null;
-          this.maxQuantity = p.stockQuantity;
-          this.quantity = 1;
-          this.loading = false;
+          this.maxQuantity   = p.stockQuantity;
+          this.quantity      = 1;
+          this.loading       = false;
         },
         error: () => {
-          this.error = 'Prodotto non trovato';
+          this.error   = 'Prodotto non trovato';
           this.loading = false;
         }
       });
@@ -65,7 +70,7 @@ export class ProductDetailComponent implements OnInit {
 
   onSelectImage(url: string, idx: number): void {
     this.selectedImage = url;
-    this.currentIndex = idx;
+    this.currentIndex  = idx;
   }
 
   onPrev(): void {
@@ -94,6 +99,8 @@ export class ProductDetailComponent implements OnInit {
   }
 
   addToCart(): void {
+    if (!this.product) return;
+
     if (!this.selectedColorId) {
       this.validationError = 'Per favore seleziona un colore.';
       return;
@@ -104,19 +111,25 @@ export class ProductDetailComponent implements OnInit {
     }
     this.validationError = null;
 
-    const item: CartItemRequest = {
-      productId: this.product!.id,
+    const req: CartItemRequest = {
+      productId: this.product.id,
       colorId: this.selectedColorId,
       quantity: this.quantity
     };
 
-    this.store.addToCart(item).subscribe({
+    this.cartService.addItem(req).subscribe({
       next: () => {
-        // TODO: mostrare conferma (e.g. toast)
+        this.triggerToast(); // Mostra il toast di conferma
       },
       error: () => {
         this.validationError = 'Impossibile aggiungere al carrello. Riprova.';
       }
     });
+  }
+
+  /** Mostra temporaneamente il toast di conferma */
+  private triggerToast(): void {
+    this.showToast = true;
+    setTimeout(() => this.showToast = false, 3000);
   }
 }

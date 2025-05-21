@@ -22,7 +22,7 @@ export interface CartItemRequest {
 export class StoreService {
   private http = inject(HttpClient);
   private productsUrl = 'http://localhost:8080/api/products';
-  private cartUrl = 'http://localhost:8080/api/cart/items';
+  private cartUrl     = 'http://localhost:8080/api/cart/items';
 
   /**
    * Restituisce una pagina di prodotti, filtrata per categorie opzionali.

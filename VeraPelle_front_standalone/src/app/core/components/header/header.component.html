@@ -1,77 +1,59 @@
 <!-- src/app/core/components/header/header.component.html -->
+
 <nav class="header">
   <div class="header-top">
+    <!-- Logo sempre a sinistra -->
     <a routerLink="/" class="logo">VeraPelle</a>
 
-    <!-- Menu Admin -->
-    <ng-container *ngIf="isAdmin; else userHeader">
-      <ul class="admin-menu">
-        <li routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
-          <button class="nav-item" routerLink="/admin/products">Gestione Prodotti</button>
-        </li>
-        <li routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
-          <button class="nav-item" routerLink="/admin/categories">Gestione Categorie</button>
-        </li>
-        <li routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
-          <button class="nav-item" routerLink="/admin/colors">Gestione Colori</button>
-        </li>
-        <li routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
-          <button class="nav-item" routerLink="/admin/users">Gestione Utenti</button>
-        </li>
-      </ul>
-      <ul class="auth-links">
-        <li><button class="nav-item" (click)="logout()">Logout</button></li>
-      </ul>
-    </ng-container>
-
-    <!-- Header per utenti -->
-    <ng-template #userHeader>
-      <div
-        #searchRef
-        class="search"
-        *ngIf="currentUrl !== '/profilo'"
+    <!-- Barra di ricerca centrata -->
+    <div
+      #searchRef
+      class="search"
+      *ngIf="currentUrl !== '/profilo'"
+      (click)="$event.stopPropagation()"
+    >
+      <input
+        [formControl]="searchControl"
+        type="text"
+        placeholder="Cerca prodotti…"
+        aria-label="Cerca prodotti"
         (click)="$event.stopPropagation()"
-      >
-        <!-- Input di ricerca -->
-        <input
-          [formControl]="searchControl"
-          type="text"
-          placeholder="Cerca prodotti…"
-          aria-label="Cerca prodotti"
-          (click)="$event.stopPropagation()"
-        />
-        <span *ngIf="loadingSuggestions" class="spinner">⏳</span>
-
-        <!-- Dropdown suggestions -->
-        <ul class="suggestions-dropdown" *ngIf="suggestions.length">
-          <li
-            *ngFor="let prod of suggestions"
-            class="suggestion-item"
-            (click)="onSelectProduct(prod); $event.stopPropagation()"
-          >
-            <img
-              *ngIf="prod.imageUrls?.length"
-              [src]="prod.imageUrls[0]"
-              alt="{{ prod.name }}"
-              class="thumb"
-            />
-            <div class="info">
-              <span class="name">{{ prod.name }}</span>
-            </div>
-          </li>
-        </ul>
-      </div>
-
-      <ul class="auth-links">
-        <ng-container *ngIf="!isAuthenticated">
-          <li><button class="nav-item" (click)="login()">Login</button></li>
-          <li><button class="nav-item" (click)="register()">Registrati</button></li>
-        </ng-container>
-        <ng-container *ngIf="isAuthenticated">
-          <li><button class="nav-item" routerLink="/profilo">Profilo</button></li>
-          <li><button class="nav-item" (click)="logout()">Logout</button></li>
-        </ng-container>
+      />
+      <span *ngIf="loadingSuggestions" class="spinner">⏳</span>
+      <ul class="suggestions-dropdown" *ngIf="suggestions.length">
+        <li
+          *ngFor="let prod of suggestions"
+          class="suggestion-item"
+          (click)="onSelectProduct(prod); $event.stopPropagation()"
+        >
+          <img
+            *ngIf="prod.imageUrls?.length"
+            [src]="prod.imageUrls[0]"
+            alt="{{ prod.name }}"
+            class="thumb"
+          />
+          <div class="info">
+            <span class="name">{{ prod.name }}</span>
+          </div>
+        </li>
       </ul>
-    </ng-template>
+    </div>
+
+    <!-- Link autenticazione + carrello a destra -->
+    <ul class="auth-links">
+      <li>
+        <button class="cart-icon nav-item" routerLink="/cart" aria-label="Carrello">
+          🛒
+        </button>
+      </li>
+      <ng-container *ngIf="!isAuthenticated">
+        <li><button class="nav-item" (click)="login()">Login</button></li>
+        <li><button class="nav-item" (click)="register()">Registrati</button></li>
+      </ng-container>
+      <ng-container *ngIf="isAuthenticated">
+        <li><button class="nav-item" routerLink="/profilo">Profilo</button></li>
+        <li><button class="nav-item" (click)="logout()">Logout</button></li>
+      </ng-container>
+    </ul>
   </div>
 </nav>

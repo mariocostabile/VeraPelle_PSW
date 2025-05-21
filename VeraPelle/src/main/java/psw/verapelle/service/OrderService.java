@@ -14,6 +14,7 @@ import psw.verapelle.repository.ProductRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class OrderService {
@@ -29,39 +30,39 @@ public class OrderService {
     @Autowired
     private CartRepository cartRepository;
 
-    public Order createOrder (OrderDTO orderDTO){
-        // Recupero l'utente autenticato
-        String email = getAuthenticatedUserEmail();
-        Customer customer = customerRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Customer not found"));
-
-        // Recupero il carrello dell'utente
-        Cart cart = cartRepository.findByCustomerId(customer.getId());
-        if (cart == null || cart.getCartItems().isEmpty()) {
-            throw new RuntimeException("Cart is empty. Add items before placing an order.");
-        }
-
-        // Controllo nello stock e lo aggiorno
-        for (CartItem item : cart.getCartItems()) {
-            Product product = item.getProduct();
-            if (product.getStockQuantity() < item.getQuantity()) {
-                throw new RuntimeException("Not enough stock for product: " + product.getName());
-            }
-            product.setStockQuantity(product.getStockQuantity() - item.getQuantity());
-            productRepository.save(product);
-        }
-
-        // Creo l'ordine
-        List<Product> products = cart.getCartItems().stream().map(CartItem::getProduct).toList();
-        Order order = new Order(null, customer, products, orderDTO.getTotalAmount(), LocalDateTime.now());
-        Order savedOrder = orderRepository.save(order);
-
-        // Svuoto il carrello
-        cart.getCartItems().clear();
-        cartRepository.save(cart);
-
-        return savedOrder;
-    }
+//    public Order createOrder (OrderDTO orderDTO){
+//        // Recupero l'utente autenticato
+//        String email = getAuthenticatedUserEmail();
+//        Customer customer = customerRepository.findByEmail(email)
+//                .orElseThrow(() -> new RuntimeException("Customer not found"));
+//
+//        // Recupero il carrello dell'utente
+//        Optional<Cart> cart = cartRepository.findByCustomerId(customer.getId());
+//        if (cart == null || cart.getCartItems().isEmpty()) {
+//            throw new RuntimeException("Cart is empty. Add items before placing an order.");
+//        }
+//
+//        // Controllo nello stock e lo aggiorno
+//        for (CartItem item : cart.getCartItems()) {
+//            Product product = item.getProduct();
+//            if (product.getStockQuantity() < item.getQuantity()) {
+//                throw new RuntimeException("Not enough stock for product: " + product.getName());
+//            }
+//            product.setStockQuantity(product.getStockQuantity() - item.getQuantity());
+//            productRepository.save(product);
+//        }
+//
+//        // Creo l'ordine
+//        List<Product> products = cart.getCartItems().stream().map(CartItem::getProduct).toList();
+//        Order order = new Order(null, customer, products, orderDTO.getTotalAmount(), LocalDateTime.now());
+//        Order savedOrder = orderRepository.save(order);
+//
+//        // Svuoto il carrello
+//        cart.getCartItems().clear();
+//        cartRepository.save(cart);
+//
+//        return savedOrder;
+//    }
 
     private String getAuthenticatedUserEmail() {
         Jwt jwt = (Jwt) SecurityContextHolder.getContext().getAuthentication().getPrincipal();

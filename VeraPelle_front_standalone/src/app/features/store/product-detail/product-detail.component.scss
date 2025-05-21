@@ -113,6 +113,30 @@
     }
   }
 
+  /* TOAST DI CONFERMA */
+  .toast-notification {
+    position: absolute;
+    bottom: 1rem;
+    right: 1rem;
+    background: rgba(60, 60, 60, 0.9);
+    color: #fff;
+    padding: 0.75rem 1.25rem;
+    border-radius: 0.5rem;
+    font-size: 0.9rem;
+    opacity: 0;
+    animation: fadeInOut 3s ease-in-out forwards;
+    pointer-events: none;
+    z-index: 1000;
+  }
+
+  @keyframes fadeInOut {
+    0%   { opacity: 0; transform: translateY(10px); }
+    10%  { opacity: 1; transform: translateY(0); }
+    90%  { opacity: 1; }
+    100% { opacity: 0; transform: translateY(10px); }
+  }
+
+
   .info {
     h1 {
       font-family: var(--font-heading);

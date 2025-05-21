@@ -93,8 +93,14 @@
             Acquista ora
           </button>
         </div>
-      </div>
-    </div>
+
+        <!-- TOAST DI CONFERMA -->
+        <div class="toast-notification" *ngIf="showToast">
+          Prodotto aggiunto al carrello!
+        </div>
+
+      </div> <!-- .info -->
+    </div> <!-- .detail-grid -->
   </ng-container>
 
   <ng-template #notFound>
