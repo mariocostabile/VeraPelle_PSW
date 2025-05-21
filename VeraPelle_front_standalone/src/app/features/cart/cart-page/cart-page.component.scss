@@ -1,0 +1,94 @@
+/* src/app/features/cart/cart-page/cart-page.component.scss */
+
+/* Pulsante “Indietro” fuori dal container, sempre visibile */
+.btn-back {
+  display: inline-block;
+  margin: 1rem 0;
+  background: transparent;
+  border: none;
+  font-size: 1.25rem;
+  cursor: pointer;
+  color: var(--color-primary);
+  transition: color 0.2s, transform 0.2s;
+  padding: 0;
+
+  &:hover {
+    color: var(--color-primary-hover);
+    transform: scale(1.1);
+  }
+}
+
+.cart-page {
+  /* Container principale con sfondo bianco */
+  position: relative;
+  padding: 2rem;
+  background: #fff;              /* <- sfondo bianco */
+  max-width: 960px;
+  margin: 0 auto 2rem auto;      /* aggiunto margin-bottom per separazione */
+  box-shadow: 0 2px 8px var(--color-shadow);
+  border-radius: 0.5rem;
+
+  h1 {
+    font-family: var(--font-heading);
+    font-size: 2rem;
+    color: var(--color-primary);
+    margin-bottom: 1rem;
+  }
+
+  .clear-btn {
+    display: inline-block;
+    margin-bottom: 1.5rem;
+    padding: 0.5rem 1rem;
+    background: var(--color-accent);
+    color: var(--color-text);
+    border: none;
+    border-radius: 0.25rem;
+    font-family: var(--font-sans);
+    cursor: pointer;
+    transition: background 0.2s;
+
+    &:hover:not(:disabled) {
+      background: var(--color-primary-hover);
+    }
+    &:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+  }
+
+  .loading {
+    text-align: center;
+    font-size: 1.1rem;
+    padding: 2rem 0;
+  }
+
+  .total {
+    margin-top: 1.5rem;
+    text-align: right;
+    font-size: 1.25rem;
+    font-weight: bold;
+    color: var(--color-primary);
+  }
+
+  .empty {
+    text-align: center;
+    font-size: 1.1rem;
+    color: #666;
+    margin-top: 2rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .cart-page {
+    padding: 1rem;
+
+    h1 {
+      font-size: 1.5rem;
+    }
+
+    .clear-btn {
+      width: 100%;
+      text-align: center;
+    }
+  }
+}

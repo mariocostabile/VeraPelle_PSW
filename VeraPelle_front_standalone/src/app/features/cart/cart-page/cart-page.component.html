@@ -1,0 +1,35 @@
+<!-- src/app/features/cart/cart-page/cart-page.component.html -->
+
+<!-- Pulsante Indietro fuori dal riquadro -->
+<button class="btn-back" (click)="goBack()">← Indietro</button>
+
+<div class="cart-page">
+  <h1>Il tuo carrello</h1>
+
+  <button class="clear-btn" (click)="onClear()" [disabled]="!(cart?.items?.length)">
+    Svuota carrello
+  </button>
+
+  <div *ngIf="loading" class="loading">
+    Caricamento...
+  </div>
+
+  <ng-container *ngIf="!loading">
+    <div *ngIf="cart && cart.items.length; else emptyCart">
+      <app-cart-item
+        *ngFor="let item of cart.items"
+        [item]="item"
+        (quantityChange)="onQuantityChange(item, $event)"
+        (remove)="onRemove(item)">
+      </app-cart-item>
+
+      <div class="total">
+        Totale: € {{ cart.total | number: '1.2-2' }}
+      </div>
+    </div>
+  </ng-container>
+
+  <ng-template #emptyCart>
+    <p class="empty">Il carrello è vuoto.</p>
+  </ng-template>
+</div>

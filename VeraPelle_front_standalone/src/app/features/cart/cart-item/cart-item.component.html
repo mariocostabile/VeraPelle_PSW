@@ -1,0 +1,22 @@
+<!-- src/app/features/cart/cart-item/cart-item.component.html -->
+
+<div class="cart-item">
+  <img [src]="thumbUrl" alt="{{ item.product.name }}" />
+
+  <div class="info">
+    <h2>{{ item.product.name }}</h2>
+    <p>Colore: {{ item.selectedColor.name }}</p>
+    <p>Prezzo unitario: € {{ item.product.price }}</p>
+
+    <div class="controls">
+      <button (click)="onDecrement()" [disabled]="item.quantity <= 1">–</button>
+      <span>{{ item.quantity }}</span>
+      <button (click)="onIncrement()">+</button>
+      <button class="remove" (click)="onRemove()">✕</button>
+    </div>
+
+    <p class="subtotal">
+      Subtotal: € {{ item.subtotal | number:'1.2-2' }}
+    </p>
+  </div>
+</div>
