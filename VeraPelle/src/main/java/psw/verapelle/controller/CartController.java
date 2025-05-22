@@ -4,6 +4,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 import psw.verapelle.DTO.*;
 import psw.verapelle.entity.Cart;
@@ -26,26 +28,41 @@ public class CartController {
     @Autowired
     private CartItemService cartItemService;
 
-    // 1) Recupera lo stato attuale del carrello (guest via cookie)
     @GetMapping
     public ResponseEntity<CartDTO> getCart(
-            @CookieValue(value = "cartId", required = false) String cartIdCookie
+            @CookieValue(value = "cartId", required = false) String cartIdCookie,
+            @AuthenticationPrincipal Jwt principal       // ← inietta qui il token
     ) {
-        Cart cart = cartService.getCart(cartIdCookie);
+        Cart cart;
+        ResponseCookie cookie;
 
-        // (ri)emetto sempre il cookie per il guest cart
-        ResponseCookie cookie = ResponseCookie.from("cartId", cart.getId().toString())
-                .path("/")
-                .httpOnly(true)
-                .sameSite("Lax")
-                .maxAge(Duration.ofDays(7))
-                .build();
+        if (principal != null) {
+            // Utente loggato: prendo il cart dal database via email/sub
+            String email = principal.getClaimAsString("email");
+            cart = cartService.getCartByCustomer(email);
+
+            // Elimino il cookie guest (non serve più)
+            cookie = ResponseCookie.from("cartId", "")
+                    .path("/")
+                    .maxAge(0)
+                    .build();
+        } else {
+            // Guest: logica esistente basata sul cookie
+            cart = cartService.getCart(cartIdCookie);
+            cookie = ResponseCookie.from("cartId", cart.getId().toString())
+                    .path("/")
+                    .httpOnly(true)
+                    .sameSite("Lax")
+                    .maxAge(Duration.ofDays(7))
+                    .build();
+        }
 
         CartDTO dto = toCartDTO(cart);
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, cookie.toString())
                 .body(dto);
     }
+
 
     // 2) Aggiunge un item (guest via cartIdCookie)
     @PostMapping("/items")
@@ -164,4 +181,34 @@ public class CartController {
                 colorDto
         );
     }
+
+    /**
+     * Chiamalo dal front-end subito dopo il login per fondere il guest cart
+     * e tornare il nuovo cart via DTO + settare un cookie vuoto per guest.
+     */
+    @PostMapping("/merge")
+    public ResponseEntity<CartDTO> mergeCart(
+            @CookieValue(value = "cartId", required = false) String cartIdCookie,
+            @AuthenticationPrincipal Jwt principal        // ← inietta qui il token decodificato
+    ) {
+        // Estrai l’email (o il subject) dal JWT
+        String email = principal.getClaimAsString("email");
+        // oppure, se preferisci usare il subject:
+        // String email = principal.getSubject();
+
+        // Fonde i carrelli passando la email
+        Cart merged = cartService.mergeGuestCartIntoCustomerCart(cartIdCookie, email);
+
+        // Invalida il cookie guest
+        ResponseCookie deleteCookie = ResponseCookie.from("cartId", "")
+                .path("/")
+                .maxAge(0)
+                .build();
+
+        CartDTO dto = toCartDTO(merged);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, deleteCookie.toString())
+                .body(dto);
+    }
+
 }

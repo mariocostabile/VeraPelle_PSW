@@ -6,9 +6,12 @@ import { Router, RouterLink, RouterLinkActive, NavigationEnd } from '@angular/ro
 import { filter, debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 
+
 import { KeycloakService } from '../../../core/services/keycloak/keycloak.service';
 import { ProductService } from '@app/core/services/product/product.service';
 import { ProductPublicDTO } from '@app/core/models/product-public-dto';
+import { CartService } from '@app/core/services/cart/cart.service';
+
 
 @Component({
   selector: 'app-header',
@@ -31,6 +34,10 @@ export class HeaderComponent implements OnInit, AfterViewInit {
   public kc = inject(KeycloakService);
   private router = inject(Router);
   private productService = inject(ProductService);
+  private cartService = inject(CartService);
+
+  private hasMergedCart = false;
+
 
   @ViewChild('searchRef', { read: ElementRef, static: false })
   searchRef!: ElementRef<HTMLElement>;
@@ -46,13 +53,26 @@ export class HeaderComponent implements OnInit, AfterViewInit {
     return !!this.kc.profile?.token;
   }
 
+
   async ngOnInit(): Promise<void> {
+    // Imposta flag admin
     this.isAdmin = this.kc.hasRole('ADMIN');
 
+    // 1) Fonde il carrello guest in quello persistente solo una volta
+    if (this.isAuthenticated && !this.hasMergedCart) {
+      this.hasMergedCart = true;
+      this.cartService.mergeCart().subscribe({
+        next: cart => console.log('Merge carrello eseguito:', cart),
+        error: err  => console.error('Merge carrello fallito', err)
+      });
+    }
+
+    // 2) Aggiorna l’URL corrente ad ogni navigazione
     this.router.events
       .pipe(filter(e => e instanceof NavigationEnd))
       .subscribe((e: NavigationEnd) => this.currentUrl = e.urlAfterRedirects);
 
+    // 3) Autocomplete prodotti
     this.searchControl.valueChanges
       .pipe(
         debounceTime(200),
@@ -68,6 +88,7 @@ export class HeaderComponent implements OnInit, AfterViewInit {
         this.loadingSuggestions = false;
       });
   }
+
 
   ngAfterViewInit(): void {
     // ViewChild è ora disponibile

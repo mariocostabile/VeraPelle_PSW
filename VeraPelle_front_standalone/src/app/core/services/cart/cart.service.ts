@@ -79,4 +79,17 @@ export class CartService {
   private emitCount(cart: CartDTO) {
     this.itemCountSubject.next(cart.items.length);
   }
+
+  /** Fondi il carrello guest (dal cookie) in quello persistente del customer */
+  mergeCart(): Observable<CartDTO> {
+    return this.http
+      .post<CartDTO>(
+        `${this.baseUrl}/merge`,
+        {},                      // nessun body necessario
+        { withCredentials: true }
+      )
+      .pipe(
+        tap(cart => this.emitCount(cart))
+      );
+  }
 }

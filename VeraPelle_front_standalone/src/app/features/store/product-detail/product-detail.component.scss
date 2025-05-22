@@ -178,7 +178,7 @@
         height: 2rem;
         border-radius: 50%;
         cursor: pointer;
-        border: 2px solid transparent;
+        border: 4px solid transparent;
         transition: transform 0.2s, border 0.2s;
 
         &:hover {
@@ -246,6 +246,15 @@
       font-size: 0.9rem;
       margin: 0.5rem 0;
     }
+
+    /* Messaggio di successo inline */
+    .success-message {
+      color: #388e3c;        // verde per il feedback positivo
+      font-size: 0.9rem;     // leggermente più piccolo del testo normale
+      margin: 0.5rem 0;      // spazio sopra e sotto
+      line-height: 1.3;      // per una buona leggibilità
+    }
+
 
     .actions {
       display: flex;

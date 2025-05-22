@@ -6,10 +6,12 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import psw.verapelle.entity.Cart;
+import psw.verapelle.entity.CartItem;
 import psw.verapelle.entity.Customer;
 import psw.verapelle.repository.CartRepository;
 import psw.verapelle.repository.CustomerRepository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -111,4 +113,45 @@ public class CartService {
                 .getPrincipal();
         return jwt.getClaim("email");
     }
+
+    /**
+     * Fonde il carrello guest (cartIdCookie) dentro quello del customer autenticato.
+     * Ritorna il CartDTO aggiornato e invalidа il guest cart.
+     */
+    @Transactional
+    public Cart mergeGuestCartIntoCustomerCart(String cartIdCookie, String email) {
+        // 1) Recupera il guest cart
+        Cart guestCart = getCart(cartIdCookie);
+
+        // 2) Recupera o crea il cart del customer identificato dall'email
+        Cart customerCart = getCartByCustomer(email);
+
+        // 3) Fonde ciascun CartItem del guest nel customer cart
+        for (CartItem guestItem : List.copyOf(guestCart.getCartItems())) {
+            Optional<CartItem> existing = customerCart.getCartItems().stream()
+                    .filter(ci ->
+                            ci.getProduct().getId().equals(guestItem.getProduct().getId()) &&
+                                    ci.getSelectedColor().getId().equals(guestItem.getSelectedColor().getId())
+                    )
+                    .findAny();
+
+            if (existing.isPresent()) {
+                // se esiste, somma le quantità
+                CartItem ci = existing.get();
+                ci.setQuantity(ci.getQuantity() + guestItem.getQuantity());
+            } else {
+                // altrimenti sposta l’item nel customerCart
+                guestItem.setCart(customerCart);
+                customerCart.getCartItems().add(guestItem);
+            }
+        }
+
+        // 4) Svuota il carrello guest e salva
+        guestCart.getCartItems().clear();
+        cartRepository.save(guestCart);
+
+        // 5) Salva e restituisci il cart del customer
+        return cartRepository.save(customerCart);
+    }
+
 }

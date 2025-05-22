@@ -54,6 +54,10 @@
               (click)="selectColor(c.id)"
             ></span>
           </div>
+          <!-- ERRORE COLORE -->
+          <p *ngIf="colorError" class="validation-error">
+            {{ colorError }}
+          </p>
         </div>
 
         <!-- Quantity Spinner / Out of Stock -->
@@ -63,18 +67,23 @@
           <input
             type="number"
             [value]="quantity"
-            (input)="quantity = $any($event.target).valueAsNumber; validationError = null"
+            (input)="
+              quantity = $any($event.target).valueAsNumber;
+              quantityError = null;
+              successMessage = null
+            "
             [min]="1"
             [max]="maxQuantity"
           />
           <button (click)="changeQuantity(1)" [disabled]="quantity >= maxQuantity">+</button>
+          <!-- ERRORE QUANTITÀ -->
+          <p *ngIf="quantityError" class="validation-error">
+            {{ quantityError }}
+          </p>
         </div>
         <ng-template #outOfStock>
           <p class="out-of-stock">Prodotto esaurito</p>
         </ng-template>
-
-        <!-- Messaggio di validazione -->
-        <p *ngIf="validationError" class="validation-error">{{ validationError }}</p>
 
         <!-- Azioni sempre abilitate, ma disattivate se quantità non valida -->
         <div class="actions">
@@ -94,10 +103,10 @@
           </button>
         </div>
 
-        <!-- TOAST DI CONFERMA -->
-        <div class="toast-notification" *ngIf="showToast">
-          Prodotto aggiunto al carrello!
-        </div>
+        <!-- MESSAGGIO DI SUCCESSO INLINE -->
+        <p *ngIf="successMessage" class="success-message">
+          {{ successMessage }}
+        </p>
 
       </div> <!-- .info -->
     </div> <!-- .detail-grid -->

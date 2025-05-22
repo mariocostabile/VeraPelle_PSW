@@ -19,8 +19,6 @@ import { ColorDTO }                      from '@app/core/models/color-dto';
   styleUrls: ['./product-detail.component.scss']
 })
 export class ProductDetailComponent implements OnInit {
-  // Flag per mostrare/nascondere il toast
-  showToast: boolean = false;
 
   private route       = inject(ActivatedRoute);
   private store       = inject(StoreService);
@@ -36,14 +34,20 @@ export class ProductDetailComponent implements OnInit {
   selectedColorId: number | null = null;
   quantity       = 1;
   maxQuantity    = 0;
-  validationError: string | null = null;
+
+  // messaggi di validazione inline
+  colorError:    string | null = null;
+  quantityError: string | null = null;
+
+  // messaggio di successo
+  successMessage: string | null = null;
 
   ngOnInit(): void {
     this.route.paramMap
       .pipe(
         switchMap((params: ParamMap) => {
           this.loading = true;
-          this.error = null;
+          this.error   = null;
           const id = Number(params.get('id'));
           return this.store.getProductById(id);
         })
@@ -52,7 +56,7 @@ export class ProductDetailComponent implements OnInit {
         next: p => {
           this.product       = p;
           this.currentIndex  = 0;
-          this.selectedImage = p.imageUrls.length ? p.imageUrls[0] : null;
+          this.selectedImage = p.imageUrls[0] || null;
           this.maxQuantity   = p.stockQuantity;
           this.quantity      = 1;
           this.loading       = false;
@@ -76,60 +80,71 @@ export class ProductDetailComponent implements OnInit {
   onPrev(): void {
     if (!this.product) return;
     const len = this.product.imageUrls.length;
-    this.currentIndex = (this.currentIndex - 1 + len) % len;
+    this.currentIndex  = (this.currentIndex - 1 + len) % len;
     this.selectedImage = this.product.imageUrls[this.currentIndex];
   }
 
   onNext(): void {
     if (!this.product) return;
     const len = this.product.imageUrls.length;
-    this.currentIndex = (this.currentIndex + 1) % len;
+    this.currentIndex  = (this.currentIndex + 1) % len;
     this.selectedImage = this.product.imageUrls[this.currentIndex];
   }
 
   selectColor(id: number): void {
-    this.selectedColorId = id;
-    this.validationError = null;
+    // se clicco sullo stesso colore, lo "deseleziono"
+    if (this.selectedColorId === id) {
+      this.selectedColorId = null;
+    } else {
+      this.selectedColorId = id;
+    }
+    // reset degli errori e del messaggio di successo
+    this.colorError    = null;
+    this.successMessage = null;
   }
 
   changeQuantity(delta: number): void {
     if (!this.product) return;
-    this.quantity = Math.min(this.maxQuantity, Math.max(1, this.quantity + delta));
-    this.validationError = null;
+    this.quantity        = Math.min(this.maxQuantity, Math.max(1, this.quantity + delta));
+    this.quantityError   = null;  // reset mirato
+    this.successMessage  = null;  // rimuove eventuale messaggio di successo precedente
   }
 
   addToCart(): void {
     if (!this.product) return;
 
+    // reset iniziale di tutti i messaggi
+    this.colorError     = null;
+    this.quantityError  = null;
+    this.successMessage = null;
+
+    // validazione colore
     if (!this.selectedColorId) {
-      this.validationError = 'Per favore seleziona un colore.';
+      this.colorError = 'Per favore seleziona un colore.';
       return;
     }
+    // validazione quantità
     if (this.quantity < 1 || this.quantity > this.maxQuantity) {
-      this.validationError = `La quantità deve essere tra 1 e ${this.maxQuantity}.`;
+      this.quantityError = `La quantità deve essere tra 1 e ${this.maxQuantity}.`;
       return;
     }
-    this.validationError = null;
 
     const req: CartItemRequest = {
       productId: this.product.id,
-      colorId: this.selectedColorId,
-      quantity: this.quantity
+      colorId:   this.selectedColorId,
+      quantity:  this.quantity
     };
 
     this.cartService.addItem(req).subscribe({
       next: () => {
-        this.triggerToast(); // Mostra il toast di conferma
+        // mostra messaggio di conferma inline
+        this.successMessage = 'Prodotto aggiunto correttamente al carrello!';
+        // sparisce dopo 3 secondi
+        setTimeout(() => this.successMessage = null, 3000);
       },
       error: () => {
-        this.validationError = 'Impossibile aggiungere al carrello. Riprova.';
+        this.quantityError = 'Impossibile aggiungere al carrello. Riprova.';
       }
     });
-  }
-
-  /** Mostra temporaneamente il toast di conferma */
-  private triggerToast(): void {
-    this.showToast = true;
-    setTimeout(() => this.showToast = false, 3000);
   }
 }

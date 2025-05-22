@@ -5,7 +5,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import psw.verapelle.DTO.CategoryDTO;
 import psw.verapelle.entity.Category;
+import psw.verapelle.entity.Product;
 import psw.verapelle.repository.CategoryRepository;
+import psw.verapelle.repository.ProductRepository;
 
 import java.util.List;
 import java.util.Objects;
@@ -15,6 +17,10 @@ public class CategoryService {
 
     @Autowired
     private CategoryRepository categoryRepository;
+
+    // Aggiungi il ProductRepository
+    @Autowired
+    private ProductRepository productRepository;
 
     @Transactional
     public Category createCategory(CategoryDTO categoryDTO) {
@@ -36,12 +42,16 @@ public class CategoryService {
         Category category = categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new RuntimeException("Category not found"));
 
-        if (!category.getProducts().isEmpty()) {
-            throw new RuntimeException("Cannot delete category, it has associated products.");
+        // 1) “Stacca” la categoria da tutti i prodotti
+        List<Product> prodottiAssociati = List.copyOf(category.getProducts());
+        for (Product p : prodottiAssociati) {
+            p.getCategories().remove(category);
         }
+        productRepository.saveAll(prodottiAssociati);
 
+        // 2) Elimina la categoria
         categoryRepository.delete(category);
-    }
+    }  // <- qui finisce deleteCategory
 
     @Transactional
     public Category updateCategory(Long id, Category updatedCategory) {

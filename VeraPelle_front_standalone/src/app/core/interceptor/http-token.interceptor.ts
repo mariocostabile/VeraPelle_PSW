@@ -17,7 +17,7 @@ export class HttpTokenInterceptor implements HttpInterceptor {
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     const token = this.kc.profile?.token;
     // intercetta sia /auth/ sia /admin/ (e in generale tutte le chiamate al tuo backend)
-    if (token && (req.url.includes('/auth/') || req.url.includes('/admin/'))) {
+    if (token && (req.url.includes('/auth/') || req.url.includes('/admin/') || req.url.includes('/api/cart'))) {
       req = req.clone({
         setHeaders: { Authorization: `Bearer ${token}` }
       });
