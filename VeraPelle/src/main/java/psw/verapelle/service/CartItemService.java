@@ -92,6 +92,31 @@ public class CartItemService {
         return cartItemRepository.save(ci);
     }
 
+    /** Aggiorna qty per utente loggato sul cart DB */
+    @Transactional
+    public CartItem updateCartItemQuantityForCustomerCart(
+            String customerEmail,
+            Long itemId,
+            int quantity
+    ) {
+        // 1) prendi il cart del customer
+        Cart cart = cartService.getCartByCustomer(customerEmail);
+
+        // 2) carica il CartItem
+        CartItem ci = cartItemRepository.findById(itemId)
+                .orElseThrow(() -> new RuntimeException("CartItem not found"));
+
+        // 3) verifica che appartenga a questo cart
+        if (!ci.getCart().getId().equals(cart.getId())) {
+            throw new RuntimeException("CartItem does not belong to this cart");
+        }
+
+        // 4) aggiorna e salva
+        ci.setQuantity(quantity);
+        return cartItemRepository.save(ci);
+    }
+
+
     /**
      * Rimuove un CartItem dal carrello identificato da cartIdCookie.
      */
@@ -106,5 +131,68 @@ public class CartItemService {
         }
 
         cartItemRepository.delete(ci);
+    }
+
+    /** Rimuove un item dal carrello del customer loggato */
+    @Transactional
+    public void removeCartItemFromCustomerCart(String customerEmail, Long itemId) {
+        // 1) prendi il cart del customer
+        Cart cart = cartService.getCartByCustomer(customerEmail);
+
+        // 2) carica l’item
+        CartItem ci = cartItemRepository.findById(itemId)
+                .orElseThrow(() -> new RuntimeException("CartItem not found"));
+
+        // 3) controlla che appartenga davvero al carrello del customer
+        if (!ci.getCart().getId().equals(cart.getId())) {
+            throw new RuntimeException("CartItem does not belong to this cart");
+        }
+
+        // 4) rimuovi
+        cartItemRepository.delete(ci);
+    }
+
+
+    /** Modalità “utente loggato”: aggiunge (o somma) l’item nel DB del customer */
+    @Transactional
+    public CartItem addCartItemToCustomerCart(
+            String customerEmail,
+            Long productId,
+            Long colorId,
+            int quantity
+    ) {
+        // 1) prendi o crea il carrello del customer
+        Cart customerCart = cartService.getCartByCustomer(customerEmail);
+
+        // 2) verifica se esiste già un item identico
+        Optional<CartItem> existing = customerCart.getCartItems().stream()
+                .filter(ci ->
+                        ci.getProduct().getId().equals(productId) &&
+                                ci.getSelectedColor().getId().equals(colorId)
+                )
+                .findAny();
+
+        CartItem ci;
+        if (existing.isPresent()) {
+            ci = existing.get();
+            ci.setQuantity(ci.getQuantity() + quantity);
+        } else {
+            // 3) altrimenti crea un nuovo CartItem
+            ci = new CartItem();
+            ci.setCart(customerCart);
+            ci.setProduct(
+                    productRepository.findById(productId)
+                            .orElseThrow(() -> new RuntimeException("Product not found"))
+            );
+            ci.setSelectedColor(
+                    colorRepository.findById(colorId)
+                            .orElseThrow(() -> new RuntimeException("Color not found"))
+            );
+            ci.setQuantity(quantity);
+            customerCart.getCartItems().add(ci);
+        }
+
+        // 4) salva e ritorna
+        return cartItemRepository.save(ci);
     }
 }

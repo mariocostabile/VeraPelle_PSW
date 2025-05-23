@@ -21,19 +21,21 @@ export function appInitializerFactory(
 ): () => Promise<void> {
   return () =>
     kc.init().then(async () => {
-      // Gestione registrazione: sincronizzo e redirigo al fragment salvato
-      if (localStorage.getItem('isRegistering') === 'true') {
-        localStorage.removeItem('isRegistering');
-        await customer.registerCustomer().toPromise();
-        console.log('✅ Utente sincronizzato in Postgres');
-
-        const saved = localStorage.getItem('kc-redirect');
-        if (saved) {
-          localStorage.removeItem('kc-redirect');
-          const relativePath = saved.replace(window.location.origin, '');
-          await router.navigateByUrl(relativePath);
-          return;
+      if(kc.profile?.token){
+        // ① Provo sempre a sincronizzare (upsert) l'utente sul DB interno
+        try {
+          await customer.registerCustomer().toPromise();
+          console.log('✅ Utente creato/correttamente sincronizzato in Postgres');
+        } catch (err: any) {
+          if (err.status === 409) {
+            // utente già presente: proseguo senza errori
+            console.log('⚪️ Utente già esistente, skip register');
+          } else {
+            console.error('🔴 Errore in registerCustomer()', err);
+          }
         }
+      }else {
+        console.log('⚪️ Nessun utente autenticato — skip register');
       }
 
       // Redirect automatico admin

@@ -63,27 +63,45 @@ public class CartController {
                 .body(dto);
     }
 
-
-    // 2) Aggiunge un item (guest via cartIdCookie)
+    // 2) Aggiunge un item, gestendo guest-via-cookie e logged-in-via-JWT
     @PostMapping("/items")
     public ResponseEntity<CartItemDTO> addItem(
             @CookieValue(value = "cartId", required = false) String cartIdCookie,
+            @AuthenticationPrincipal Jwt principal,      // ← aggiunto
             @RequestBody AddCartItemRequest req
     ) {
-        CartItem ci = cartItemService.addCartItem(
-                cartIdCookie,
-                req.getProductId(),
-                req.getColorId(),
-                req.getQuantity()
-        );
+        CartItem ci;
+        ResponseCookie cookie;
 
-        // in caso di nuovo cart creato all’interno del service, riemettiamo il cookie
-        ResponseCookie cookie = ResponseCookie.from("cartId", ci.getCart().getId().toString())
-                .path("/")
-                .httpOnly(true)
-                .sameSite("Lax")
-                .maxAge(Duration.ofDays(7))
-                .build();
+        if (principal != null) {
+            // ——— UTENTE LOGGATO ———
+            String email = principal.getClaimAsString("email");
+            ci = cartItemService.addCartItemToCustomerCart(
+                    email,
+                    req.getProductId(),
+                    req.getColorId(),
+                    req.getQuantity()
+            );
+            // invalido il cookie guest
+            cookie = ResponseCookie.from("cartId", "")
+                    .path("/")
+                    .maxAge(0)
+                    .build();
+        } else {
+            // ——— UTENTE GUEST ——— (la tua logica originale)
+            ci = cartItemService.addCartItem(
+                    cartIdCookie,
+                    req.getProductId(),
+                    req.getColorId(),
+                    req.getQuantity()
+            );
+            cookie = ResponseCookie.from("cartId", ci.getCart().getId().toString())
+                    .path("/")
+                    .httpOnly(true)
+                    .sameSite("Lax")
+                    .maxAge(Duration.ofDays(7))
+                    .build();
+        }
 
         CartItemDTO dto = toCartItemDTO(ci);
         return ResponseEntity.status(201)
@@ -91,39 +109,64 @@ public class CartController {
                 .body(dto);
     }
 
-    // 3) Modifica la quantità (guest via cartIdCookie)
+    // 3) Modifica la quantità, ora guest‐cookie o logged‐in‐JWT
     @PutMapping("/items/{itemId}")
     public ResponseEntity<CartItemDTO> updateItem(
             @CookieValue(value = "cartId", required = false) String cartIdCookie,
+            @AuthenticationPrincipal Jwt principal,            // ← aggiunto
             @PathVariable Long itemId,
             @RequestBody UpdateCartItemQuantityRequest req
     ) {
-        CartItem ci = cartItemService.updateCartItemQuantity(
-                cartIdCookie,
-                itemId,
-                req.getQuantity()
-        );
+        CartItem ci;
+        if (principal != null) {
+            // ——— UTENTE LOGGATO ———
+            String email = principal.getClaimAsString("email");
+            ci = cartItemService.updateCartItemQuantityForCustomerCart(
+                    email, itemId, req.getQuantity()
+            );
+        } else {
+            // ——— GUEST ———
+            ci = cartItemService.updateCartItemQuantity(
+                    cartIdCookie, itemId, req.getQuantity()
+            );
+        }
         return ResponseEntity.ok(toCartItemDTO(ci));
     }
 
-    // 4) Rimuove un singolo item (guest via cartIdCookie)
     @DeleteMapping("/items/{itemId}")
     public ResponseEntity<Void> removeItem(
             @CookieValue(value = "cartId", required = false) String cartIdCookie,
+            @AuthenticationPrincipal Jwt principal,      // ← aggiunto
             @PathVariable Long itemId
     ) {
-        cartItemService.removeCartItem(cartIdCookie, itemId);
+        if (principal != null) {
+            // UTENTE LOGGATO: delego al service specifico
+            String email = principal.getClaimAsString("email");
+            cartItemService.removeCartItemFromCustomerCart(email, itemId);
+        } else {
+            // GUEST: logica cookie-based
+            cartItemService.removeCartItem(cartIdCookie, itemId);
+        }
         return ResponseEntity.noContent().build();
     }
 
-    // 5) Svuota tutto il carrello (guest via cartIdCookie)
+
+    // 5) Svuota tutto il carrello, guest‐cookie o logged‐in‐JWT
     @DeleteMapping
     public ResponseEntity<Void> clearCart(
-            @CookieValue(value = "cartId", required = false) String cartIdCookie
+            @CookieValue(value = "cartId", required = false) String cartIdCookie,
+            @AuthenticationPrincipal Jwt principal    // ← aggiunto
     ) {
-        cartService.clearCart(cartIdCookie);
+        if (principal != null) {
+            // ——— UTENTE LOGGATO ———
+            cartService.clearCartByCustomer();
+        } else {
+            // ——— GUEST ———
+            cartService.clearCart(cartIdCookie);
+        }
         return ResponseEntity.noContent().build();
     }
+
 
     // --- helper per trasformare entity → DTO ---
 

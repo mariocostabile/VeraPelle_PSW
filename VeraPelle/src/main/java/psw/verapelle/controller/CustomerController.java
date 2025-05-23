@@ -42,7 +42,8 @@ public class CustomerController {
             CustomerDTO dto = customerService.getCustomerById(saved.getId());
             return ResponseEntity.status(HttpStatus.CREATED).body(dto);
         }
-        return ResponseEntity.status(HttpStatus.CONFLICT).body("User already exists.");
+        CustomerDTO dto = customerService.getCustomerById(keycloakId);
+        return ResponseEntity.ok(dto);
     }
 
     /**
