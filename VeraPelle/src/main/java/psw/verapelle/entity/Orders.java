@@ -48,5 +48,9 @@ public class Orders {
         items.remove(item);
         item.setOrder(null);
     }
+
+    @Version
+    @Column(name = "version")
+    private Integer version;
 }
 

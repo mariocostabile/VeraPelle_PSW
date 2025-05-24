@@ -1,6 +1,7 @@
 package psw.verapelle.service;
 
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import psw.verapelle.DTO.CategoryDTO;

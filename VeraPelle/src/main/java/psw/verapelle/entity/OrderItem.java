@@ -27,4 +27,8 @@ public class OrderItem {
     private int quantity;
 
     private BigDecimal unitPrice;
+
+    @Version
+    @Column(name = "version")
+    private Integer version;
 }

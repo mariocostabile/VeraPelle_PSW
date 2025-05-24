@@ -1,6 +1,14 @@
 /* src/app/features/home/home.component.scss */
 .home-hero {
   background: var(--color-primary);
+
+  // qui metti la tua immagine
+  background-image: url('assets/images/primo-piano-di-un-calzolaio-che-lavora-con-tessuto-pelle.jpg');
+  background-size: cover;           // riempie tutto il contenitore
+  background-position: center;      // centra l’immagine
+  background-repeat: no-repeat;     // evita ripetizioni
+
+
   color: var(--color-text);
   padding: 4rem 2rem;
   text-align: center;
@@ -16,12 +24,15 @@
     font-family: var(--font-heading);
     font-size: 2.5rem;
     margin-bottom: 1rem;
+    color: #fff;
+    text-shadow: 1px 1px black;
   }
 
   p {
     font-size: 1.2rem;
     margin-bottom: 2rem;
     opacity: 0.9;
+    text-shadow: 1px 1px black;
   }
 
   .cta {

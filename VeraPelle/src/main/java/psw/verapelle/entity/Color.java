@@ -23,4 +23,8 @@ public class Color {
     /** Codice esadecimale del colore (es. "#FF0000") */
     @Column(name = "hex_code", nullable = false, length = 7)
     private String hexCode;
+
+    @Version
+    @Column(name = "version")
+    private Integer version;
 }

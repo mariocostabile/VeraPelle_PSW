@@ -1,22 +1,31 @@
 package psw.verapelle.DTO;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import psw.verapelle.entity.OrderStatus;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Getter
-@Setter
-@AllArgsConstructor
+@Data
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class OrderDTO {
+
     private Long id;
-    private Long customerId;
-    private List<Long> productIds;
+    private LocalDateTime date;
+    private OrderStatus status;
     private BigDecimal totalAmount;
-    private LocalDateTime orderDate;
+    private String shippingAddress;
+
+    /**
+     * Lista dettagli item
+     */
+    private List<OrderItemDetailDTO> items;
+
+    /**
+     * Stato simulato del pagamento ("APPROVED" o "DECLINED")
+     */
+    private String paymentStatus;
 }

@@ -1,71 +1,136 @@
 package psw.verapelle.service;
 
+import org.springframework.transaction.annotation.Transactional;
+
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
-import psw.verapelle.DTO.OrderDTO;
+import psw.verapelle.DTO.*;
 import psw.verapelle.entity.*;
-import psw.verapelle.repository.CartRepository;
-import psw.verapelle.repository.CustomerRepository;
-import psw.verapelle.repository.OrderRepository;
-import psw.verapelle.repository.ProductRepository;
+import psw.verapelle.repository.*;
 
-
-import java.time.LocalDateTime;
+import java.math.BigDecimal;
+import java.security.Principal;
 import java.util.List;
-import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
+@Transactional
 public class OrderService {
-    @Autowired
-    private OrderRepository orderRepository;
 
-    @Autowired
-    private CustomerRepository customerRepository;
+    @Autowired private OrderRepository orderRepo;
+    @Autowired private CustomerRepository customerRepo;
+    @Autowired private ProductRepository productRepo;
 
-    @Autowired
-    private ProductRepository productRepository;
+    /**
+     * Crea un nuovo ordine per il customer identificato da customerId,
+     * con i dati di CreateOrderRequest (items + shippingAddress + paymentInfo).
+     */
+    public OrderDTO createOrder(CreateOrderRequest req, String customerId) {
+        // 1) Recupera il customer
+        Customer customer = customerRepo.findById(customerId)
+                .orElseThrow(() -> new RuntimeException("Customer non trovato: " + customerId));
 
-    @Autowired
-    private CartRepository cartRepository;
+        // 2) Costruisci l'entità Orders
+        Orders order = Orders.builder()
+                .customer(customer)
+                .shippingAddress(req.getShippingAddress())
+                .build();
 
-//    public Order createOrder (OrderDTO orderDTO){
-//        // Recupero l'utente autenticato
-//        String email = getAuthenticatedUserEmail();
-//        Customer customer = customerRepository.findByEmail(email)
-//                .orElseThrow(() -> new RuntimeException("Customer not found"));
-//
-//        // Recupero il carrello dell'utente
-//        Optional<Cart> cart = cartRepository.findByCustomerId(customer.getId());
-//        if (cart == null || cart.getCartItems().isEmpty()) {
-//            throw new RuntimeException("Cart is empty. Add items before placing an order.");
-//        }
-//
-//        // Controllo nello stock e lo aggiorno
-//        for (CartItem item : cart.getCartItems()) {
-//            Product product = item.getProduct();
-//            if (product.getStockQuantity() < item.getQuantity()) {
-//                throw new RuntimeException("Not enough stock for product: " + product.getName());
-//            }
-//            product.setStockQuantity(product.getStockQuantity() - item.getQuantity());
-//            productRepository.save(product);
-//        }
-//
-//        // Creo l'ordine
-//        List<Product> products = cart.getCartItems().stream().map(CartItem::getProduct).toList();
-//        Order order = new Order(null, customer, products, orderDTO.getTotalAmount(), LocalDateTime.now());
-//        Order savedOrder = orderRepository.save(order);
-//
-//        // Svuoto il carrello
-//        cart.getCartItems().clear();
-//        cartRepository.save(cart);
-//
-//        return savedOrder;
-//    }
+        // 3) Aggiungi OrderItem e calcola totalAmount
+        BigDecimal total = BigDecimal.ZERO;
+        for (OrderItemDTO itemDto : req.getItems()) {
+            Product product = productRepo.findById(itemDto.getProductId())
+                    .orElseThrow(() -> new RuntimeException("Product non trovato: " + itemDto.getProductId()));
 
-    private String getAuthenticatedUserEmail() {
-        Jwt jwt = (Jwt) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        return jwt.getClaim("email");
+            BigDecimal unitPrice = product.getPrice();
+            int qty = itemDto.getQuantity();
+
+            OrderItem item = OrderItem.builder()
+                    .product(product)
+                    .quantity(qty)
+                    .unitPrice(unitPrice)
+                    .build();
+
+            order.addItem(item);
+            total = total.add(unitPrice.multiply(BigDecimal.valueOf(qty)));
+        }
+        order.setTotalAmount(total);
+
+        // 4) Salva ordine con status CREATED
+        order = orderRepo.save(order);
+
+        // 5) Simula il pagamento
+        PaymentResult payment = processPaymentStub(order.getId(), req.getPaymentInfo());
+        order.setStatus(payment.approved ? OrderStatus.PAID : OrderStatus.DECLINED);
+        order = orderRepo.save(order);
+
+        // 6) Mappa a DTO e restituisci
+        return toDto(order, payment.message);
+    }
+
+    /**
+     * Restituisce tutti gli ordini del customer
+     */
+    @Transactional(readOnly = true)
+    public List<OrderDTO> getOrders(String customerId) {
+        return orderRepo.findByCustomer_Id(customerId).stream()
+                .map(o -> toDto(o, o.getStatus().name()))
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Restituisce un ordine specifico (solo se appartiene al customer)
+     */
+    @Transactional(readOnly = true)
+    public OrderDTO getOrderById(Long orderId, String customerId) {
+        Orders order = orderRepo.findByIdAndCustomer_Id(orderId, customerId)
+                .orElseThrow(() -> new RuntimeException("Ordine non trovato: " + orderId));
+        return toDto(order, order.getStatus().name());
+    }
+
+    // ——— Helper privati ———
+
+    /**
+     * Stub di pagamento inline: approva sempre.
+     */
+    private PaymentResult processPaymentStub(Long orderId, PaymentInfoDTO info) {
+        // qui potresti aggiungere logiche random o controlli di info.getCardNumber()
+        return new PaymentResult(true, "APPROVED");
+    }
+
+    /**
+     * Mappa l'entità Orders (con items) nel DTO di risposta
+     */
+    private OrderDTO toDto(Orders order, String paymentStatus) {
+        List<OrderItemDetailDTO> items = order.getItems().stream()
+                .map(i -> OrderItemDetailDTO.builder()
+                        .productId(i.getProduct().getId())
+                        .productName(i.getProduct().getName())
+                        .quantity(i.getQuantity())
+                        .unitPrice(i.getUnitPrice())
+                        .build())
+                .collect(Collectors.toList());
+
+        return OrderDTO.builder()
+                .id(order.getId())
+                .date(order.getDate())
+                .status(order.getStatus())
+                .totalAmount(order.getTotalAmount())
+                .shippingAddress(order.getShippingAddress())
+                .items(items)
+                .paymentStatus(paymentStatus)
+                .build();
+    }
+
+    /**
+     * Piccola classe interna per rappresentare l’esito del pagamento
+     */
+    private static class PaymentResult {
+        final boolean approved;
+        final String message;
+        PaymentResult(boolean approved, String message) {
+            this.approved = approved;
+            this.message = message;
+        }
     }
 }

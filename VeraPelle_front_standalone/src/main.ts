@@ -38,6 +38,7 @@ export function appInitializerFactory(
         console.log('⚪️ Nessun utente autenticato — skip register');
       }
 
+
       // Redirect automatico admin
       if (kc.hasRole('ADMIN') && window.location.pathname === '/') {
         await router.navigate(['/admin/products']);
