@@ -84,7 +84,7 @@ export class CartService {
   mergeCart(): Observable<CartDTO> {
     return this.http
       .post<CartDTO>(
-        `${this.baseUrl}/merge`,
+        `${this.baseUrl}/auth/merge`,
         {},                      // nessun body necessario
         { withCredentials: true }
       )

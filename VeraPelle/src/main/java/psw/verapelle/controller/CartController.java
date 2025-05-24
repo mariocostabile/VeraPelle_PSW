@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
@@ -229,7 +230,8 @@ public class CartController {
      * Chiamalo dal front-end subito dopo il login per fondere il guest cart
      * e tornare il nuovo cart via DTO + settare un cookie vuoto per guest.
      */
-    @PostMapping("/merge")
+    @PostMapping("/auth/merge")
+    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<CartDTO> mergeCart(
             @CookieValue(value = "cartId", required = false) String cartIdCookie,
             @AuthenticationPrincipal Jwt principal        // ← inietta qui il token decodificato
