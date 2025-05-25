@@ -20,4 +20,7 @@ public interface OrderRepository extends JpaRepository<Orders, Long> {
      * così l'utente non vede ordini di altri.
      */
     Optional<Orders> findByIdAndCustomer_Id(Long id, String customerId);
+
+
+    List<Orders> findByCustomer_IdOrderByDateDesc(String customerId);
 }

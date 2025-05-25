@@ -30,41 +30,56 @@ public class OrderService {
         Customer customer = customerRepo.findById(customerId)
                 .orElseThrow(() -> new RuntimeException("Customer non trovato: " + customerId));
 
-        // 2) Costruisci l'entità Orders
+        // 2) Crea e salva subito l'ordine con status CREATED
         Orders order = Orders.builder()
                 .customer(customer)
                 .shippingAddress(req.getShippingAddress())
+                .status(OrderStatus.CREATED)
                 .build();
-
-        // 3) Aggiungi OrderItem e calcola totalAmount
-        BigDecimal total = BigDecimal.ZERO;
-        for (OrderItemDTO itemDto : req.getItems()) {
-            Product product = productRepo.findById(itemDto.getProductId())
-                    .orElseThrow(() -> new RuntimeException("Product non trovato: " + itemDto.getProductId()));
-
-            BigDecimal unitPrice = product.getPrice();
-            int qty = itemDto.getQuantity();
-
-            OrderItem item = OrderItem.builder()
-                    .product(product)
-                    .quantity(qty)
-                    .unitPrice(unitPrice)
-                    .build();
-
-            order.addItem(item);
-            total = total.add(unitPrice.multiply(BigDecimal.valueOf(qty)));
-        }
-        order.setTotalAmount(total);
-
-        // 4) Salva ordine con status CREATED
         order = orderRepo.save(order);
 
-        // 5) Simula il pagamento
+        // 3) Simula il pagamento
         PaymentResult payment = processPaymentStub(order.getId(), req.getPaymentInfo());
-        order.setStatus(payment.approved ? OrderStatus.PAID : OrderStatus.DECLINED);
+
+        if (payment.approved) {
+            // 4a) Se APPROVED: aggiungi items e decurta stock
+            BigDecimal total = BigDecimal.ZERO;
+            for (OrderItemDTO itemDto : req.getItems()) {
+                Product product = productRepo.findById(itemDto.getProductId())
+                        .orElseThrow(() -> new RuntimeException(
+                                "Product non trovato: " + itemDto.getProductId()));
+
+                int qty = itemDto.getQuantity();
+                if (product.getStockQuantity() < qty) {
+                    throw new RuntimeException("Stock insufficiente per prodotto " + product.getId());
+                }
+
+                // Decremento stock
+                product.setStockQuantity(product.getStockQuantity() - qty);
+                // Hibernate aggiornerà il record a commit
+
+                BigDecimal unitPrice = product.getPrice();
+                OrderItem item = OrderItem.builder()
+                        .product(product)
+                        .quantity(qty)
+                        .unitPrice(unitPrice)
+                        .build();
+                order.addItem(item);
+
+                total = total.add(unitPrice.multiply(BigDecimal.valueOf(qty)));
+            }
+            order.setTotalAmount(total);
+            order.setStatus(OrderStatus.PAID);
+
+        } else {
+            // 4b) Se DECLINED: mantieni stock intatto e marca l'ordine come DECLINED
+            order.setStatus(OrderStatus.DECLINED);
+        }
+
+        // 5) Salva l'ordine finale (con items e stato aggiornato)
         order = orderRepo.save(order);
 
-        // 6) Mappa a DTO e restituisci
+        // 6) Mappa e restituisci DTO
         return toDto(order, payment.message);
     }
 
@@ -73,7 +88,7 @@ public class OrderService {
      */
     @Transactional(readOnly = true)
     public List<OrderDTO> getOrders(String customerId) {
-        return orderRepo.findByCustomer_Id(customerId).stream()
+        return orderRepo.findByCustomer_IdOrderByDateDesc(customerId).stream()
                 .map(o -> toDto(o, o.getStatus().name()))
                 .collect(Collectors.toList());
     }

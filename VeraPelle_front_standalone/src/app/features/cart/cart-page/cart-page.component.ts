@@ -6,13 +6,15 @@ import { CartService }       from '../../../core/services/cart/cart.service';
 import { CartDTO }           from '../../../core/models/cart-dto';
 import { CartItemDTO }       from '../../../core/models/cart-item-dto';
 import { CartItemComponent } from '../cart-item/cart-item.component';
+import { RouterModule, Router } from '@angular/router';
 
 @Component({
   selector: 'app-cart-page',
   standalone: true,
   imports: [
     CommonModule,
-    CartItemComponent
+    CartItemComponent,
+    RouterModule
   ],
   templateUrl: './cart-page.component.html',
   styleUrls: ['./cart-page.component.scss']

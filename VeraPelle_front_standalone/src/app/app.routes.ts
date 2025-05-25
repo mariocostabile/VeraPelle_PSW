@@ -7,6 +7,8 @@ import { authGuard }                from './core/guards/auth.guard';
 import { ProductListComponent }     from './features/store/product-list/product-list.component';
 import { ProductDetailComponent }   from './features/store/product-detail/product-detail.component';
 import { CartPageComponent }        from './features/cart/cart-page/cart-page.component';
+import { CheckoutPageComponent }    from './features/cart/checkout-page/checkout-page.component';
+import { OrderConfirmationComponent } from './features/cart/order-confirmation/order-confirmation.component';
 
 export const routes: Routes = [
   { path: '', component: HomeComponent },
@@ -20,6 +22,9 @@ export const routes: Routes = [
   // 3) Pagina dedicata Carrello
   { path: 'cart', component: CartPageComponent },
 
+  // 4) checkout (richiede login)
+  {path: 'checkout', component: CheckoutPageComponent, canActivate: [authGuard]},
+
   // 4) Profilo (protetto)
   { path: 'profilo', component: ProfiloComponent, canActivate: [authGuard] },
 
@@ -30,6 +35,9 @@ export const routes: Routes = [
       import('./features/admin/admin.module').then(m => m.AdminModule),
     canActivate: [authGuard]
   },
+
+  // 5) conferma ordine (richiede login)
+  {path: 'order-confirmation/:id', component: OrderConfirmationComponent, canActivate: [authGuard]},
 
   // 6) Wildcard → home
   { path: '**', redirectTo: '' }

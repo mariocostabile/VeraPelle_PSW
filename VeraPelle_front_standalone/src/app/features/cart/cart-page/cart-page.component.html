@@ -26,6 +26,17 @@
       <div class="total">
         Totale: € {{ cart.total | number: '1.2-2' }}
       </div>
+
+      <!-- Pulsante Checkout -->
+      <div class="checkout-action">
+        <button
+          class="btn btn-primary"
+          [routerLink]="['/checkout']"
+          [disabled]="!cart?.items?.length"
+        >
+          Procedi al checkout
+        </button>
+      </div>
     </div>
   </ng-container>
 

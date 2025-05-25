@@ -1,26 +1,33 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormGroup, FormBuilder, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import {Router, RouterLink} from '@angular/router';
 import { CustomerService } from '../../core/services/customer/customer.service';
 import { CustomerDTO } from '../../core/models/customer-dto';
 import { catchError } from 'rxjs/operators';
 import { of } from 'rxjs';
+import { OrderService } from '../../core/services/order/order.service';
+import { OrderDTO }       from '../../core/models/order-dto';
+import { Observable }     from 'rxjs';
 
 @Component({
   selector: 'app-profilo',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink],
   templateUrl: './profilo.component.html',
   styleUrls: ['./profilo.component.scss']
 })
 export class ProfiloComponent implements OnInit {
   private customerService = inject(CustomerService);
   private router = inject(Router);
+  private orderService = inject(OrderService);
+
 
   form: FormGroup;
   loading = true;
   error = false;
+  orders$!: Observable<OrderDTO[]>;
+
 
   constructor(private fb: FormBuilder) {
     this.form = this.fb.group({
@@ -46,6 +53,8 @@ export class ProfiloComponent implements OnInit {
           this.form.patchValue(profile);
         }
         this.loading = false;
+        // Dopo caricamento profilo, inizializza orders$
+        this.orders$ = this.orderService.getOrders();
       });
   }
 

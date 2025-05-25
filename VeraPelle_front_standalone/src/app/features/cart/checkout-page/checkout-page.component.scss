@@ -1,0 +1,175 @@
+/* src/app/features/cart/checkout-page/checkout-page.component.scss */
+
+.checkout-container {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 2rem;
+  max-width: 960px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background: #fff;
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 8px var(--color-shadow);
+
+  h2 {
+    grid-column: 1 / -1;
+    font-family: var(--font-heading);
+    font-size: 1.75rem;
+    color: var(--color-primary);
+    margin-bottom: 1rem;
+  }
+}
+
+/* Form di checkout */
+.checkout-container form {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 1rem;
+
+  label {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: #333;
+  }
+
+  input {
+    padding: 0.5rem;
+    border: 1px solid #ccc;
+    border-radius: 0.25rem;
+    font-family: var(--font-sans);
+    font-size: 1rem;
+
+    &:focus {
+      outline: none;
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 2px rgba(102, 59, 29, 0.2);
+    }
+  }
+
+  .error {
+    color: #d9534f;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+  }
+}
+
+.form-row {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+
+  .form-group {
+    flex: 1;
+    margin-bottom: 0;
+  }
+}
+
+button[type="submit"] {
+  align-self: flex-start;
+  padding: 0.75rem 1.5rem;
+  background: var(--color-primary);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  border: none;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  transition: background 0.2s;
+
+  &:hover:not(:disabled) {
+    background: var(--color-primary-hover);
+  }
+  &:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+  }
+}
+
+/* Riepilogo carrello */
+.cart-summary {
+  background: var(--color-bg);
+  padding: 1.5rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 6px var(--color-shadow);
+
+  h3 {
+    font-family: var(--font-heading);
+    font-size: 1.25rem;
+    margin-bottom: 1rem;
+    color: var(--color-primary);
+  }
+
+  .cart-items {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+
+    .cart-item {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+      padding: 0.75rem 0;
+      border-bottom: 1px solid #e0e0e0;
+
+      &:last-child {
+        border-bottom: none;
+      }
+
+      .cart-thumb {
+        width: 64px;
+        height: 64px;
+        object-fit: cover;
+        border-radius: 0.25rem;
+      }
+
+      .item-info {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+
+        .item-name {
+          font-weight: 600;
+        }
+        .item-color,
+        .item-qty,
+        .item-subtotal {
+          font-size: 0.9rem;
+          color: #555;
+        }
+      }
+    }
+  }
+
+  .cart-total {
+    margin-top: 1rem;
+    text-align: right;
+    font-size: 1.25rem;
+    font-weight: bold;
+    color: var(--color-primary);
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .checkout-container {
+    grid-template-columns: 1fr;
+    padding: 1rem;
+  }
+
+  .form-row {
+    flex-direction: column;
+  }
+
+  .checkout-container h2 {
+    text-align: center;
+  }
+
+  .cart-summary {
+    margin-top: 2rem;
+  }
+}

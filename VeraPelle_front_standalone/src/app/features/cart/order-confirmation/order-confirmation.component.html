@@ -1,0 +1,28 @@
+<div *ngIf="loading">Caricamento in corso…</div>
+
+<div *ngIf="error">
+  <p class="error">{{ error }}</p>
+  <a routerLink="/">Torna alla home</a>
+</div>
+
+<div *ngIf="!loading && order">
+  <h2>Ordine #{{ order.id }} Confermato</h2>
+  <p>Data: {{ order.date | date:'medium' }}</p>
+  <p>Stato: {{ order.status }}</p>
+  <p>Pagamento: {{ order.paymentStatus }}</p>
+  <h3>Indirizzo di spedizione</h3>
+  <p>{{ order.shippingAddress }}</p>
+
+  <h3>Dettaglio prodotti</h3>
+  <ul>
+    <li *ngFor="let item of order.items">
+      {{ item.productName }} &times;{{ item.quantity }} –
+      {{ item.unitPrice | currency }} cad.
+    </li>
+  </ul>
+
+  <p><strong>Totale:</strong> {{ order.totalAmount | currency }}</p>
+
+  <button routerLink="/">Torna alla home</button>
+  <button routerLink="/orders">I miei ordini</button>
+</div>

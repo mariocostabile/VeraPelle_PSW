@@ -102,3 +102,44 @@
     grid-template-columns: 1fr;
   }
 }
+
+.my-orders {
+  margin-top: 2rem;
+
+  h2 {
+    margin-bottom: 1rem;
+    color: var(--color-primary);
+  }
+
+  .orders-list {
+    list-style: none;
+    padding: 0;
+
+    .order-entry {
+      margin-bottom: 0.75rem;
+
+      a {
+        display: flex;
+        justify-content: space-between;
+        text-decoration: none;
+        padding: 0.5rem;
+        background: #fff;
+        border-radius: 0.25rem;
+        box-shadow: 0 1px 4px var(--color-shadow);
+
+        .date, .status, .total {
+          margin-left: 1rem;
+        }
+
+        &:hover {
+          background: var(--color-bg);
+        }
+      }
+    }
+  }
+
+  .empty {
+    font-style: italic;
+    color: #666;
+  }
+}

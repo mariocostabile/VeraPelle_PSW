@@ -38,3 +38,24 @@
     </div>
   </form>
 </div>
+
+<!-- Sezione ordini -->
+<section class="my-orders" *ngIf="orders$ | async as orders">
+  <h2>I miei ordini</h2>
+  <ng-container *ngIf="orders.length; else noOrders">
+    <ul class="orders-list">
+      <li *ngFor="let o of orders" class="order-entry">
+        <a [routerLink]="['/order-confirmation', o.id]">
+          <strong>Ordine #{{ o.id }}</strong>
+          <span class="date">{{ o.date | date:'short' }}</span>
+          <span class="status">({{ o.status }})</span>
+          <span class="total">{{ o.totalAmount | currency }}</span>
+        </a>
+      </li>
+    </ul>
+  </ng-container>
+</section>
+
+<ng-template #noOrders>
+  <p class="empty">Non hai ancora effettuato ordini.</p>
+</ng-template>

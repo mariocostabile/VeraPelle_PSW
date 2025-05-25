@@ -1,0 +1,75 @@
+<!-- src/app/features/cart/checkout-page.component.html -->
+<div class="checkout-container">
+  <h2>Checkout</h2>
+
+  <!-- FORM DI CHECKOUT -->
+  <form [formGroup]="checkoutForm" (ngSubmit)="onSubmit()">
+    <!-- Indirizzo di spedizione -->
+    <div class="form-group">
+      <label for="shippingAddress">Indirizzo di spedizione</label>
+      <input id="shippingAddress" formControlName="shippingAddress" />
+      <div class="error"
+           *ngIf="checkoutForm.get('shippingAddress')?.invalid && checkoutForm.get('shippingAddress')?.touched">
+        Inserisci l'indirizzo.
+      </div>
+    </div>
+
+    <!-- Dati pagamento -->
+    <div class="form-group">
+      <label for="cardNumber">Numero carta</label>
+      <input id="cardNumber" formControlName="cardNumber" maxlength="19" />
+      <div class="error"
+           *ngIf="checkoutForm.get('cardNumber')?.invalid && checkoutForm.get('cardNumber')?.touched">
+        Numero di carta non valido (min 12 cifre).
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label for="expiry">Scadenza (MM/AA)</label>
+        <input id="expiry" formControlName="expiry" placeholder="MM/AA" />
+      </div>
+      <div class="form-group">
+        <label for="cvv">CVV</label>
+        <input id="cvv" formControlName="cvv" maxlength="3" />
+      </div>
+    </div>
+
+    <button type="submit" [disabled]="checkoutForm.invalid">
+      Paga e Conferma
+    </button>
+  </form>
+
+  <!-- RIEPILOGO CARRELLO -->
+  <div class="cart-summary">
+    <h3>Riepilogo carrello</h3>
+
+    <ng-container *ngIf="cart$ | async as cart; else noCart">
+      <ul class="cart-items">
+        <li *ngFor="let item of cart.items" class="cart-item">
+          <img
+            *ngIf="item.thumbnailUrl"
+            [src]="getThumbUrl(item)"
+            alt="{{ item.product.name }}"
+            class="cart-thumb"
+          />
+          <div class="item-info">
+            <div class="item-name">{{ item.product.name }}</div>
+            <div class="item-color">Colore: {{ item.selectedColor.name }}</div>
+            <div class="item-qty">Quantità: {{ item.quantity }}</div>
+            <div class="item-subtotal">
+              {{ item.subtotal | currency }}
+            </div>
+          </div>
+        </li>
+      </ul>
+      <p class="cart-total">
+        <strong>Totale:</strong> {{ cart.total | currency }}
+      </p>
+    </ng-container>
+
+    <ng-template #noCart>
+      <p>Il carrello è vuoto.</p>
+    </ng-template>
+  </div>
+</div>
