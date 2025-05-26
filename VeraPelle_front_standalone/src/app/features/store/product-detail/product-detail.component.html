@@ -94,10 +94,8 @@
           >
             Aggiungi al carrello
           </button>
-          <button
-            class="btn-buy-now"
-            (click)="addToCart()"
-            [disabled]="quantity < 1 || quantity > maxQuantity"
+          <button class="btn-add-cart"
+            (click)="buyNow()"
           >
             Acquista ora
           </button>

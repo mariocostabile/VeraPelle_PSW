@@ -67,13 +67,17 @@ export class KeycloakService {
     this._parsedToken = this.kc.tokenParsed as ParsedToken;
   }
 
-  /** Login Keycloak (default redirect su "/") */
+  /** Login Keycloak: default redirect su "/" ma overrideabile */
   login(options?: Keycloak.KeycloakLoginOptions): Promise<void> | undefined {
-    return this.kc?.login({
-      redirectUri: window.location.origin + '/',
-      ...options
-    });
+    // default va in home
+    const defaultOptions: Keycloak.KeycloakLoginOptions = {
+      redirectUri: window.location.origin + '/'
+    };
+    // se passo redirectUri in options, quello sovrascrive il default
+    const opts = { ...defaultOptions, ...options };
+    return this.kc?.login(opts);
   }
+
 
   /** Logout e clear del profilo */
   logout(): Promise<void> | undefined {

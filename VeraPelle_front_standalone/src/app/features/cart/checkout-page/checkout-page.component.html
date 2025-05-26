@@ -1,4 +1,7 @@
 <!-- src/app/features/cart/checkout-page.component.html -->
+
+<button class="btn-back" (click)="goBack()">← Indietro</button>
+
 <div class="checkout-container">
   <h2>Checkout</h2>
 
@@ -44,7 +47,7 @@
   <div class="cart-summary">
     <h3>Riepilogo carrello</h3>
 
-    <ng-container *ngIf="cart$ | async as cart; else noCart">
+    <ng-container *ngIf="cart as cart; else noCart">
       <ul class="cart-items">
         <li *ngFor="let item of cart.items" class="cart-item">
           <img
@@ -55,8 +58,14 @@
           />
           <div class="item-info">
             <div class="item-name">{{ item.product.name }}</div>
-            <div class="item-color">Colore: {{ item.selectedColor.name }}</div>
-            <div class="item-qty">Quantità: {{ item.quantity }}</div>
+            <!-- Controlli copia-incollati dal Carrello -->
+            <div class="controls">
+              <button (click)="onQuantityChange(item, -1)" [disabled]="item.quantity <= 1">–</button>
+              <span>{{ item.quantity }}</span>
+              <button (click)="onQuantityChange(item, +1)">+</button>
+              <button class="remove" (click)="onRemove(item)">✕</button>
+            </div>
+
             <div class="item-subtotal">
               {{ item.subtotal | currency }}
             </div>

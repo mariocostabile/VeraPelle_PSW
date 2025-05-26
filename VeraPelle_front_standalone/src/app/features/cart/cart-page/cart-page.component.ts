@@ -1,12 +1,12 @@
 // src/app/features/cart/cart-page/cart-page.component.ts
 
-import { Component, OnInit } from '@angular/core';
+import {Component, inject, OnInit} from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
 import { CartService }       from '../../../core/services/cart/cart.service';
 import { CartDTO }           from '../../../core/models/cart-dto';
-import { CartItemDTO }       from '../../../core/models/cart-item-dto';
 import { CartItemComponent } from '../cart-item/cart-item.component';
 import { RouterModule, Router } from '@angular/router';
+import {CartItemDTO} from '@app/core/models/cart-item-dto';
 
 @Component({
   selector: 'app-cart-page',
@@ -25,8 +25,9 @@ export class CartPageComponent implements OnInit {
 
   constructor(
     private cartService: CartService,
-    private location: Location    // ← iniettiamo Location
   ) {}
+
+  private router = inject(Router);
 
   ngOnInit(): void {
     this.loadCart();
@@ -46,7 +47,7 @@ export class CartPageComponent implements OnInit {
   }
 
   goBack(): void {
-    this.location.back();  // ← torna indietro nella history
+    this.router.navigate(['/products'])
   }
 
   onQuantityChange(item: CartItemDTO, delta: number): void {

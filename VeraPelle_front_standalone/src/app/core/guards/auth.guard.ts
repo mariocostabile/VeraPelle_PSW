@@ -9,7 +9,10 @@ export const authGuard: CanActivateFn = () => {
   if (kc.profile?.token) {
     return true;
   } else {
-    kc.login();
+    // Non autenticato → login e, al termine, ritorno esattamente qui (es. /#/checkout)
+    kc.login({
+      redirectUri: window.location.href
+    });
     return false;
   }
 };

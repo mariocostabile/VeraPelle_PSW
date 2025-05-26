@@ -39,22 +39,41 @@
   </form>
 </div>
 
-<!-- Sezione ordini -->
-<section class="my-orders" *ngIf="orders$ | async as orders">
+<section class="admin-panel my-orders" *ngIf="orders$ | async as orders">
   <h2>I miei ordini</h2>
+
   <ng-container *ngIf="orders.length; else noOrders">
-    <ul class="orders-list">
-      <li *ngFor="let o of orders" class="order-entry">
-        <a [routerLink]="['/order-confirmation', o.id]">
-          <strong>Ordine #{{ o.id }}</strong>
-          <span class="date">{{ o.date | date:'short' }}</span>
-          <span class="status">({{ o.status }})</span>
-          <span class="total">{{ o.totalAmount | currency }}</span>
-        </a>
-      </li>
-    </ul>
+    <table>
+      <thead>
+      <tr>
+        <th>ID</th>
+        <th>Data</th>
+        <th>Stato</th>
+        <th>Totale</th>
+        <th>Azioni</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr *ngFor="let o of orders">
+        <td>{{ o.id }}</td>
+        <td>{{ o.date | date:'short' }}</td>
+        <td>{{ o.status }}</td>
+        <td>{{ o.totalAmount | currency }}</td>
+        <td class="actions">
+          <button class="btn-icon" [routerLink]="['/order-confirmation', o.id]" title="Dettagli">
+            🔍
+          </button>
+        </td>
+      </tr>
+      </tbody>
+    </table>
   </ng-container>
+
+  <ng-template #noOrders>
+    <p class="empty">Non hai ancora effettuato ordini.</p>
+  </ng-template>
 </section>
+
 
 <ng-template #noOrders>
   <p class="empty">Non hai ancora effettuato ordini.</p>

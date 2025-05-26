@@ -5,11 +5,13 @@ import { CommonModule }               from '@angular/common';
 import { ActivatedRoute, ParamMap }   from '@angular/router';
 import { Location }                   from '@angular/common';
 import { switchMap }                  from 'rxjs/operators';
-
 import { StoreService, CartItemRequest } from '@app/core/services/store/store.service';
 import { CartService }                   from '@app/core/services/cart/cart.service';
 import { ProductPublicDTO }              from '@app/core/models/product-public-dto';
-import { ColorDTO }                      from '@app/core/models/color-dto';
+import { Router }      from '@angular/router';
+
+
+
 
 @Component({
   selector: 'app-product-detail',
@@ -24,6 +26,8 @@ export class ProductDetailComponent implements OnInit {
   private store       = inject(StoreService);
   private cartService = inject(CartService);
   private location    = inject(Location);
+  private router = inject(Router);
+
 
   product: ProductPublicDTO | null = null;
   selectedImage: string | null      = null;
@@ -147,4 +151,44 @@ export class ProductDetailComponent implements OnInit {
       }
     });
   }
+
+  /**
+   * Svuota il carrello, aggiunge solo questo prodotto e va al checkout
+   */
+  buyNow(): void {
+    if (!this.product) return;
+
+    // Validazioni identiche ad addToCart()
+    this.colorError    = null;
+    this.quantityError = null;
+    if (!this.selectedColorId) {
+      this.colorError = 'Per favore seleziona un colore.';
+      return;
+    }
+    if (this.quantity < 1 || this.quantity > this.maxQuantity) {
+      this.quantityError = `La quantità deve essere tra 1 e ${this.maxQuantity}.`;
+      return;
+    }
+
+    const req: CartItemRequest = {
+      productId: this.product.id,
+      colorId:   this.selectedColorId,
+      quantity:  this.quantity
+    };
+
+    // 1) Svuota il carrello
+    this.cartService.clearCart().pipe(
+      // 2) Poi aggiungi solo questo prodotto
+      switchMap(() => this.cartService.addItem(req))
+    ).subscribe({
+      next: () => {
+        // 3) Naviga subito al checkout
+        this.router.navigate(['/checkout']);
+      },
+      error: () => {
+        this.quantityError = 'Errore nel Buy Now. Riprova.';
+      }
+    });
+  }
+
 }

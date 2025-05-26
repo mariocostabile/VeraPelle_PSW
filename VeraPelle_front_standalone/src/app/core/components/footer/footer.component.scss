@@ -1,64 +1,69 @@
-/* src/app/core/components/footer/footer.component.scss */
-
+/* src/app/features/footer/footer.component.scss */
 .footer {
-  display: flex;
-  align-items: flex-start;
-  background-color: #663b1d;
-  padding: 0.3rem 2rem;
-  box-shadow: none;
+  background-color: #663b1d;  /* colore aggiornato */
   color: #fff;
-  flex-wrap: wrap;
+  padding: 1rem;
+  font-size: 0.85rem;
+  font-family: var(--font-sans);
+
+  a {
+    color: #fff;
+    text-decoration: underline;
+    transition: opacity 0.2s;
+    &:hover { opacity: 0.8; }
+  }
 
   .footer__container {
     display: flex;
-    width: 100%;
-    align-items: flex-start;
+    flex-wrap: wrap;
     justify-content: space-between;
+    gap: 1rem;
+    max-width: 1024px;
+    margin: 0 auto;
+  }
+
+  .footer__contacts,
+  .footer__links {
+    flex: 1 1 200px;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
   }
 
   .footer__contacts {
-    line-height: 1.6;
-
-    /* titolo resettato come paragrafo */
     h4 {
-      margin: 0 0 0.2rem;
-      font-size: 0.9rem;     /* stessa dimensione di <p> */
-      font-weight: normal;   /* peso normale, non bold */
-      color: #fff;           /* mantiene il bianco */
+      margin: 0 0 0.25rem;
+      font-size: 1rem;
+      font-weight: 500;
+      color: #fff;
     }
-
     p {
-      margin: 0.2rem 0;
-      font-size: 0.9rem;
+      margin: 0;
+      line-height: 1.4;
     }
   }
 
   .footer__links {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    display: flex;
-    flex-direction: column;
-
-    li {
-      margin-bottom: 0.5rem;
-
-      a {
-        /* semplice link di testo */
-        color: #fff;
-        font-size: 0.9rem;
-        font-weight: normal;
-        text-decoration: underline;
-        background: none;
-        border: none;
-        padding: 0;
-        cursor: pointer;
-        transition: color 0.2s;
-
-        &:hover {
-          color: #ddd;
-        }
-      }
+    h5 {
+      color: #fff;
+      margin: 0 0 0.25rem;
+      font-size: 0.95rem;
+      font-weight: 500;
     }
+    ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      li { margin-bottom: 0.4rem; }
+    }
+  }
+
+  .footer__bottom {
+    margin-top: 1rem;
+    border-top: 1px solid rgba(255,255,255,0.2);
+    padding-top: 0.5rem;
+    text-align: center;
+    font-size: 0.75rem;
+    opacity: 0.7;
   }
 }

@@ -1,5 +1,5 @@
 import { Component, OnInit, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import {CommonModule, Location} from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { CartService } from '../../../core/services/cart/cart.service';
@@ -9,6 +9,10 @@ import { CartDTO } from '../../../core/models/cart-dto';
 import { CreateOrderRequest, OrderItemDTO, PaymentInfoDTO } from '../../../core/models/create-order-request';
 import {CartItemDTO} from '@app/core/models/cart-item-dto';
 import { take } from 'rxjs';
+import { CustomerService } from '../../../core/services/customer/customer.service';
+
+
+
 
 
 @Component({
@@ -16,18 +20,23 @@ import { take } from 'rxjs';
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './checkout-page.component.html',
-  styleUrls: ['./checkout-page.component.scss']
+  styleUrls: ['./checkout-page.component.scss'],
 })
 export class CheckoutPageComponent implements OnInit {
   checkoutForm!: FormGroup;
   cart$!: Observable<CartDTO>;
   loading = false;
   errorMessage: string | null = null;
+  cart?: CartDTO;
+
+
 
   private fb = inject(FormBuilder);
   private cartService = inject(CartService);
   private orderService = inject(OrderService);
   private router = inject(Router);
+  private customerService = inject(CustomerService);
+
 
   ngOnInit() {
     // Init form
@@ -38,8 +47,20 @@ export class CheckoutPageComponent implements OnInit {
       cvv: ['', Validators.required]
     });
 
+    // 2) Pre-riempi shippingAddress dal profilo utente
+    this.customerService.getCustomerProfile()
+      .pipe(take(1))
+      .subscribe(profile => {
+        if (profile?.address) {
+          this.checkoutForm.patchValue({
+            shippingAddress: profile.address
+          });
+        }
+      });
+
     // Load and merge cart if needed
     this.cart$ = this.cartService.getCart();
+    this.cart$.subscribe(c => this.cart = c);
   }
 
   onSubmit() {
@@ -58,9 +79,9 @@ export class CheckoutPageComponent implements OnInit {
           }));
 
           // 2) Prendi i valori del form
-          const { shippingAddress, cardNumber, expiry, cvv } =
+          const {shippingAddress, cardNumber, expiry, cvv} =
             this.checkoutForm.value;
-          const paymentInfo: PaymentInfoDTO = { cardNumber, expiry, cvv };
+          const paymentInfo: PaymentInfoDTO = {cardNumber, expiry, cvv};
 
           // 3) Prepara la request
           const req: CreateOrderRequest = {
@@ -98,6 +119,50 @@ export class CheckoutPageComponent implements OnInit {
     const t = item.thumbnailUrl || '';
     const normalized = t.startsWith('/') ? t : `/${t}`;
     return `http://localhost:8080${normalized}`;
+  }
+
+  /**
+   * Aumenta o diminuisce la quantità di un item e aggiorna la vista
+   */
+  onQuantityChange(item: CartItemDTO, delta: number): void {
+    const newQty = item.quantity + delta;
+    if (newQty < 1) return;
+
+    this.cartService.updateItem(item.id, newQty).subscribe({
+      next: updatedDto => {
+        // aggiorna solo l'item e il totale
+        item.quantity = newQty;
+        item.subtotal = updatedDto.subtotal;
+        if (this.cart) {
+          this.cart.total = this.cart.items
+            .reduce((sum, it) => sum + it.subtotal, 0);
+        }
+      },
+      error: () => {
+        // opzionale: messaggio di errore
+      }
+    });
+  }
+
+  /**
+   * Rimuove un item dal carrello e aggiorna la vista
+   */
+  onRemove(item: CartItemDTO): void {
+    this.cartService.removeItem(item.id).subscribe({
+      next: () => {
+        if (!this.cart) return;
+        this.cart.items = this.cart.items.filter(it => it.id !== item.id);
+        this.cart.total = this.cart.items
+          .reduce((sum, it) => sum + it.subtotal, 0);
+      },
+      error: () => {
+        // opzionale: messaggio di errore
+      }
+    });
+  }
+
+  goBack(): void {
+    this.router.navigate(['/cart']);
   }
 
 }
