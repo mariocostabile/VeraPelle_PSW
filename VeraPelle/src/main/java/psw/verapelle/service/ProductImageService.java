@@ -1,6 +1,7 @@
 package psw.verapelle.service;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import psw.verapelle.entity.Product;
@@ -53,6 +54,7 @@ public class ProductImageService {
         return saved;
     }
 
+    @Caching
     public List<ProductImage> getImagesByProduct(Long productId) {
         return imageRepo.findByProductId(productId);
     }

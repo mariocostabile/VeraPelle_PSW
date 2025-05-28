@@ -1,5 +1,6 @@
 package psw.verapelle.service;
 
+import org.springframework.cache.annotation.Caching;
 import org.springframework.transaction.annotation.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,11 +68,13 @@ public class CategoryService {
         }).orElseThrow(() -> new RuntimeException("Category not found"));
     }
 
+    @Caching
     @Transactional
     public List<Category> getAllCategories() {
         return categoryRepository.findAll();
     }
 
+    @Caching
     @Transactional
     public Category getCategoryById(Long id) {
         return categoryRepository.findById(id)

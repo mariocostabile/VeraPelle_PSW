@@ -1,6 +1,7 @@
 package psw.verapelle.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import psw.verapelle.DTO.ColorDTO;
@@ -16,6 +17,7 @@ public class ColorService {
     @Autowired
     private ColorRepository colorRepository;
 
+    @Caching
     @Transactional(readOnly = true)
     public List<ColorDTO> getAllColors() {
         return colorRepository.findAll()
@@ -24,6 +26,7 @@ public class ColorService {
                 .collect(Collectors.toList());
     }
 
+    @Caching
     @Transactional(readOnly = true)
     public ColorDTO getColorById(Long id) {
         Color c = colorRepository.findById(id)

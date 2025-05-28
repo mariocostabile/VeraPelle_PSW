@@ -1,5 +1,6 @@
 package psw.verapelle.service;
 
+import org.springframework.cache.annotation.Caching;
 import org.springframework.transaction.annotation.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -86,6 +87,7 @@ public class OrderService {
     /**
      * Restituisce tutti gli ordini del customer
      */
+    @Caching
     @Transactional(readOnly = true)
     public List<OrderDTO> getOrders(String customerId) {
         return orderRepo.findByCustomer_IdOrderByDateDesc(customerId).stream()
@@ -96,6 +98,7 @@ public class OrderService {
     /**
      * Restituisce un ordine specifico (solo se appartiene al customer)
      */
+    @Caching
     @Transactional(readOnly = true)
     public OrderDTO getOrderById(Long orderId, String customerId) {
         Orders order = orderRepo.findByIdAndCustomer_Id(orderId, customerId)

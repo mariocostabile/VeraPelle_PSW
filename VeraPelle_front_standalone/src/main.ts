@@ -1,5 +1,5 @@
 import { bootstrapApplication } from '@angular/platform-browser';
-import { importProvidersFrom, APP_INITIALIZER } from '@angular/core';
+import {importProvidersFrom, APP_INITIALIZER, LOCALE_ID, DEFAULT_CURRENCY_CODE} from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { provideRouter, withHashLocation, Router } from '@angular/router';
 import {
@@ -7,12 +7,16 @@ import {
   withInterceptorsFromDi
 } from '@angular/common/http';
 import { HTTP_INTERCEPTORS } from '@angular/common/http';
+import localeIt from '@angular/common/locales/it';
+import {registerLocaleData} from '@angular/common';
 
 import { AppComponent }         from './app/app.component';
 import { routes }               from './app/app.routes';
 import { HttpTokenInterceptor } from './app/core/interceptor/http-token.interceptor';
 import { KeycloakService }      from './app/core/services/keycloak/keycloak.service';
 import { CustomerService }      from './app/core/services/customer/customer.service';
+
+registerLocaleData(localeIt, 'it-IT')
 
 export function appInitializerFactory(
   kc: KeycloakService,
@@ -51,6 +55,10 @@ bootstrapApplication(AppComponent, {
     // BrowserModule per direttive comuni
     importProvidersFrom(BrowserModule),
 
+    {provide: LOCALE_ID, useValue: 'it-IT'},
+    { provide: DEFAULT_CURRENCY_CODE, useValue: 'EUR' },
+
+
     // Routing con hash location strategy
     provideRouter(routes, withHashLocation()),
 
@@ -69,6 +77,7 @@ bootstrapApplication(AppComponent, {
       deps: [KeycloakService, CustomerService, Router],
       multi: true
     }
+
   ]
 })
   .catch(err => console.error(err));

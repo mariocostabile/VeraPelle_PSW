@@ -2,6 +2,7 @@ package psw.verapelle.service;
 
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -110,11 +111,13 @@ public class ProductService {
         productRepository.delete(product);
     }
 
+    @Caching
     @Transactional(readOnly = true)
     public List<Product> getAllProducts() {
         return productRepository.findAll();
     }
 
+    @Caching
     @Transactional(readOnly = true)
     public Product getProductById(Long id) {
         return productRepository.findByIdWithImages(id)

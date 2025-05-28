@@ -1,5 +1,6 @@
 package psw.verapelle.service;
 
+import org.springframework.cache.annotation.Caching;
 import org.springframework.transaction.annotation.Transactional;
 
 import jakarta.validation.Valid;
@@ -25,6 +26,7 @@ public class CustomerService {
      |               Self-service methods              |
      -------------------------------------------------*/
 
+    @Caching
     public List<CustomerDTO> getAllCustomers() {
         return customerRepository.findAll().stream()
                 .map(c -> new CustomerDTO(
@@ -93,6 +95,7 @@ public class CustomerService {
      |               Admin-service methods             |
      -------------------------------------------------*/
 
+    @Caching
     @Transactional
     public CustomerDTO getCustomerById(String id) {
         Customer c = customerRepository.findById(id)

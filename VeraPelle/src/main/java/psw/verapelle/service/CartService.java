@@ -1,5 +1,6 @@
 package psw.verapelle.service;
 
+import org.springframework.cache.annotation.Caching;
 import org.springframework.transaction.annotation.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +29,7 @@ public class CartService {
      * Recupera il carrello per un utente guest, in base al cookie cartId.
      * Se il cookie manca o è malformato o non trova il cart esistente, ne crea uno nuovo.
      */
+    @Caching
     @Transactional
     public Cart getCart(String cartIdCookie) {
         if (cartIdCookie != null) {
@@ -48,6 +50,7 @@ public class CartService {
      * Recupera il carrello per l'utente autenticato, creandolo se non esiste.
      * Questo metodo è usato in fase di checkout.
      */
+    @Caching
     @Transactional
     public Cart getCartByCustomer() {
         String email = getAuthenticatedUserEmail();
@@ -57,6 +60,7 @@ public class CartService {
     /**
      * Recupera o crea il carrello associato al customer identificato dall'email.
      */
+    @Caching
     @Transactional
     public Cart getCartByCustomer(String email) {
         Customer customer = customerRepository.findByEmail(email)
