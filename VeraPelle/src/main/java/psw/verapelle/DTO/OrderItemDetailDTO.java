@@ -28,4 +28,19 @@ public class OrderItemDetailDTO {
      * Prezzo unitario al momento dell'ordine
      */
     private BigDecimal unitPrice;
+
+    /**
+     * Nome del colore selezionato per la variante
+     */
+    private String colorName;
+
+    /**
+     * Codice esadecimale del colore selezionato
+     */
+    private String colorHex;
+
+    /**
+     * Stock residuo della variante selezionata al momento dell'ordine
+     */
+    private int variantStockQuantity;
 }

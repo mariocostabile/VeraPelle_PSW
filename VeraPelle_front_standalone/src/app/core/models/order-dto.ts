@@ -12,6 +12,9 @@ export interface OrderItemDetailDTO {
   productName: string;
   quantity: number;
   unitPrice: number;
+  colorName:            string;
+  colorHex:             string;
+  variantStockQuantity: number;
 }
 
 export interface OrderDTO {

@@ -1,8 +1,9 @@
-// src/app/models/create-order-request.ts
+// src/app/core/models/create-order-request.ts
 
 export interface OrderItemDTO {
   productId: number;
   quantity: number;
+  colorId: number;       // ← nuovo campo per la variante selezionata
 }
 
 export interface PaymentInfoDTO {
@@ -13,6 +14,6 @@ export interface PaymentInfoDTO {
 
 export interface CreateOrderRequest {
   shippingAddress: string;
-  items: OrderItemDTO[];
+  items: OrderItemDTO[];  // ora ogni item include anche colorId
   paymentInfo: PaymentInfoDTO;
 }

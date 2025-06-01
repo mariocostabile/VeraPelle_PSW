@@ -58,6 +58,13 @@
           />
           <div class="item-info">
             <div class="item-name">{{ item.product.name }}</div>
+
+            <!-- subito dopo il nome prodotto, dentro <li> -->
+            <div class="item-color">
+              <span class="dot" [style.background]="item.selectedColor.hexCode"></span>
+              <span class="color-name">{{ item.selectedColor.name }}</span>
+            </div>
+
             <!-- Controlli copia-incollati dal Carrello -->
             <div class="controls">
               <button (click)="onQuantityChange(item, -1)" [disabled]="item.quantity <= 1">–</button>

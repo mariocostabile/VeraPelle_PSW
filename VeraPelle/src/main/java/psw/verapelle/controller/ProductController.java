@@ -8,8 +8,12 @@ import psw.verapelle.DTO.ProductDTO;
 import psw.verapelle.entity.Color;
 import psw.verapelle.entity.Category;
 import psw.verapelle.entity.Product;
+import psw.verapelle.entity.ProductVariant;
 import psw.verapelle.service.ProductService;
+import psw.verapelle.DTO.VariantDTO;
 
+import java.util.Objects;
+import java.util.stream.Collectors;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -64,21 +68,38 @@ public class ProductController {
         dto.setName(p.getName());
         dto.setDescription(p.getDescription());
         dto.setPrice(p.getPrice());
-        dto.setStockQuantity(p.getStockQuantity());
-        // Mappatura Many-to-Many: lista di ID di categoria
-        List<Long> catIds = p.getCategories()
-                .stream()
-                .map(Category::getId)
-                .collect(Collectors.toList());
-        dto.setCategoryIds(catIds);
 
-        // ← Mappatura dei colori: lista di ID di colore
-        List<Long> colorIds = p.getColors()
-                .stream()
-                .map(Color::getId)
-                .collect(Collectors.toList());
-        dto.setColorIds(colorIds);
+        // Calcolo del totale delle quantità come somma delle varianti
+        int totalQty = p.getVariants().stream()
+                .map(ProductVariant::getStockQuantity)       // Integer
+                .filter(Objects::nonNull)             // escludi eventuali null
+                .mapToInt(Integer::intValue)          // converti in int
+                .sum();
+        dto.setStockQuantity(totalQty);
+
+        // Categoria IDs
+        dto.setCategoryIds(
+                p.getCategories().stream()
+                        .map(Category::getId)
+                        .collect(Collectors.toList())
+        );
+
+        // Varianti colore con stock dedicato (null-safe)
+        dto.setVariants(
+                p.getVariants().stream()
+                        .map(v -> {
+                            Integer vQty = v.getStockQuantity();
+                            return new VariantDTO(
+                                    v.getColor().getId(),
+                                    v.getColor().getName(),
+                                    v.getColor().getHexCode(),
+                                    vQty != null ? vQty : 0
+                            );
+                        })
+                        .collect(Collectors.toList())
+        );
 
         return dto;
     }
+
 }

@@ -1,6 +1,6 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute, RouterModule } from '@angular/router';
+import {ActivatedRoute, Router, RouterModule} from '@angular/router';
 import { OrderService } from '../../../core/services/order/order.service';
 import { OrderDTO } from '../../../core/models/order-dto';
 
@@ -14,6 +14,7 @@ import { OrderDTO } from '../../../core/models/order-dto';
 export class OrderConfirmationComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private orderService = inject(OrderService);
+  private router = inject(Router);
 
   order?: OrderDTO;
   loading = true;
@@ -39,4 +40,5 @@ export class OrderConfirmationComponent implements OnInit {
       }
     });
   }
+
 }

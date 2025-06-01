@@ -75,7 +75,8 @@ export class CheckoutPageComponent implements OnInit {
           // 1) Costruisci gli orderItems
           const orderItems: OrderItemDTO[] = cart.items.map(i => ({
             productId: i.product.id!,
-            quantity: i.quantity
+            quantity:  i.quantity,
+            colorId:   i.selectedColor.id    // ← ecco il nuovo campo
           }));
 
           // 2) Prendi i valori del form

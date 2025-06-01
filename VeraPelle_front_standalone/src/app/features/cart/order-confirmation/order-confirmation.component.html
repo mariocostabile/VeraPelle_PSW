@@ -10,18 +10,37 @@
   <p>Data: {{ order.date | date:'medium' }}</p>
   <p>Stato: {{ order.status }}</p>
   <p>Pagamento: {{ order.paymentStatus }}</p>
+
   <h3>Indirizzo di spedizione</h3>
   <p>{{ order.shippingAddress }}</p>
 
   <h3>Dettaglio prodotti</h3>
-  <ul>
-    <li *ngFor="let item of order.items">
-      {{ item.productName }} &times;{{ item.quantity }} –
-      {{ item.unitPrice | currency }} cad.
+  <ul class="order-items">
+    <li *ngFor="let item of order.items" class="order-item">
+      <!-- Riga principale: nome e quantità -->
+      <div class="item-main">
+        <span class="name">{{ item.productName }}</span>
+        <span class="qty">×{{ item.quantity }}</span>
+      </div>
+      <!-- Variante: swatch colore, nome e stock -->
+      <div class="item-variant">
+        <span
+          class="swatch"
+          [style.background]="item.colorHex"
+          [attr.title]="item.colorName">
+        </span>
+        <small class="color-name">{{ item.colorName }}</small>
+      </div>
+      <!-- Prezzo unitario -->
+      <div class="item-price">
+        <small>Prezzo unitario: {{ item.unitPrice | currency:'EUR' }}</small>
+      </div>
     </li>
   </ul>
 
-  <p><strong>Totale:</strong> {{ order.totalAmount | currency }}</p>
+  <p class="order-total">
+    <strong>Totale:</strong> {{ order.totalAmount | currency:'EUR' }}
+  </p>
 
   <button routerLink="/">Torna alla home</button>
   <button routerLink="/profilo">I miei ordini</button>

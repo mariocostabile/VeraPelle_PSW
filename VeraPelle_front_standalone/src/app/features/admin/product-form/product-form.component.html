@@ -37,7 +37,7 @@
           step="0.01"
           min="0"
           placeholder="0,00"
-          (focus)="form.get('price')?.value === 0 && form.get('price')?.setValue(null)"
+          (focus)="onPriceFocus()"
         />
       </div>
       <div
@@ -55,9 +55,7 @@
         type="number"
         formControlName="stockQuantity"
         class="form-control"
-        placeholder="0"
-        (focus)="form.get('stockQuantity')?.value === 0 && form.get('stockQuantity')?.setValue(null)"
-      />
+        readonly     />
     </label>
 
     <!-- Categorie -->
@@ -103,6 +101,39 @@
         Seleziona almeno un colore
       </div>
     </label>
+
+    <!-- Distribuzione stock per colore -->
+    <div formArrayName="colorQuantities" class="color-quantities">
+      <h3>Distribuzione stock per colore</h3>
+
+      <div
+        *ngFor="let grp of colorQuantities.controls; let i = index"
+        [formGroupName]="i"
+        class="color-quantity-item"
+      >
+        <label>
+          {{ getColorName(grp.value.colorId) }}
+          <input
+            type="number"
+            formControlName="quantity"
+            class="form-control"
+            placeholder="0"
+            (focus)="onQuantityFocus(i)"
+          />
+
+        </label>
+      </div>
+
+      <div
+        class="error-message"
+        *ngIf="form.hasError('quantitiesSumMismatch') && form.touched"
+      >
+        La somma delle quantità deve essere uguale al totale di
+        <strong>{{ form.get('stockQuantity')?.value }}</strong>.
+      </div>
+    </div>
+
+
 
     <!-- Sezione immagini -->
     <div class="image-upload">

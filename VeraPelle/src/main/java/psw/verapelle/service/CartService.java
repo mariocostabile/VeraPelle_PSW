@@ -133,10 +133,13 @@ public class CartService {
 
         // 3) Fonde ciascun CartItem del guest nel customer cart
         for (CartItem guestItem : List.copyOf(guestCart.getCartItems())) {
+            Long prodId  = guestItem.getProduct().getId();
+            Long colorId = guestItem.getSelectedColor().getId();     // <- qui
+
             Optional<CartItem> existing = customerCart.getCartItems().stream()
                     .filter(ci ->
-                            ci.getProduct().getId().equals(guestItem.getProduct().getId()) &&
-                                    ci.getSelectedColor().getId().equals(guestItem.getSelectedColor().getId())
+                            ci.getProduct().getId().equals(prodId) &&
+                                    ci.getSelectedColor().getId().equals(colorId)   // <- e qui
                     )
                     .findAny();
 
@@ -158,6 +161,7 @@ public class CartService {
         // 5) Salva e restituisci il cart del customer
         return cartRepository.save(customerCart);
     }
+
 
 
 }

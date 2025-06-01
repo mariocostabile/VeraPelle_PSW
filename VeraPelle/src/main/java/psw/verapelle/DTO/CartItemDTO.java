@@ -14,4 +14,7 @@ public class CartItemDTO {
     private double subtotal;
     private String thumbnailUrl;
     private ColorDTO selectedColor;
+
+    /** Stock residuo della variante selezionata */
+    private int variantStockQuantity;
 }

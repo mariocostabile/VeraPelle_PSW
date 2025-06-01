@@ -32,6 +32,12 @@ public class OrderItem {
 
     private BigDecimal unitPrice;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "product_variant_id", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private ProductVariant variant;
+
+
     @Version
     @Column(name = "version")
     private Integer version;

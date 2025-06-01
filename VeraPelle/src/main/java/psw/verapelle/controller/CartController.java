@@ -9,14 +9,13 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 import psw.verapelle.DTO.*;
-import psw.verapelle.entity.Cart;
-import psw.verapelle.entity.CartItem;
-import psw.verapelle.entity.ProductImage;
+import psw.verapelle.entity.*;
 import psw.verapelle.service.CartItemService;
 import psw.verapelle.service.CartService;
 
 import java.time.Duration;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @RestController
@@ -182,39 +181,59 @@ public class CartController {
     }
 
     private CartItemDTO toCartItemDTO(CartItem ci) {
-        var p = ci.getProduct();
-        // estraiamo gli ID di categorie e colori
+        Product p = ci.getProduct();
+
+        // Categoria IDs
         List<Long> categoryIds = p.getCategories().stream()
-                .map(c -> c.getId())
-                .collect(Collectors.toList());
-        List<Long> colorIds = p.getColors().stream()
-                .map(c -> c.getId())
+                .map(Category::getId)
                 .collect(Collectors.toList());
 
-        // estraiamo gli URL delle immagini
+        // URL delle immagini
         List<String> imageUrls = p.getImages().stream()
                 .map(ProductImage::getUrlPath)
                 .collect(Collectors.toList());
 
-        var prodDto = new ProductDTO(
-                p.getId(),
-                p.getName(),
-                p.getDescription(),
-                p.getPrice(),
-                p.getStockQuantity(),
-                categoryIds,
-                colorIds
+        // Costruzione di ProductDTO con varianti
+        ProductDTO prodDto = new ProductDTO();
+        prodDto.setId(p.getId());
+        prodDto.setName(p.getName());
+        prodDto.setDescription(p.getDescription());
+        prodDto.setPrice(p.getPrice());
+        prodDto.setStockQuantity(p.getStockQuantity()); // deprecated
+        prodDto.setCategoryIds(categoryIds);
+        prodDto.setVariants(
+                p.getVariants().stream()
+                        .map(v -> {
+                            Integer qty = v.getStockQuantity();
+                            return new VariantDTO(
+                                    v.getColor().getId(),
+                                    v.getColor().getName(),
+                                    v.getColor().getHexCode(),
+                                    qty != null ? qty : 0
+                            );
+                        })
+                        .collect(Collectors.toList())
         );
 
-        var color = ci.getSelectedColor();
-        var colorDto = new ColorDTO(
+        // Colore selezionato
+        Color color = ci.getSelectedColor();
+        ColorDTO colorDto = new ColorDTO(
                 color.getId(),
                 color.getName(),
                 color.getHexCode()
         );
 
-        // miniatura: prima immagine se presente
+        // Miniatura: prima immagine se presente
         String thumb = imageUrls.isEmpty() ? null : imageUrls.get(0);
+
+        // Stock residuo della variante selezionata
+        int variantStock = p.getVariants().stream()
+                .filter(v -> v.getColor().getId().equals(color.getId()))
+                .map(ProductVariant::getStockQuantity)
+                .filter(Objects::nonNull)
+                .mapToInt(Integer::intValue)
+                .findFirst()
+                .orElse(0);
 
         return new CartItemDTO(
                 ci.getId(),
@@ -222,9 +241,11 @@ public class CartController {
                 ci.getQuantity(),
                 prodDto.getPrice().doubleValue() * ci.getQuantity(),
                 thumb,
-                colorDto
+                colorDto,
+                variantStock
         );
     }
+
 
     /**
      * Chiamalo dal front-end subito dopo il login per fondere il guest cart

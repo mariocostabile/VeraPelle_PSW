@@ -22,4 +22,5 @@ public class ProductPublicDTO {
     private List<String> imageUrls;
     private List<ColorDTO> colors;
     private Integer stockQuantity;
+    private List<VariantDTO> variants;
 }

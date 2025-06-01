@@ -4,13 +4,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import psw.verapelle.entity.Cart;
-import psw.verapelle.entity.CartItem;
-import psw.verapelle.entity.Color;
-import psw.verapelle.entity.Product;
+import psw.verapelle.entity.*;
 import psw.verapelle.repository.CartItemRepository;
 import psw.verapelle.repository.ColorRepository;
 import psw.verapelle.repository.ProductRepository;
+import psw.verapelle.repository.ProductVariantRepository;
 
 import java.util.Optional;
 
@@ -29,6 +27,10 @@ public class CartItemService {
     @Autowired
     private ColorRepository colorRepository;
 
+    @Autowired
+    private ProductVariantRepository variantRepository;
+
+
     /**
      * Aggiunge un item al carrello guest o loggato, basato sul cartIdCookie.
      */
@@ -38,17 +40,34 @@ public class CartItemService {
             throw new IllegalArgumentException("Quantity must be at least 1");
         }
 
+        // 1) Carico carrello, prodotto e colore
         Cart cart = cartService.getCart(cartIdCookie);
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new RuntimeException("Product not found"));
         Color color = colorRepository.findById(colorId)
                 .orElseThrow(() -> new RuntimeException("Color not found"));
 
-        if (product.getStockQuantity() < quantity) {
-            throw new RuntimeException("Insufficient stock for product: " + product.getName());
+        // 2) Leggo lo stock della variante colore
+        ProductVariant variant = variantRepository
+                .findByProductIdAndColorId(productId, colorId)
+                .orElseThrow(() -> new RuntimeException("Variant not found"));
+
+        // 3) Calcolo quantità già presente di questa variante nel carrello
+        int existingQty = cart.getCartItems().stream()
+                .filter(ci -> ci.getProduct().getId().equals(productId)
+                        && ci.getSelectedColor().getId().equals(colorId))
+                .mapToInt(CartItem::getQuantity)
+                .sum();
+
+        // 4) Verifico che non superi lo stock della variante
+        if (existingQty + quantity > variant.getStockQuantity()) {
+            throw new RuntimeException("Insufficient stock for color "
+                    + color.getName() + ": only "
+                    + (variant.getStockQuantity() - existingQty)
+                    + " left");
         }
 
-        // Cerca un item con stesso prodotto+colore nel carrello corrente
+        // 5) Cerco un item già esistente identico
         Optional<CartItem> existing = cart.getCartItems().stream()
                 .filter(ci ->
                         ci.getProduct().getId().equals(productId) &&
@@ -62,7 +81,7 @@ public class CartItemService {
             return cartItemRepository.save(ci);
         }
 
-        // Altrimenti ne creo uno nuovo
+        // 6) Altrimenti ne creo uno nuovo
         CartItem ci = new CartItem();
         ci.setCart(cart);
         ci.setProduct(product);
@@ -70,6 +89,7 @@ public class CartItemService {
         ci.setQuantity(quantity);
         return cartItemRepository.save(ci);
     }
+
 
     /**
      * Aggiorna la quantità di un CartItem esistente (deve restare ≥ 1)
@@ -81,17 +101,46 @@ public class CartItemService {
             throw new IllegalArgumentException("Quantity must be at least 1");
         }
 
+        // 1) Recupera il carrello guest
         Cart cart = cartService.getCart(cartIdCookie);
+
+        // 2) Carica il CartItem e verifica appartenenza
         CartItem ci = cartItemRepository.findById(itemId)
                 .orElseThrow(() -> new RuntimeException("CartItem not found"));
-
         if (!ci.getCart().getId().equals(cart.getId())) {
             throw new RuntimeException("CartItem does not belong to this cart");
         }
 
+        // 3) Leggi lo stock della variante colore
+        Long prodId  = ci.getProduct().getId();
+        Long colorId = ci.getSelectedColor().getId();
+        ProductVariant variant = variantRepository
+                .findByProductIdAndColorId(prodId, colorId)
+                .orElseThrow(() -> new RuntimeException("Variant not found"));
+
+        // 4) Calcola la quantità "esterna" (tutte le altre occorrenze di questa variante)
+        int otherQty = cart.getCartItems().stream()
+                .filter(x ->
+                        x.getProduct().getId().equals(prodId) &&
+                                x.getSelectedColor().getId().equals(colorId) &&
+                                !x.getId().equals(ci.getId())
+                )
+                .mapToInt(CartItem::getQuantity)
+                .sum();
+
+        // 5) Verifica che la nuova quantità non superi lo stock
+        if (otherQty + quantity > variant.getStockQuantity()) {
+            throw new RuntimeException("Insufficient stock for color "
+                    + variant.getColor().getName() + ": only "
+                    + (variant.getStockQuantity() - otherQty)
+                    + " left");
+        }
+
+        // 6) Applica la modifica e salva
         ci.setQuantity(quantity);
         return cartItemRepository.save(ci);
     }
+
 
     /** Aggiorna qty per utente loggato sul cart DB */
     @Transactional
@@ -100,22 +149,50 @@ public class CartItemService {
             Long itemId,
             int quantity
     ) {
-        // 1) prendi il cart del customer
+        if (quantity < 1) {
+            throw new IllegalArgumentException("Quantity must be at least 1");
+        }
+
+        // 1) Prendi il carrello del customer
         Cart cart = cartService.getCartByCustomer(customerEmail);
 
-        // 2) carica il CartItem
+        // 2) Carica il CartItem e verifica appartenenza
         CartItem ci = cartItemRepository.findById(itemId)
                 .orElseThrow(() -> new RuntimeException("CartItem not found"));
-
-        // 3) verifica che appartenga a questo cart
         if (!ci.getCart().getId().equals(cart.getId())) {
             throw new RuntimeException("CartItem does not belong to this cart");
         }
 
-        // 4) aggiorna e salva
+        // 3) Leggi lo stock della variante colore
+        Long prodId  = ci.getProduct().getId();
+        Long colorId = ci.getSelectedColor().getId();
+        ProductVariant variant = variantRepository
+                .findByProductIdAndColorId(prodId, colorId)
+                .orElseThrow(() -> new RuntimeException("Variant not found"));
+
+        // 4) Calcola la quantità "esterna" (tutte le altre occorrenze di questa variante)
+        int otherQty = cart.getCartItems().stream()
+                .filter(x ->
+                        x.getProduct().getId().equals(prodId) &&
+                                x.getSelectedColor().getId().equals(colorId) &&
+                                !x.getId().equals(ci.getId())
+                )
+                .mapToInt(CartItem::getQuantity)
+                .sum();
+
+        // 5) Verifica che la nuova quantità non superi lo stock
+        if (otherQty + quantity > variant.getStockQuantity()) {
+            throw new RuntimeException("Insufficient stock for color "
+                    + variant.getColor().getName() + ": only "
+                    + (variant.getStockQuantity() - otherQty)
+                    + " left");
+        }
+
+        // 6) Applica la modifica e salva
         ci.setQuantity(quantity);
         return cartItemRepository.save(ci);
     }
+
 
 
     /**
@@ -162,23 +239,49 @@ public class CartItemService {
             Long colorId,
             int quantity
     ) {
-        // 1) prendi o crea il carrello del customer
+        if (quantity < 1) {
+            throw new IllegalArgumentException("Quantity must be at least 1");
+        }
+
+        // 1) Prendo o creo il carrello del customer
         Cart customerCart = cartService.getCartByCustomer(customerEmail);
 
-        // 2) verifica se esiste già un item identico
+        // 2) Carico variante colore per lo stock
+        ProductVariant variant = variantRepository
+                .findByProductIdAndColorId(productId, colorId)
+                .orElseThrow(() -> new RuntimeException("Variant not found"));
+
+        // 3) Calcolo quantità già presente di questa variante nel carrello
+        int existingQty = customerCart.getCartItems().stream()
+                .filter(ci ->
+                        ci.getProduct().getId().equals(productId) &&
+                                ci.getSelectedColor().getId().equals(colorId)
+                )
+                .mapToInt(CartItem::getQuantity)
+                .sum();
+
+        // 4) Verifico che non superi lo stock della variante
+        if (existingQty + quantity > variant.getStockQuantity()) {
+            throw new RuntimeException("Insufficient stock for color "
+                    + variant.getColor().getName() + ": only "
+                    + (variant.getStockQuantity() - existingQty)
+                    + " left");
+        }
+
+        // 5) Controllo se esiste già un item identico
         Optional<CartItem> existing = customerCart.getCartItems().stream()
                 .filter(ci ->
                         ci.getProduct().getId().equals(productId) &&
                                 ci.getSelectedColor().getId().equals(colorId)
                 )
-                .findAny();
+                .findFirst();
 
         CartItem ci;
         if (existing.isPresent()) {
             ci = existing.get();
             ci.setQuantity(ci.getQuantity() + quantity);
         } else {
-            // 3) altrimenti crea un nuovo CartItem
+            // 6) Creo un nuovo CartItem
             ci = new CartItem();
             ci.setCart(customerCart);
             ci.setProduct(
@@ -193,7 +296,8 @@ public class CartItemService {
             customerCart.getCartItems().add(ci);
         }
 
-        // 4) salva e ritorna
+        // 7) Salvo e ritorno
         return cartItemRepository.save(ci);
     }
+
 }

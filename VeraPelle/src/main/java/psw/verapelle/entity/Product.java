@@ -28,6 +28,8 @@ public class Product {
     @Column(nullable = false)
     private BigDecimal price;
 
+    /** @deprecated ora gestito via varianti colore */
+    @Deprecated
     @Column(name = "stock_quantity", nullable = false)
     private Integer stockQuantity;
 
@@ -72,4 +74,15 @@ public class Product {
     )
     @JsonIgnore
     private List<ProductImage> images = new ArrayList<>();
+
+    /**
+     * Varianti colore con stock dedicato.
+     */
+    @OneToMany(
+            mappedBy = "product",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    @JsonIgnore
+    private List<ProductVariant> variants = new ArrayList<>();
 }

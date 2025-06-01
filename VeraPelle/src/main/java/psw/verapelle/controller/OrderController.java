@@ -1,5 +1,6 @@
 package psw.verapelle.controller;
 
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,7 +27,7 @@ public class OrderController {
      */
     @PostMapping
     public ResponseEntity<OrderDTO> createOrder(
-            @RequestBody CreateOrderRequest req,
+            @Valid @RequestBody CreateOrderRequest req,
             @AuthenticationPrincipal Jwt principal
     ) {
         String customerId = principal.getSubject();

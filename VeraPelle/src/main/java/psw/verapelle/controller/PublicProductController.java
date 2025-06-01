@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import psw.verapelle.DTO.ColorDTO;
 import psw.verapelle.DTO.ProductPublicDTO;
+import psw.verapelle.DTO.VariantDTO;
 import psw.verapelle.entity.Category;
 import psw.verapelle.entity.Product;
 import psw.verapelle.service.ProductService;
@@ -74,6 +75,20 @@ public class PublicProductController {
                 .map(c -> new ColorDTO(c.getId(), c.getName(), c.getHexCode()))
                 .collect(Collectors.toList());
 
+        // qui costruisco le varianti vere e proprie
+        List<VariantDTO> variants = product.getVariants().stream()
+                .map(v -> new VariantDTO(
+                        v.getColor().getId(),
+                        v.getColor().getName(),
+                        v.getColor().getHexCode(),
+                        v.getStockQuantity() == null ? 0 : v.getStockQuantity()
+                ))
+                .collect(Collectors.toList());
+
+        int total = variants.stream()
+                .mapToInt(VariantDTO::getStockQuantity)
+                .sum();
+
         return new ProductPublicDTO(
                 product.getId(),
                 product.getName(),
@@ -82,7 +97,8 @@ public class PublicProductController {
                 product.getDescription(),
                 imageUrls,
                 colors,
-                product.getStockQuantity()
+                total,      // totale opzionale
+                variants    // la nuova lista
         );
     }
 }

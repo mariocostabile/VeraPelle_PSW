@@ -22,6 +22,7 @@ import {CartItemDTO} from '@app/core/models/cart-item-dto';
 export class CartPageComponent implements OnInit {
   cart: CartDTO | null = null;
   loading = false;
+  private location    = inject(Location);
 
   constructor(
     private cartService: CartService,
@@ -47,7 +48,7 @@ export class CartPageComponent implements OnInit {
   }
 
   goBack(): void {
-    this.router.navigate(['/products'])
+    this.location.back();
   }
 
   onQuantityChange(item: CartItemDTO, delta: number): void {

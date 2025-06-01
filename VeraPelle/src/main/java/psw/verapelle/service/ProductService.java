@@ -8,12 +8,18 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import psw.verapelle.DTO.ProductDTO;
+import psw.verapelle.DTO.VariantDTO;
+import psw.verapelle.entity.Color;
 import psw.verapelle.entity.Product;
+import psw.verapelle.entity.ProductVariant;
 import psw.verapelle.repository.CategoryRepository;
 import psw.verapelle.repository.ColorRepository;
 import psw.verapelle.repository.ProductRepository;
+import psw.verapelle.repository.ProductVariantRepository;
+
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -29,6 +35,9 @@ public class ProductService {
     @Autowired
     private ColorRepository colorRepository;
 
+    @Autowired
+    private ProductVariantRepository variantRepository;
+
     @Transactional
     public Product createProduct(ProductDTO productDTO) {
         if (productDTO.getName() == null || productDTO.getName().trim().isEmpty()) {
@@ -39,7 +48,7 @@ public class ProductService {
         product.setName(productDTO.getName());
         product.setDescription(productDTO.getDescription());
         product.setPrice(productDTO.getPrice());
-        product.setStockQuantity(productDTO.getStockQuantity());
+        // stockQuantity è deprecato; ora gestito tramite varianti colore
 
         // categorie
         product.setCategories(
@@ -49,39 +58,53 @@ public class ProductService {
                         .collect(Collectors.toList())
         );
 
-        // colori (se presenti)
-        if (productDTO.getColorIds() != null) {
+        // colori disponibili: li prendiamo dalle varianti
+        if (productDTO.getVariants() != null) {
             product.setColors(
-                    productDTO.getColorIds().stream()
-                            .map(id -> colorRepository.findById(id)
-                                    .orElseThrow(() -> new RuntimeException("Color not found: " + id)))
-                            .collect(Collectors.toList())
+            productDTO.getVariants().stream()
+            .map(vdto -> colorRepository.findById(vdto.getColorId())
+            .orElseThrow(() -> new RuntimeException("Color not found: " + vdto.getColorId())))
+            .distinct()
+            .collect(Collectors.toList())
             );
         }
 
-        return productRepository.save(product);
+        // 1️⃣ salvo il prodotto base per ottenere l’ID
+        Product saved = productRepository.save(product);
+
+        // 2️⃣ creo le varianti colore con stock dedicato
+        for (VariantDTO vdto : productDTO.getVariants()) {
+            Color c = colorRepository.findById(vdto.getColorId())
+                    .orElseThrow(() -> new RuntimeException("Color not found: " + vdto.getColorId()));
+            ProductVariant pv = new ProductVariant();
+            pv.setProduct(saved);
+            pv.setColor(c);
+            pv.setStockQuantity(vdto.getStockQuantity());
+            variantRepository.save(pv);
+        }
+        return saved;    // ***
     }
 
     @Transactional
     public Product updateProduct(Long id, ProductDTO productDTO) {
         return productRepository.findById(id)
-                .map(product -> {
+                .map(p -> {
                     if (productDTO.getName() != null) {
-                        product.setName(productDTO.getName());
+                        p.setName(productDTO.getName());
                     }
                     if (productDTO.getDescription() != null) {
-                        product.setDescription(productDTO.getDescription());
+                        p.setDescription(productDTO.getDescription());
                     }
                     if (productDTO.getPrice() != null) {
-                        product.setPrice(productDTO.getPrice());
+                        p.setPrice(productDTO.getPrice());
                     }
                     // StockQuantity è primitivo, aggiorniamo se >= 0
                     if (productDTO.getStockQuantity() >= 0) {
-                        product.setStockQuantity(productDTO.getStockQuantity());
-                    }
+                        p.setStockQuantity(productDTO.getStockQuantity());
+                    }  // ← chiusura mancante qui
 
                     if (productDTO.getCategoryIds() != null) {
-                        product.setCategories(
+                        p.setCategories(
                                 productDTO.getCategoryIds().stream()
                                         .map(cid -> categoryRepository.findById(cid)
                                                 .orElseThrow(() -> new RuntimeException("Category not found: " + cid)))
@@ -89,17 +112,42 @@ public class ProductService {
                         );
                     }
 
-                    // colori (se presenti)
-                    if (productDTO.getColorIds() != null) {
-                        product.setColors(
-                                productDTO.getColorIds().stream()
-                                        .map(cid -> colorRepository.findById(cid)
-                                                .orElseThrow(() -> new RuntimeException("Color not found: " + cid)))
+                    if (productDTO.getVariants() != null) {
+                        p.setColors(
+                                productDTO.getVariants().stream()
+                                        .map(vdto -> colorRepository.findById(vdto.getColorId())
+                                                .orElseThrow(() -> new RuntimeException("Color not found: " + vdto.getColorId())))
+                                        .distinct()
                                         .collect(Collectors.toList())
                         );
                     }
 
-                    return productRepository.save(product);
+                    // 3️⃣ sincronizzo le varianti colore
+                    Map<Long, ProductVariant> existing = p.getVariants().stream()
+                            .collect(Collectors.toMap(v -> v.getColor().getId(), v -> v));
+
+                    for (VariantDTO vdto : productDTO.getVariants()) {
+                        ProductVariant pv = existing.remove(vdto.getColorId());
+                        if (pv != null) {
+                            pv.setStockQuantity(vdto.getStockQuantity());
+                        } else {
+                            Color c = colorRepository.findById(vdto.getColorId())
+                                    .orElseThrow(() -> new RuntimeException("Color not found: " + vdto.getColorId()));
+                            pv = new ProductVariant();
+                            pv.setProduct(p);
+                            pv.setColor(c);
+                            pv.setStockQuantity(vdto.getStockQuantity());
+                            p.getVariants().add(pv);
+                        }
+                    }
+
+                    // elimino le varianti rimosse dal form
+                    for (ProductVariant toDelete : existing.values()) {
+                        variantRepository.delete(toDelete);
+                    }
+
+                    // salvo e ritorno il prodotto aggiornato
+                    return productRepository.save(p);
                 })
                 .orElseThrow(() -> new RuntimeException("Product not found: " + id));
     }

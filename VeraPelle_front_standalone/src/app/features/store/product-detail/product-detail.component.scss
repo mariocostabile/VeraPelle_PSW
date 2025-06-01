@@ -311,3 +311,8 @@
   text-align: center;
   padding: 2rem;
 }
+
+.quantity-picker.disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}

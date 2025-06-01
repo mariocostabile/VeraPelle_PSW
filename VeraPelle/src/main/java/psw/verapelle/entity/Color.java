@@ -3,6 +3,9 @@ package psw.verapelle.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
@@ -27,4 +30,15 @@ public class Color {
     @Version
     @Column(name = "version")
     private Integer version;
+
+    /**
+     * Relazione inversa: varianti di prodotto per questo colore.
+     */
+    @OneToMany(
+    mappedBy = "color",
+    cascade = CascadeType.ALL,
+    orphanRemoval = true
+    )
+    @JsonIgnore
+    private List<ProductVariant> variants = new ArrayList<>();
 }

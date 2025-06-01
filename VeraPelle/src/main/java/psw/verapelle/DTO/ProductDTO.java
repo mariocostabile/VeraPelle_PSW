@@ -11,10 +11,11 @@ public class ProductDTO {
     private String name;
     private String description;
     private BigDecimal price;
+    /** @deprecated gestito tramite varianti colore */
+    @Deprecated
     private int stockQuantity;
-    // ← sostituito categoryId con lista di ID
     private List<Long> categoryIds;
 
-    // ← aggiunto: lista di ID dei colori associati
-    private List<Long> colorIds;
+    /** Liste delle varianti colore con stock dedicato */
+    private List<VariantDTO> variants;
 }

@@ -43,63 +43,75 @@
         <p class="description">{{ product.description }}</p>
 
         <!-- Color Picker -->
-        <div class="color-picker" *ngIf="product.colors?.length">
+        <!-- ↑ sopra questa riga c’è la descrizione prodotto -->
+
+        <!-- ─── INIZIO blocco varianti/quantità ─── -->
+        <!-- Color Picker / Varianti -->
+        <div class="color-picker" *ngIf="product.variants?.length">
           <label>Colore:</label>
           <div class="swatches">
-            <span
-              *ngFor="let c of product.colors"
-              class="swatch"
-              [style.background]="c.hexCode"
-              [class.selected]="c.id === selectedColorId"
-              (click)="selectColor(c.id)"
-            ></span>
+    <span
+      *ngFor="let v of product.variants"
+      class="swatch"
+      [style.background]="v.hexCode"
+      [class.selected]="v.colorId === selectedVariant?.colorId"
+      (click)="selectVariant(v)"
+    ></span>
           </div>
-          <!-- ERRORE COLORE -->
-          <p *ngIf="colorError" class="validation-error">
-            {{ colorError }}
+          <p *ngIf="colorError" class="validation-error">{{ colorError }}</p>
+          <p *ngIf="selectedVariant" class="availability">
+            Disponibili: {{ maxQuantity }}
           </p>
         </div>
 
-        <!-- Quantity Spinner / Out of Stock -->
-        <div class="quantity-picker" *ngIf="maxQuantity > 0; else outOfStock">
+        <!-- Prompt se non ho selezionato una variante -->
+        <ng-template #selectColorPrompt>
+          <p class="validation-error">Seleziona prima un colore</p>
+        </ng-template>
+
+        <!-- ─── INIZIO blocco quantità sempre visibile ─── -->
+        <div class="quantity-picker" [class.disabled]="!selectedVariant">
           <label>Quantità:</label>
-          <button (click)="changeQuantity(-1)" [disabled]="quantity <= 1">–</button>
+          <button
+            type="button"
+            (click)="decrement()"
+            [disabled]="!selectedVariant || quantity <= 1"
+          >–</button>
           <input
             type="number"
             [value]="quantity"
-            (input)="
-              quantity = $any($event.target).valueAsNumber;
-              quantityError = null;
-              successMessage = null
-            "
-            [min]="1"
-            [max]="maxQuantity"
+            readonly
           />
-          <button (click)="changeQuantity(1)" [disabled]="quantity >= maxQuantity">+</button>
-          <!-- ERRORE QUANTITÀ -->
-          <p *ngIf="quantityError" class="validation-error">
-            {{ quantityError }}
-          </p>
+          <button
+            type="button"
+            (click)="increment()"
+            [disabled]="!selectedVariant || quantity >= maxQuantity"
+          >+</button>
         </div>
-        <ng-template #outOfStock>
-          <p class="out-of-stock">Prodotto esaurito</p>
-        </ng-template>
 
-        <!-- Azioni sempre abilitate, ma disattivate se quantità non valida -->
+        <!-- Messaggio se non ho ancora selezionato un colore -->
+        <p *ngIf="!selectedVariant" class="validation-error">
+          Seleziona prima un colore
+        </p>
+
+        <!-- Messaggio variante esaurita -->
+        <p *ngIf="selectedVariant && maxQuantity === 0" class="out-of-stock">
+          Variante esaurita
+        </p>
+        <!-- ─── FINE blocco quantità sempre visibile ─── -->
+
+
+        <!-- Azioni -->
         <div class="actions">
           <button
             class="btn-add-cart"
             (click)="addToCart()"
-            [disabled]="quantity < 1 || quantity > maxQuantity"
+            [disabled]="!selectedVariant || quantity < 1 || quantity > maxQuantity"
           >
             Aggiungi al carrello
           </button>
-          <button class="btn-add-cart"
-            (click)="buyNow()"
-          >
-            Acquista ora
-          </button>
         </div>
+        <!-- ─── FINE blocco varianti/quantità ─── -->
 
         <!-- MESSAGGIO DI SUCCESSO INLINE -->
         <p *ngIf="successMessage" class="success-message">

@@ -1,5 +1,3 @@
-// src/app/core/models/cart-item-dto.ts
-
 import { ProductDTO } from './product-dto';
 import { ColorDTO } from './color-dto';
 
@@ -9,5 +7,10 @@ export interface CartItemDTO {
   quantity: number;
   subtotal: number;
   thumbnailUrl: string | null;
+
+  // colore selezionato
   selectedColor: ColorDTO;
+
+  // stock residuo della variante selezionata
+  variantStockQuantity: number;
 }
