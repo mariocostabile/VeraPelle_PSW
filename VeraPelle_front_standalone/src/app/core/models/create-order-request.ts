@@ -14,6 +14,6 @@ export interface PaymentInfoDTO {
 
 export interface CreateOrderRequest {
   shippingAddress: string;
-  items: OrderItemDTO[];  // ora ogni item include anche colorId
   paymentInfo: PaymentInfoDTO;
+  cartVersion: number;   // ← versione del carrello per l'ottimistic locking
 }

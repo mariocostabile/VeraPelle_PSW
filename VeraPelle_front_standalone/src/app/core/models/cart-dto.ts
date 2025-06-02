@@ -6,4 +6,5 @@ export interface CartDTO {
   id: number;
   items: CartItemDTO[];
   total: number;
+  version: number;
 }

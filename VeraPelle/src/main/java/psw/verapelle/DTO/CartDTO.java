@@ -13,4 +13,5 @@ public class CartDTO {
     private Long id;
     private List<CartItemDTO> items;
     private double total;
+    private Integer version;
 }

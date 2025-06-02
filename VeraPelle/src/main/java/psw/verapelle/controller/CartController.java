@@ -177,7 +177,7 @@ public class CartController {
         double total = items.stream()
                 .mapToDouble(CartItemDTO::getSubtotal)
                 .sum();
-        return new CartDTO(cart.getId(), items, total);
+        return new CartDTO(cart.getId(), items, total, cart.getVersion());
     }
 
     private CartItemDTO toCartItemDTO(CartItem ci) {

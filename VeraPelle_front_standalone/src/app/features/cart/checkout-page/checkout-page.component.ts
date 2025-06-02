@@ -6,7 +6,7 @@ import { CartService } from '../../../core/services/cart/cart.service';
 import { OrderService } from '../../../core/services/order/order.service';
 import { Observable } from 'rxjs';
 import { CartDTO } from '../../../core/models/cart-dto';
-import { CreateOrderRequest, OrderItemDTO, PaymentInfoDTO } from '../../../core/models/create-order-request';
+import { CreateOrderRequest, PaymentInfoDTO } from '../../../core/models/create-order-request';
 import {CartItemDTO} from '@app/core/models/cart-item-dto';
 import { take } from 'rxjs';
 import { CustomerService } from '../../../core/services/customer/customer.service';
@@ -24,10 +24,10 @@ import { CustomerService } from '../../../core/services/customer/customer.servic
 })
 export class CheckoutPageComponent implements OnInit {
   checkoutForm!: FormGroup;
-  cart$!: Observable<CartDTO>;
   loading = false;
   errorMessage: string | null = null;
   cart?: CartDTO;
+  cartVersion!: number;
 
 
 
@@ -58,9 +58,11 @@ export class CheckoutPageComponent implements OnInit {
         }
       });
 
-    // Load and merge cart if needed
-    this.cart$ = this.cartService.getCart();
-    this.cart$.subscribe(c => this.cart = c);
+    // 3) Ora leggiamo il carrello UNA SOLA VOLTA e salviamo anche versione
+    this.cartService.getCart().pipe(take(1)).subscribe(cartDto => {
+      this.cart = cartDto;             // salviamo oggetti e totali per la view
+      this.cartVersion = cartDto.version; // ← salviamo la “version” per l’optimistic lock
+    });
   }
 
   onSubmit() {
@@ -68,51 +70,38 @@ export class CheckoutPageComponent implements OnInit {
     this.errorMessage = null;
     this.loading = true;
 
-    this.cart$
-      .pipe(take(1))       // prendi solo la prima emissione e poi completa
-      .subscribe({
-        next: cart => {
-          // 1) Costruisci gli orderItems
-          const orderItems: OrderItemDTO[] = cart.items.map(i => ({
-            productId: i.product.id!,
-            quantity:  i.quantity,
-            colorId:   i.selectedColor.id    // ← ecco il nuovo campo
-          }));
+    // 1) Estrai i valori dal form
+    const { shippingAddress, cardNumber, expiry, cvv } = this.checkoutForm.value;
+    const paymentInfo: PaymentInfoDTO = { cardNumber, expiry, cvv };
 
-          // 2) Prendi i valori del form
-          const {shippingAddress, cardNumber, expiry, cvv} =
-            this.checkoutForm.value;
-          const paymentInfo: PaymentInfoDTO = {cardNumber, expiry, cvv};
+    // 2) Costruisci la request inviando solo la versione del carrello
+    const req: CreateOrderRequest = {
+      shippingAddress,
+      paymentInfo,
+      cartVersion: this.cartVersion
+    };
 
-          // 3) Prepara la request
-          const req: CreateOrderRequest = {
-            shippingAddress,
-            items: orderItems,
-            paymentInfo
-          };
-
-          // 4) Chiama il service con il payload corretto
-          this.orderService.createOrder(req).subscribe({
-            next: order => {
-              // Se ha successo, svuota il carrello e naviga
-              this.cartService.clearCart().subscribe(() => {
-                this.router.navigate(['/order-confirmation', order.id]);
-                this.loading = false;
-              });
-            },
-            error: err => {
-              this.errorMessage = err?.message || 'Errore durante il checkout';
-              this.loading = false;
-            }
-          });
-        },
-        error: () => {
-          // Errore a leggere il carrello
-          this.errorMessage = 'Impossibile caricare il carrello';
+    // 3) Chiama il service per creare l’ordine
+    this.orderService.createOrder(req).subscribe({
+      next: order => {
+        // Se l’ordine viene creato con successo, svuota il carrello e naviga
+        this.cartService.clearCart().subscribe(() => {
+          this.router.navigate(['/order-confirmation', order.id]);
           this.loading = false;
+        });
+      },
+      error: err => {
+        // Se il server risponde 409, significa che la versione del carrello non combacia
+        if (err.status === 409) {
+          this.errorMessage = 'Il carrello è stato modificato da un’altra sessione. Ricarica e riprova.';
+        } else {
+          this.errorMessage = err?.message || 'Errore durante il checkout';
         }
-      });
+        this.loading = false;
+      }
+    });
   }
+
 
   // sotto la tua classe CheckoutPageComponent
   /** Restituisce l’URL completo della miniatura */

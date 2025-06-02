@@ -9,7 +9,7 @@ import java.util.List;
 @Builder
 public class CreateOrderRequest {
     private String shippingAddress;
-    private List<OrderItemDTO> items;
+    private Integer cartVersion;
     // Se in futuro aggiungi dati di pagamento, inserisci qui un PaymentInfoDTO
     private PaymentInfoDTO paymentInfo;
 }

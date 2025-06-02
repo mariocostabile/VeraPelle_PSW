@@ -1,10 +1,12 @@
 package psw.verapelle.service;
 
 import org.springframework.cache.annotation.Caching;
+import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 import psw.verapelle.DTO.*;
 import psw.verapelle.entity.*;
 import psw.verapelle.repository.*;
@@ -25,21 +27,31 @@ public class OrderService {
     @Autowired private OrderRepository orderRepo;
     @Autowired private CustomerRepository customerRepo;
     @Autowired private ProductRepository productRepo;
-    @Autowired
-    private ProductVariantRepository variantRepository;
+    @Autowired private ProductVariantRepository variantRepository;
+    @Autowired private CartRepository cartRepo;
 
 
 
-    /**
-     * Crea un nuovo ordine per il customer identificato da customerId,
-     * con i dati di CreateOrderRequest (items + shippingAddress + paymentInfo).
-     */
     public OrderDTO createOrder(CreateOrderRequest req, String customerId) {
-        // 1) Recupera il customer
-        Customer customer = customerRepo.findById(customerId)
-                .orElseThrow(() -> new RuntimeException("Customer non trovato: " + customerId));
+        // 1) Recupera il carrello del customer da DB (ottimistic lock tramite @Version su Cart)
+        Cart cart = cartRepo.findByCustomerId(customerId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST, "Carrello non trovato per customer: " + customerId));
 
-        // 2) Crea e salva subito l'ordine con status CREATED
+        // 2) Controlla la versione: se mismatch, restituisci 409 Conflict
+        if (!Objects.equals(cart.getVersion(), req.getCartVersion())) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "Carrello modificato da un’altra sessione. Ricarica e riprova."
+            );
+        }
+
+        // 3) Recupera il Customer per associare l'ordine
+        Customer customer = customerRepo.findById(customerId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST, "Customer non trovato: " + customerId));
+
+        // 4) Crea e salva subito l'ordine con status CREATED
         Orders order = Orders.builder()
                 .customer(customer)
                 .shippingAddress(req.getShippingAddress())
@@ -47,38 +59,38 @@ public class OrderService {
                 .build();
         order = orderRepo.save(order);
 
-        // 3) Simula il pagamento
+        // 5) Simula il pagamento
         PaymentResult payment = processPaymentStub(order.getId(), req.getPaymentInfo());
 
         if (payment.approved) {
-            // 4a) Se APPROVED: aggiungi items e decurta stock
+            // 6a) Se APPROVED: usiamo cart.getCartItems() per creare gli OrderItem e decurtare stock
             BigDecimal total = BigDecimal.ZERO;
-            for (OrderItemDTO itemDto : req.getItems()) {
-                Long productId = itemDto.getProductId();
-                Long colorId   = itemDto.getColorId();
-                int qty        = itemDto.getQuantity();
+            for (CartItem ci : cart.getCartItems()) {
+                Long productId = ci.getProduct().getId();
+                Long colorId   = ci.getSelectedColor().getId();
+                int qty        = ci.getQuantity();
 
-                // 1) Leggi la variante colore per questo prodotto
+                // Leggi la variante colore per questo prodotto
                 ProductVariant variant = variantRepository
                         .findByProductIdAndColorId(productId, colorId)
-                        .orElseThrow(() -> new RuntimeException(
+                        .orElseThrow(() -> new ResponseStatusException(
+                                HttpStatus.BAD_REQUEST,
                                 "Variant non trovata per product " + productId + " color " + colorId));
 
-                // 2) Verifica disponibilità
+                // Verifica disponibilità
                 if (variant.getStockQuantity() < qty) {
-                    throw new RuntimeException("Stock insufficiente per variante: "
-                            + "product " + productId
-                            + " color " + colorId
-                            + ", rimangono solo " + variant.getStockQuantity());
+                    throw new ResponseStatusException(
+                            HttpStatus.BAD_REQUEST,
+                            "Stock insufficiente per variante: product " + productId +
+                                    " color " + colorId + ", rimangono solo " + variant.getStockQuantity());
                 }
 
-                // 3) Decurta lo stock della variante e salva
+                // Decurta lo stock della variante e salva
                 variant.setStockQuantity(variant.getStockQuantity() - qty);
                 variantRepository.save(variant);
 
-                // 3.bis) Riallinea anche lo stock complessivo in Product
-                Product product = productRepo.findById(productId)
-                        .orElseThrow(() -> new RuntimeException("Product non trovato: " + productId));
+                // Riallinea lo stock complessivo in Product
+                Product product = variant.getProduct();
                 int totalStock = product.getVariants().stream()
                         .map(ProductVariant::getStockQuantity)
                         .filter(Objects::nonNull)
@@ -87,7 +99,7 @@ public class OrderService {
                 product.setStockQuantity(totalStock);
                 productRepo.save(product);
 
-                // 4) Crea l’OrderItem con variante
+                // Crea l’OrderItem con variante
                 BigDecimal unitPrice = product.getPrice();
                 OrderItem item = OrderItem.builder()
                         .product(product)
@@ -103,17 +115,22 @@ public class OrderService {
             order.setTotalAmount(total);
             order.setStatus(OrderStatus.PAID);
 
+            // 7) Se pagamento OK, svuota il carrello
+            cart.getCartItems().clear();
+            cartRepo.save(cart);
+
         } else {
-            // 4b) Se DECLINED: mantieni stock intatto e marca l'ordine come DECLINED
+            // 6b) Se DECLINED: mantieni stock e marca l'ordine come DECLINED
             order.setStatus(OrderStatus.DECLINED);
         }
 
-        // 5) Salva l'ordine finale (con items e stato aggiornato)
+        // 8) Salva l'ordine finale (con items e stato aggiornato)
         order = orderRepo.save(order);
 
-        // 6) Mappa e restituisci DTO
+        // 9) Mappa e restituisci DTO
         return toDto(order, payment.message);
     }
+
 
 
 
@@ -135,7 +152,8 @@ public class OrderService {
     @Transactional(readOnly = true)
     public OrderDTO getOrderById(Long orderId, String customerId) {
         Orders order = orderRepo.findByIdAndCustomer_Id(orderId, customerId)
-                .orElseThrow(() -> new RuntimeException("Ordine non trovato: " + orderId));
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Ordine non trovato: " + orderId));
         return toDto(order, order.getStatus().name());
     }
 
@@ -144,18 +162,19 @@ public class OrderService {
     /**
      * Stub di pagamento inline: approva sempre.
      */
+    // Helper per il pagamento (stub)
     private PaymentResult processPaymentStub(Long orderId, PaymentInfoDTO info) {
-        // qui potresti aggiungere logiche random o controlli di info.getCardNumber()
         return new PaymentResult(true, "APPROVED");
     }
 
     /**
      * Mappa l'entità Orders (con items) nel DTO di risposta
      */
+    // Mapper di Orders → OrderDTO (rimane invariato)
     private OrderDTO toDto(Orders order, String paymentStatus) {
         List<OrderItemDetailDTO> items = order.getItems().stream()
                 .map(i -> {
-                    ProductVariant v = i.getVariant();            // prendi la variante
+                    ProductVariant v = i.getVariant();
                     Color color      = v.getColor();
 
                     return OrderItemDetailDTO.builder()
@@ -163,9 +182,9 @@ public class OrderService {
                             .productName(i.getProduct().getName())
                             .quantity(i.getQuantity())
                             .unitPrice(i.getUnitPrice())
-                            .colorName(color.getName())               // nuovo
-                            .colorHex(color.getHexCode())             // nuovo
-                            .variantStockQuantity(v.getStockQuantity()) // nuovo
+                            .colorName(color.getName())
+                            .colorHex(color.getHexCode())
+                            .variantStockQuantity(v.getStockQuantity())
                             .build();
                 })
                 .collect(Collectors.toList());
@@ -185,6 +204,7 @@ public class OrderService {
     /**
      * Piccola classe interna per rappresentare l’esito del pagamento
      */
+    // Piccola classe interna per rappresentare l’esito del pagamento
     private static class PaymentResult {
         final boolean approved;
         final String message;
