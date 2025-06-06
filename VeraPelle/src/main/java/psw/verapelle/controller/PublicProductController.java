@@ -29,7 +29,7 @@ public class PublicProductController {
     @GetMapping
     public Page<ProductPublicDTO> getProducts(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "12") int size,
             @RequestParam(required = false, name = "categories") List<Long> categoryIds
     ) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("name"));

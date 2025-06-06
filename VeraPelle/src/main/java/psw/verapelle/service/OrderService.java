@@ -32,6 +32,7 @@ public class OrderService {
 
 
 
+    @Transactional
     public OrderDTO createOrder(CreateOrderRequest req, String customerId) {
         // 1) Recupera il carrello del customer da DB (ottimistic lock tramite @Version su Cart)
         Cart cart = cartRepo.findByCustomerId(customerId)

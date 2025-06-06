@@ -20,7 +20,6 @@
       <th>Prezzo</th>
       <th>Quantità</th>
       <th>Categorie</th>
-      <th>Colori</th>
       <th>Azioni</th>
     </tr>
     </thead>
@@ -31,7 +30,6 @@
       <td>{{ p.price | currency:'EUR' }}</td>
       <td>{{ p.stockQuantity }}</td>
       <td>{{ p.categoryIds.join(', ') }}</td>
-      <td>{{ p.colorIds?.join(', ') }}</td>
       <td class="actions">
         <!-- Modifica -->
         <a

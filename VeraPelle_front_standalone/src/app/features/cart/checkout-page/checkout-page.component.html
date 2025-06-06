@@ -5,6 +5,11 @@
 <div class="checkout-container">
   <h2>Checkout</h2>
 
+  <!-- ALERT DI ERRORE GENERALE -->
+  <div *ngIf="errorMessage" class="alert alert-danger">
+    {{ errorMessage }}
+  </div>
+
   <!-- FORM DI CHECKOUT -->
   <form [formGroup]="checkoutForm" (ngSubmit)="onSubmit()">
     <!-- Indirizzo di spedizione -->
