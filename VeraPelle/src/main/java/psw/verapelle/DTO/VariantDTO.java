@@ -8,5 +8,5 @@ public class VariantDTO {
     private Long colorId;
     private String colorName;
     private String hexCode;
-    private int stockQuantity;
+    private Integer stockQuantity;
 }

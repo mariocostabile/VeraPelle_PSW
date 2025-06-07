@@ -99,10 +99,11 @@ public class ProductService {
                     if (productDTO.getPrice() != null) {
                         p.setPrice(productDTO.getPrice());
                     }
-                    // StockQuantity è primitivo, aggiorniamo se >= 0
-                    if (productDTO.getStockQuantity() >= 0) {
+                    // StockQuantity è opzionale: aggiorniamo solo se presente
+                    if (productDTO.getStockQuantity() != null &&
+                            productDTO.getStockQuantity() >= 0) {
                         p.setStockQuantity(productDTO.getStockQuantity());
-                    }  // ← chiusura mancante qui
+                    }
 
                     if (productDTO.getCategoryIds() != null) {
                         p.setCategories(

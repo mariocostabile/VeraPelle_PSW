@@ -13,7 +13,7 @@ public class ProductDTO {
     private BigDecimal price;
     /** @deprecated gestito tramite varianti colore */
     @Deprecated
-    private int stockQuantity;
+    private Integer stockQuantity;
     private List<Long> categoryIds;
 
     /** Liste delle varianti colore con stock dedicato */
