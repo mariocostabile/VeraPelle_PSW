@@ -23,7 +23,7 @@ export class ProductListComponent implements OnInit {
 
   // Paginazione
   page = 0;
-  size = 12;
+  size = 6;
   totalPages = 0;
 
   constructor(
