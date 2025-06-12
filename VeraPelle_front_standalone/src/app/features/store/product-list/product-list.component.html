@@ -27,7 +27,7 @@
       />
 
       <h3>{{ p.name }}</h3>
-      <p class="price">€{{ p.price }}</p>
+      <p class="price"> € {{ p.price | number:'1.2-2' }}</p>
       <p class="cats">
         <ng-container *ngFor="let name of p.categoryNames; let i = index">
           {{ name }}<span *ngIf="i < p.categoryNames.length - 1">, </span>

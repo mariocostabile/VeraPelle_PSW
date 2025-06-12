@@ -6,7 +6,7 @@
   <div class="info">
     <h2>{{ item.product.name }}</h2>
     <p>Colore: {{ item.selectedColor.name }}</p>
-    <p>Prezzo unitario: € {{ item.product.price }}</p>
+    <p>Prezzo unitario: € {{ item.product.price | number:'1.2-2' }}</p>
 
     <div class="controls">
       <button (click)="onDecrement()" [disabled]="item.quantity <= 1">–</button>

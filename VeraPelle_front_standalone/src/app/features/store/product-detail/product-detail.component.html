@@ -33,7 +33,7 @@
       <!-- Informazioni Prodotto -->
       <div class="info">
         <h1>{{ product.name }}</h1>
-        <p class="price">€{{ product.price }}</p>
+        <p class="price"> € {{ product.price | number:'1.2-2' }}</p>
         <p class="categories">
           <strong>Categoria:</strong>
           <span *ngFor="let c of product.categoryNames; let i = index">
